@@ -30,6 +30,9 @@ class Application {
 	 */
 	protected Gimli_Container $Container;
 
+	/**
+	 * @var Config $Config
+	 */
 	public Config $Config;
 
 	/**

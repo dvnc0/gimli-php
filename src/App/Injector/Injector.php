@@ -9,19 +9,50 @@ use Gimli\Injector\Injector_Interface;
 
 class Injector implements Injector_Interface {
 	
+	/**
+	 * @var array $resolved_classes
+	 */
 	protected array $resolved_classes = [];
+
+	/**
+	 * @var array $registered_classes
+	 */
 	protected array $registered_classes = [];
+
+	/**
+	 * @var Application $Application
+	 */
 	protected Application $Application;
 
+	/**
+	 * Constructor
+	 *
+	 * @param Application $Application
+	 * @param array $registered_classes
+	 */
 	public function __construct(Application $Application, array $registered_classes = []) {
 		$this->registered_classes = $registered_classes;
 		$this->Application = $Application;
 	}
 
+	/**
+	 * Registers a class instance
+	 *
+	 * @param string $class_name
+	 * @param object $instance
+	 * @return void
+	 */
 	public function register(string $class_name, object $instance) {
 		$this->registered_classes[$class_name] = $instance;
 	}
 
+	/**
+	 * Resolves a class instance
+	 *
+	 * @param string $class_name
+	 * @param array $dependencies
+	 * @return object
+	 */
 	public function resolve(string $class_name, array $dependencies = []): object {
 		if (!empty($this->resolved_classes[$class_name])) {
 			return $this->resolved_classes[$class_name];
@@ -34,10 +65,24 @@ class Injector implements Injector_Interface {
 		return $this->createFreshInstance($class_name, $dependencies);
 	}
 
+	/**
+	 * Resolves a fresh class instance
+	 *
+	 * @param string $class_name
+	 * @param array $dependencies
+	 * @return object
+	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object {
 		return $this->createFreshInstance($class_name, $dependencies);
 	}
 
+	/**
+	 * Creates a fresh class instance
+	 *
+	 * @param string $class_name
+	 * @param array $dependencies
+	 * @return object
+	 */
 	protected function createFreshInstance(string $class_name, array $dependencies):object {
 		$dependencies[Application::class] = $this->Application;
 		$dependencies[Injector::class] = $this;

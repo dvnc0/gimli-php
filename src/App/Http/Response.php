@@ -5,12 +5,39 @@ namespace Gimli\Http;
 
 class Response
 {
+	/**
+	 * @var bool $success
+	 */
 	public bool $success;
+
+	/**
+	 * @var string $response_body
+	 */
 	public string $response_body;
+
+	/**
+	 * @var int $response_code
+	 */
 	public int $response_code;
+
+	/**
+	 * @var array $data
+	 */
 	public array $data;
+
+	/**
+	 * @var bool $is_json
+	 */
 	public bool $is_json = false;
 
+	/**
+	 * Constructor
+	 *
+	 * @param string $response_body
+	 * @param bool $success
+	 * @param array $data
+	 * @param int $response_code
+	 */
 	public function __construct(string $response_body = '', bool $success = TRUE, array $data = [], int $response_code = 200) {
 		$this->success       = $success;
 		$this->response_body = $response_body;
@@ -18,6 +45,15 @@ class Response
 		$this->data = $data;
 	}
 
+	/**
+	 * Sets the response body
+	 *
+	 * @param string $response_body
+	 * @param bool $success
+	 * @param array $data
+	 * @param int $response_code
+	 * @return Response
+	 */
 	public function setResponse(string $response_body, bool $success = TRUE, array $data = [], int $response_code = 200) {
 		$this->success       = $success;
 		$this->response_body = $response_body;
@@ -26,6 +62,15 @@ class Response
 		return $this;
 	}
 
+	/**
+	 * Sets the response body as JSON
+	 *
+	 * @param string $response_body
+	 * @param bool $success
+	 * @param array $data
+	 * @param int $response_code
+	 * @return Response
+	 */
 	public function setJsonResponse(string $response_body, bool $success = TRUE, array $data = [], int $response_code = 200) {
 		$this->is_json = true;
 		$this->success       = $success;

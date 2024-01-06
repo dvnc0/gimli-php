@@ -26,6 +26,12 @@ class Environment_Base
 		}
 	}
 
+	/**
+	 * Gets a value from the environment
+	 *
+	 * @param string $key
+	 * @return mixed
+	 */
 	public function get(string $key) {
 		if (strpos($key, '.') !== false) {
 			$keys = explode('.', $key);
@@ -39,6 +45,13 @@ class Environment_Base
 		return $this->{$key};
 	}
 
+	/**
+	 * Sets a value in the environment
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 * @return void
+	 */
 	public function set(string $key, $value): void {
 		if (strpos($key, '.') !== false) {
 			$keys = explode('.', $key);
@@ -52,6 +65,12 @@ class Environment_Base
 		$this->{$key} = $value;
 	}
 
+	/**
+	 * Checks if a value exists in the environment
+	 *
+	 * @param string $key
+	 * @return bool
+	 */
 	public function has(string $key): bool {
 		if (strpos($key, '.') !== false) {
 			$keys = explode('.', $key);
