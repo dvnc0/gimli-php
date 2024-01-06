@@ -2,10 +2,10 @@
     "name": "danc0/gimli",
     "version": "1.0.0",
     "type": "library",
-    "description": "A small PHP framework.",
+    "description": "A PHP micro framework.",
     "authors": [
         {
-            "name": "Dan Cobb",
+            "name": "dvnc0",
             "email": "dcobb.dev@gmail.com"
         }
     ],
