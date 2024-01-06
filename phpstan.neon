@@ -1,0 +1,8 @@
+parameters:
+	level: 5
+	paths:
+		- src/app
+		- src/tests
+	excludePaths:
+		- src/app/tmp
+		- src/vendor

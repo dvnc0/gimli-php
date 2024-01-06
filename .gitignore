@@ -1,0 +1,5 @@
+vendor
+.gitconfig
+.vscode
+git-destroyer-config.json
+composer.lock
