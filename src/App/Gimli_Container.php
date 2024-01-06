@@ -4,6 +4,7 @@ namespace Gimli;
 
 use Gimli\Application;
 use Gimli\Injector\Injector_Interface;
+use Gimli\Injector\Injector;
 use Gimli\Router\Router;
 use Gimli\Environment\Config;
 
