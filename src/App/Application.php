@@ -8,11 +8,13 @@ use Gimli\Http\Request;
 use Gimli\Gimli_Container;
 use Gimli\Router\Router;
 use Gimli\Environment\Config;
+use Gimli\View\View_Engine_Interface;
 
 /**
  * @property Injector_Interface $Injector
  * @property Router $Router
  * @property Config $Config
+ * @property View_Engine_Interface $View
  */
 class Application {
 	/**
@@ -36,6 +38,11 @@ class Application {
 	public Config $Config;
 
 	/**
+	 * @var View_Engine_Interface $View
+	 */
+	public View_Engine_Interface $View;
+
+	/**
 	 * Constructor
 	 *
 	 * @param non-empty-string $app_root
@@ -48,7 +55,7 @@ class Application {
 	}
 
 	/**
-	 * Magic method to allow access to protected properties
+	 * Magic method
 	 *
 	 * @param non-empty-string $name
 	 * @return mixed

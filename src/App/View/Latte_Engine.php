@@ -18,7 +18,7 @@ class Latte_Engine implements View_Engine_Interface
 	public function render(string $template_path, array $template_data = []): string {
 		$latte = new \Latte\Engine;
 		
-		$latte->setTempDirectory($this->app_root_dir . 'app/tmp');
+		$latte->setTempDirectory($this->app_root_dir . '/tmp');
 
 		$latte->addFunction('getVue', function(string $path) {
 			$file = file_get_contents($this->app_root_dir . 'public/js/manifest.json');

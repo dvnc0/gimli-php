@@ -37,7 +37,7 @@ abstract class Middleware_Base
     abstract function process(): Middleware_Response;
 
 	/**
-	 * Magic method to allow access to protected properties
+	 * Magic method
 	 */
 	public function __get($name) {
 		if (property_exists($this, $name)) {

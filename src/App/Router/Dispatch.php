@@ -5,6 +5,12 @@ namespace Gimli\Router;
 
 class Dispatch
 {
+	/**
+	 * constructor
+	 *
+	 * @param mixed $data
+	 * @return void
+	 */
 	public function dispatch($data) {
 		http_response_code($data->response_code);
 
