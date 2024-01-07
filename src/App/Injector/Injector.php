@@ -102,8 +102,10 @@ class Injector implements Injector_Interface {
 
 				if (!empty($dependencies[$param_name])) {
 					$constructor_args[] = $dependencies[$param_name];
+					continue;
 				} else if (!empty($param_class) && class_exists($param_class)) {
 					$constructor_args[] = $this->resolve($param_class);
+					continue;
 				} else {
 					continue;
 				}
