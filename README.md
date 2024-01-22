@@ -1,6 +1,8 @@
 # GimliDuck ⚔️🦆
 An adaptable micro PHP framework that tries to stay out of your way.
 
+**Very much a work in progress, use at your own risk... Certainty of death. Small chance of success. What are we waiting for?**
+
 ## Installation
 TODO
 
