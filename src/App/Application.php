@@ -9,12 +9,14 @@ use Gimli\Gimli_Container;
 use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\View\View_Engine_Interface;
+use Gimli\Session\Session_Interface;
 
 /**
  * @property Injector_Interface $Injector
  * @property Router $Router
  * @property Config $Config
  * @property View_Engine_Interface $View
+ * @property Session_Interface $Session
  */
 class Application {
 	/**
@@ -41,6 +43,11 @@ class Application {
 	 * @var View_Engine_Interface $View
 	 */
 	public View_Engine_Interface $View;
+
+	/**
+	 * @var Session_Interface $Session
+	 */
+	public Session_Interface $Session;
 
 	/**
 	 * Constructor
