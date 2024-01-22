@@ -21,6 +21,11 @@ class Gimli_Container {
 		$this->Application = $Application;
 	}
 
+	/**
+	 * Get the dependency injector instance
+	 *
+	 * @return Injector_Interface
+	 */
 	public function getInjector(): Injector_Interface {
 		if (!isset($this->Injector)) {
 			$this->Injector = new Injector($this->Application);
@@ -28,6 +33,11 @@ class Gimli_Container {
 		return $this->Injector;
 	}
 
+	/**
+	 * Get the router instance
+	 *
+	 * @return Router
+	 */
 	public function getRouter(): Router {
 		if (!isset($this->Router)) {
 			$this->Router = new Router($this->Application);

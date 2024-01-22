@@ -21,13 +21,13 @@ use Exception;
  */
 class Router{
 	protected Application $Application;
-	public array $routes                = [];
-	public string $current_route        = '';
-	public string $current_group        = '';
-	public string $current_type         = '';
-	public string $group_middleware     = '';
-	public bool $trailing_slash_matters = TRUE;
-	public array $patterns              = [
+	protected array $routes                = [];
+	protected string $current_route        = '';
+	protected string $current_group        = '';
+	protected string $current_type         = '';
+	protected string $group_middleware     = '';
+	protected bool $trailing_slash_matters = TRUE;
+	protected array $patterns              = [
 		':all' => "([^/]+)",
 		':alpha' => "([A-Za-z_-]+)",
 		':alphanumeric' => "([\w-]+)",

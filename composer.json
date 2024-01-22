@@ -2,7 +2,7 @@
     "name": "danc0/gimli",
     "version": "1.0.2",
     "type": "library",
-    "description": "A PHP micro framework.",
+    "description": "GimliDuck is an adaptable micro PHP framework that tries to stay out of your way.",
     "authors": [
         {
             "name": "dvnc0",
@@ -29,11 +29,11 @@
         "phpunit/php-code-coverage": "^9.2"
     },
     "scripts": {
-        "test": "vendor/bin/phpunit src/tests/",
-        "coverage": "vendor/bin/phpunit --coverage-html src/tests/coverage/ src/tests/",
+        "test": "src/vendor/bin/phpunit src/tests/",
+        "coverage": "src/vendor/bin/phpunit --coverage-html src/tests/coverage/ src/tests/",
         "view": "xdg-open src/tests/coverage/index.html",
-        "stan": "vendor/bin/phpstan analyse -c phpstan.neon",
-        "phpcs": "vendor/bin/phpcbf -p --colors --standard=phpcs.xml app --ignore=*/tmp/*; vendor/bin/phpcs -n --colors --standard=phpcs.xml app --ignore=*/tmp/*",
+        "stan": "src/vendor/bin/phpstan analyse -c phpstan.neon",
+        "phpcs": "src/vendor/bin/phpcbf -p --colors --standard=phpcs.xml app --ignore=*/tmp/*; src/vendor/bin/phpcs -n --colors --standard=phpcs.xml app --ignore=*/tmp/*",
         "check": "composer run-script test; composer run-script stan; composer run-script phpcs"
     }
 }
