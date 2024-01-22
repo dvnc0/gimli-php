@@ -44,32 +44,50 @@ class Router{
 		$this->Dispatch = $this->Injector->resolve(Dispatch::class);
 	}
 
-	public function get(string $route, string|callable $callback) {
+	public function get(string $route, string|callable|array $callback) {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
 		$this->addRoute('GET', $route, $callback);
 		return $this;
 	}
 
-	public function post(string $route, string|callable $callback) {
+	public function post(string $route, string|callable|array $callback) {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
 		$this->addRoute('POST', $route, $callback);
 		return $this;
 	}
 
-	public function put(string $route, string|callable $callback) {
+	public function put(string $route, string|callable|array $callback) {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
 		$this->addRoute('PUT', $route, $callback);
 		return $this;
 	}
 
-	public function patch(string $route, string|callable $callback) {
+	public function patch(string $route, string|callable|array $callback) {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
 		$this->addRoute('PATCH', $route, $callback);
 		return $this;
 	}
 
-	public function delete(string $route, string|callable $callback) {
+	public function delete(string $route, string|callable|array $callback) {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
 		$this->addRoute('DELETE', $route, $callback);
 		return $this;
 	}
 
-	public function any(string $route, string|callable $callback) {
+	public function any(string $route, string|callable|array $callback) {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
 		$this->addRoute('GET', $route, $callback);
 		$this->addRoute('POST', $route, $callback);
 		$this->addRoute('PUT', $route, $callback);

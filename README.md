@@ -27,3 +27,18 @@ $Router->get('/', function(){
 $Router->run();
 ```
 That is really all you need to get started. You can add more like a template engine, a config file, etc, but you don't **have** to.
+
+### Declaring Routes
+There are a few things you can do with your route callbacks... pass a string, a callable, or an array.
+
+```php
+
+$Router->get('/', function(){
+	echo "Hello World"
+});
+
+$Router->get('/', Home_Controller::class . '@homePage');
+
+$Router->get('/', [Home_Controller::class, 'homePage']);
+```
+Any of those work, it's up to you how you do it.
