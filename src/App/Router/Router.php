@@ -69,18 +69,12 @@ class Router{
 		return $this;
 	}
 
-	public function options(string $route, string|callable $callback) {
-		$this->addRoute('OPTIONS', $route, $callback);
-		return $this;
-	}
-
 	public function any(string $route, string|callable $callback) {
 		$this->addRoute('GET', $route, $callback);
 		$this->addRoute('POST', $route, $callback);
 		$this->addRoute('PUT', $route, $callback);
 		$this->addRoute('PATCH', $route, $callback);
 		$this->addRoute('DELETE', $route, $callback);
-		$this->addRoute('OPTIONS', $route, $callback);
 		return $this;
 	}
 

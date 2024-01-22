@@ -1,4 +1,4 @@
-# GimliDuck
+# GimliDuck ⚔️🦆
 An adaptable micro PHP framework that tries to stay out of your way.
 
 ## Installation
