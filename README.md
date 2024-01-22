@@ -1,7 +1,9 @@
 # GimliDuck ⚔️🦆
 An adaptable micro PHP framework that tries to stay out of your way.
 
-**Very much a work in progress, use at your own risk... Certainty of death. Small chance of success. What are we waiting for?**
+**Very much a work in progress, use at your own risk...**
+
+**Certainty of death. Small chance of success. What are we waiting for?**
 
 ## Installation
 TODO
@@ -42,3 +44,11 @@ $Router->get('/', Home_Controller::class . '@homePage');
 $Router->get('/', [Home_Controller::class, 'homePage']);
 ```
 Any of those work, it's up to you how you do it.
+
+You can add middleware if you need some extra defense
+
+```php
+$Router->get('/', [Home_Controller::class, 'homePage'])->addMiddleware(Logged_In_Middleware::class);
+```
+
+That should be an instance of `Gimli\Middleware\Middleware_Base` and you need to define the `abstract process` method, which returns `Gimli\Middleware\Middleware_Response`.
