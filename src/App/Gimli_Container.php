@@ -17,6 +17,27 @@ use Gimli\View\Latte_Engine;
  * @property View_Engine_Interface $View
  */
 class Gimli_Container {
+	/**
+	 * @var Application $Application
+	 */
+	protected Application $Application;
+
+	/**
+	 * @var Injector_Interface $Injector
+	 */
+
+	protected Injector_Interface $Injector;
+
+	/**
+	 * @var Router $Router
+	 */
+	protected Router $Router;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param Application $Application
+	 */
 	public function __construct(Application $Application) {
 		$this->Application = $Application;
 	}
@@ -50,6 +71,6 @@ class Gimli_Container {
 			return $this->{$name}(...$arguments);
 		}
 
-		return null;
+		return NULL;
 	}
 }

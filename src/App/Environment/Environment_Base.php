@@ -33,8 +33,8 @@ class Environment_Base
 	 * @return mixed
 	 */
 	public function get(string $key) {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
 				$object = $object->{$key};
@@ -49,12 +49,12 @@ class Environment_Base
 	 * Sets a value in the environment
 	 *
 	 * @param string $key
-	 * @param mixed $value
+	 * @param mixed  $value
 	 * @return void
 	 */
 	public function set(string $key, $value): void {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
 				$object = $object->{$key};
@@ -72,16 +72,16 @@ class Environment_Base
 	 * @return bool
 	 */
 	public function has(string $key): bool {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
 				if (!isset($object->{$key})) {
-					return false;
+					return FALSE;
 				}
 				$object = $object->{$key};
 			}
-			return true;
+			return TRUE;
 		}
 
 		return isset($this->{$key});

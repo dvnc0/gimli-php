@@ -52,19 +52,19 @@ class Application {
 	/**
 	 * Constructor
 	 *
-	 * @param non-empty-string $app_root
-	 * @param array $server_variables $_SERVER values
+	 * @param non-empty-string $app_root 	     The application root path
+	 * @param array            $server_variables $_SERVER values
 	 */
 	public function __construct(string $app_root, array $server_variables) {
-		$this->app_root = $app_root;
-		$this->Request = new Request($server_variables);
+		$this->app_root  = $app_root;
+		$this->Request   = new Request($server_variables);
 		$this->Container = new Gimli_Container($this);
 	}
 
 	/**
 	 * Magic method
 	 *
-	 * @param non-empty-string $name
+	 * @param non-empty-string $name property name
 	 * @return mixed
 	 */
 	public function __get(string $name) {

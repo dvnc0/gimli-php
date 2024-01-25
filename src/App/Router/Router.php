@@ -39,9 +39,9 @@ class Router{
 	protected string $allowed_methods = "GET|PUT|POST|DELETE|PATCH";
 	
 
-	public function __construct(Application $Application){
+	public function __construct(Application $Application) {
 		$this->Application = $Application;
-		$this->Dispatch = $this->Injector->resolve(Dispatch::class);
+		$this->Dispatch    = $this->Injector->resolve(Dispatch::class);
 	}
 
 	public function get(string $route, string|callable|array $callback) {
@@ -176,7 +176,7 @@ class Router{
 		$class_to_call        = $this->Injector->resolve($className);
 
 		$response_object = new Response;
-		$response = call_user_func_array([$class_to_call, $method], [$this->Request, $response_object, ...$route_match['args']]);
+		$response        = call_user_func_array([$class_to_call, $method], [$this->Request, $response_object, ...$route_match['args']]);
 
 		$this->Dispatch->dispatch($response);
 

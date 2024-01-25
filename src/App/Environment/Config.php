@@ -6,7 +6,7 @@ namespace Gimli\Environment;
 use Gimli\Environment\Environment_Base;
 
 class Config extends Environment_Base{
-    public bool $is_live      = FALSE;
+	public bool $is_live      = FALSE;
 	public bool $is_dev       = FALSE;
 	public bool $is_staging   = FALSE;
 	public bool $is_cli       = FALSE;

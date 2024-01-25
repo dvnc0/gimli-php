@@ -102,7 +102,7 @@ class Request
 			return;
 		}
 
-		$this->post = json_decode(file_get_contents('php://input'), true) ?: [];
+		$this->post = json_decode(file_get_contents('php://input'), TRUE) ?: [];
 	}
 
 	/**
@@ -121,6 +121,6 @@ class Request
 	 * @return mixed
 	 */
 	public function getPostParam($key) {
-		return $this->post[$key] ?: null;
+		return $this->post[$key] ?: NULL;
 	}
 }

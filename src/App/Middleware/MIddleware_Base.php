@@ -18,23 +18,23 @@ abstract class Middleware_Base
 	/**
 	 * @var Application $Application
 	 */
-    public Application $Application;
+	public Application $Application;
 
 	/**
 	 * Constructor
 	 *
 	 * @param Application $Application
 	 */
-    public function __construct(Application $Application) {
-        $this->Application = $Application;
-    }
-    
+	public function __construct(Application $Application) {
+		$this->Application = $Application;
+	}
+	
 	/**
 	 * Processes the middleware
 	 * 
 	 * @return Middleware_Response
 	 */
-    abstract function process(): Middleware_Response;
+	abstract function process(): Middleware_Response;
 
 	/**
 	 * Magic method

@@ -28,11 +28,11 @@ class Injector implements Injector_Interface {
 	 * Constructor
 	 *
 	 * @param Application $Application
-	 * @param array $registered_classes
+	 * @param array       $registered_classes
 	 */
 	public function __construct(Application $Application, array $registered_classes = []) {
 		$this->registered_classes = $registered_classes;
-		$this->Application = $Application;
+		$this->Application        = $Application;
 	}
 
 	/**
@@ -50,7 +50,7 @@ class Injector implements Injector_Interface {
 	 * Resolves a class instance
 	 *
 	 * @param string $class_name
-	 * @param array $dependencies
+	 * @param array  $dependencies
 	 * @return object
 	 */
 	public function resolve(string $class_name, array $dependencies = []): object {
@@ -69,7 +69,7 @@ class Injector implements Injector_Interface {
 	 * Resolves a fresh class instance
 	 *
 	 * @param string $class_name
-	 * @param array $dependencies
+	 * @param array  $dependencies
 	 * @return object
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object {
@@ -80,25 +80,25 @@ class Injector implements Injector_Interface {
 	 * Creates a fresh class instance
 	 *
 	 * @param string $class_name
-	 * @param array $dependencies
+	 * @param array  $dependencies
 	 * @return object
 	 */
 	protected function createFreshInstance(string $class_name, array $dependencies):object {
 		$dependencies[Application::class] = $this->Application;
-		$dependencies[Injector::class] = $this;
+		$dependencies[Injector::class]    = $this;
 
-		$reflection = new ReflectionClass($class_name);
+		$reflection  = new ReflectionClass($class_name);
 		$constructor = $reflection->getConstructor();
 
 		if (empty($constructor)) {
 			$instance = new $class_name();
 		} else {
 			$constructor_params = $constructor->getParameters();
-			$constructor_args = [];
+			$constructor_args   = [];
 
 			foreach ($constructor_params as $param) {
-				$param_class = $param->getType()->getName();
-				$param_name = $param->getName();
+				$param_class = $param->getType()->getName(); // @phpstan-ignore-line
+				$param_name  = $param->getName();
 
 				if (!empty($dependencies[$param_class])) {
 					$constructor_args[] = $dependencies[$param_class];

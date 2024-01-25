@@ -27,31 +27,31 @@ class Session implements Session_Interface {
 	 * @param non-empty-string $key
 	 */
 	public function get(string $key): mixed {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys  = explode('.', $key);
 			$value = $this->session;
 			foreach ($keys as $key) {
 				if (isset($value[$key])) {
 					$value = $value[$key];
 				} else {
-					return null;
+					return NULL;
 				}
 			}
 			return $value;
 		}
 
-		return $this->session[$key] ?? null;
+		return $this->session[$key] ?? NULL;
 	}
 
 	/**
 	 * set method
 	 * 
 	 * @param non-empty-string $key
-	 * @param mixed $value
+	 * @param mixed            $value
 	 */
 	public function set(string $key, mixed $value): void {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys    = explode('.', $key);
 			$session = &$this->session;
 			foreach ($keys as $key) {
 				if (!isset($session[$key])) {
@@ -72,8 +72,8 @@ class Session implements Session_Interface {
 	 * @param non-empty-string $key
 	 */
 	public function delete(string $key): void {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys    = explode('.', $key);
 			$session = &$this->session;
 			foreach ($keys as $key) {
 				if (!isset($session[$key])) {
@@ -101,17 +101,17 @@ class Session implements Session_Interface {
 	 * @param non-empty-string $key
 	 */
 	public function has(string $key): bool {
-		if (strpos($key, '.') !== false) {
-			$keys = explode('.', $key);
+		if (strpos($key, '.') !== FALSE) {
+			$keys  = explode('.', $key);
 			$value = $this->session;
 			foreach ($keys as $key) {
 				if (isset($value[$key])) {
 					$value = $value[$key];
 				} else {
-					return false;
+					return FALSE;
 				}
 			}
-			return true;
+			return TRUE;
 		}
 
 		return isset($this->session[$key]);
