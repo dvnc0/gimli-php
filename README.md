@@ -6,7 +6,7 @@ An adaptable micro PHP framework that tries to stay out of your way.
 **Certainty of death. Small chance of success. What are we waiting for?**
 
 ## Installation
-TODO
+`composer require danc0/gimliduck-php`
 
 ## Usage
 Creating a GimliDuck application is simple, because it should be.
