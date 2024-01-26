@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Gimli\Router;
 
-class Dispatch
-{
+class Dispatch {
+
 	/**
-	 * constructor
+	 * dispatch changes
 	 *
 	 * @param mixed $data data
 	 * @return void

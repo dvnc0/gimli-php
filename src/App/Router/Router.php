@@ -19,7 +19,7 @@ use Exception;
  * @property Injector $Injector
  * @property Request $Request
  */
-class Router{
+class Router {
 	protected Application $Application;
 	protected array $routes                = [];
 	protected string $current_route        = '';
