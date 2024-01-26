@@ -3,3 +3,5 @@ vendor
 .vscode
 git-destroyer-config.json
 composer.lock
+.phpunit.cache
+src/tests/coverage

@@ -53,8 +53,8 @@ class Router {
 	/**
 	 * add a GET route
 	 * 
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
 	 * 
 	 * @return Router
 	 */
@@ -69,8 +69,8 @@ class Router {
 	/**
 	 * add a POST route
 	 * 
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
 	 * 
 	 * @return Router
 	 */
@@ -85,8 +85,8 @@ class Router {
 	/**
 	 * add a PUT route
 	 * 
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
 	 * 
 	 * @return Router
 	 */
@@ -101,8 +101,8 @@ class Router {
 	/**
 	 * add a PATCH route
 	 * 
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
 	 * 
 	 * @return Router
 	 */
@@ -117,8 +117,8 @@ class Router {
 	/**
 	 * add a DELETE route
 	 * 
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
 	 * 
 	 * @return Router
 	 */
@@ -133,8 +133,8 @@ class Router {
 	/**
 	 * add GET, POST, PUT, PATCH, DELETE routes
 	 * 
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
 	 * 
 	 * @return Router
 	 */
@@ -153,9 +153,9 @@ class Router {
 	/**
 	 * add a route
 	 * 
-	 * @param string $method   method for route
-	 * @param string $route    route
-	 * @param mixed  $callback callback
+	 * @param string          $method   method for route
+	 * @param string          $route    route
+	 * @param string|callable $callback callback
 	 * 
 	 * @return void
 	 */

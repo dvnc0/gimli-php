@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Gimli\Environment;
 
-class Environment_Base
-{
+class Environment_Base {
 	/**
 	 * Construct
 	 *
@@ -20,7 +19,7 @@ class Environment_Base
 	 * @param array $environment_settings environment settings
 	 * @return void
 	 */
-	public function setEnvironmentSettings(array $environment_settings): void { 
+	public function setEnvironmentSettings(array $environment_settings): void {
 		foreach (get_class_vars(get_class($this)) as $key => $value) {
 			$this->{$key} = $environment_settings[$key] ?? $value;
 		}
@@ -37,6 +36,10 @@ class Environment_Base
 			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
+				if (is_array($object)) {
+					$object = $object[$key];
+					continue;
+				}
 				$object = $object->{$key};
 			}
 			return $object;
@@ -57,11 +60,17 @@ class Environment_Base
 			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
-				$object = $object->{$key};
+				if (is_array($object)) {
+					$object = &$object[$key];
+					continue;
+				}
+				$object = &$object->{$key};
 			}
+
 			$object = $value;
 			return;
 		}
+
 		$this->{$key} = $value;
 	}
 
@@ -76,9 +85,18 @@ class Environment_Base
 			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
+				if (is_array($object)) {
+					if (!isset($object[$key])) {
+						return FALSE;
+					}
+					$object = $object[$key];
+					continue;
+				}
+
 				if (!isset($object->{$key})) {
 					return FALSE;
 				}
+
 				$object = $object->{$key};
 			}
 			return TRUE;
