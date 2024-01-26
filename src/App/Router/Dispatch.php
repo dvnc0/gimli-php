@@ -8,7 +8,7 @@ class Dispatch
 	/**
 	 * constructor
 	 *
-	 * @param mixed $data
+	 * @param mixed $data data
 	 * @return void
 	 */
 	public function dispatch($data) {

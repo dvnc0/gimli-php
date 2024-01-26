@@ -52,7 +52,7 @@ class Application {
 	/**
 	 * Constructor
 	 *
-	 * @param non-empty-string $app_root 	     The application root path
+	 * @param non-empty-string $app_root         The application root path
 	 * @param array            $server_variables $_SERVER values
 	 */
 	public function __construct(string $app_root, array $server_variables) {

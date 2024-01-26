@@ -24,7 +24,9 @@ class Session implements Session_Interface {
 	/**
 	 * get method
 	 * 
-	 * @param non-empty-string $key
+	 * @param non-empty-string $key key to get
+	 * 
+	 * @return mixed
 	 */
 	public function get(string $key): mixed {
 		if (strpos($key, '.') !== FALSE) {
@@ -46,8 +48,10 @@ class Session implements Session_Interface {
 	/**
 	 * set method
 	 * 
-	 * @param non-empty-string $key
-	 * @param mixed            $value
+	 * @param non-empty-string $key   key to set
+	 * @param mixed            $value value to set
+	 * 
+	 * @return void
 	 */
 	public function set(string $key, mixed $value): void {
 		if (strpos($key, '.') !== FALSE) {
@@ -69,7 +73,9 @@ class Session implements Session_Interface {
 	/**
 	 * delete method
 	 * 
-	 * @param non-empty-string $key
+	 * @param non-empty-string $key key to delete
+	 * 
+	 * @return void
 	 */
 	public function delete(string $key): void {
 		if (strpos($key, '.') !== FALSE) {
@@ -90,6 +96,8 @@ class Session implements Session_Interface {
 
 	/**
 	 * clear method
+	 * 
+	 * @return void
 	 */
 	public function clear(): void {
 		session_unset();
@@ -98,7 +106,9 @@ class Session implements Session_Interface {
 	/**
 	 * has method
 	 * 
-	 * @param non-empty-string $key
+	 * @param non-empty-string $key key to check for
+	 * 
+	 * @return bool
 	 */
 	public function has(string $key): bool {
 		if (strpos($key, '.') !== FALSE) {
