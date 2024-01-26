@@ -22,9 +22,9 @@ class Middleware_Response {
 	/**
 	 * Constructor
 	 *
-	 * @param boolean $success
-	 * @param string  $message
-	 * @param string  $forward
+	 * @param boolean $success success or fail
+	 * @param string  $message message
+	 * @param string  $forward forward location
 	 */
 	public function __construct(bool $success, string $message = '', string $forward = '') {
 		$this->success = $success;

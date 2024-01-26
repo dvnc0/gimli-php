@@ -36,7 +36,7 @@ class Gimli_Container {
 	/**
 	 * Constructor
 	 * 
-	 * @param Application $Application
+	 * @param Application $Application Application container
 	 */
 	public function __construct(Application $Application) {
 		$this->Application = $Application;
@@ -66,6 +66,14 @@ class Gimli_Container {
 		return $this->Router;
 	}
 
+	/**
+	 * magic method
+	 * 
+	 * @param string $name      non-empty-string property name
+	 * @param array  $arguments arguments
+	 * 
+	 * @return null
+	 */
 	public function __call(string $name, array $arguments) {
 		if (method_exists($this, $name)) {
 			return $this->{$name}(...$arguments);

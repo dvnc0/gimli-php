@@ -23,7 +23,7 @@ abstract class Middleware_Base
 	/**
 	 * Constructor
 	 *
-	 * @param Application $Application
+	 * @param Application $Application Application
 	 */
 	public function __construct(Application $Application) {
 		$this->Application = $Application;
@@ -34,12 +34,16 @@ abstract class Middleware_Base
 	 * 
 	 * @return Middleware_Response
 	 */
-	abstract function process(): Middleware_Response;
+	abstract public function process(): Middleware_Response;
 
 	/**
 	 * Magic method
+	 * 
+	 * @param non-empty-string $name property name
+	 * 
+	 * @return object
 	 */
-	public function __get($name) {
+	public function __get(string $name) {
 		if (property_exists($this, $name)) {
 			return $this->{$name};
 		}

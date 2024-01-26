@@ -17,7 +17,7 @@ class Environment_Base
 	/**
 	 * Sets environment settings from an array if they are declared settings.
 	 *
-	 * @param array $environment_settings
+	 * @param array $environment_settings environment settings
 	 * @return void
 	 */
 	public function setEnvironmentSettings(array $environment_settings): void { 
@@ -29,7 +29,7 @@ class Environment_Base
 	/**
 	 * Gets a value from the environment
 	 *
-	 * @param string $key
+	 * @param string $key key to get
 	 * @return mixed
 	 */
 	public function get(string $key) {
@@ -48,8 +48,8 @@ class Environment_Base
 	/**
 	 * Sets a value in the environment
 	 *
-	 * @param string $key
-	 * @param mixed  $value
+	 * @param string $key   key to set
+	 * @param mixed  $value value to set
 	 * @return void
 	 */
 	public function set(string $key, $value): void {
@@ -68,7 +68,7 @@ class Environment_Base
 	/**
 	 * Checks if a value exists in the environment
 	 *
-	 * @param string $key
+	 * @param string $key key to check
 	 * @return bool
 	 */
 	public function has(string $key): bool {

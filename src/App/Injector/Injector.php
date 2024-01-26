@@ -27,8 +27,8 @@ class Injector implements Injector_Interface {
 	/**
 	 * Constructor
 	 *
-	 * @param Application $Application
-	 * @param array       $registered_classes
+	 * @param Application $Application        Application
+	 * @param array       $registered_classes registered classes
 	 */
 	public function __construct(Application $Application, array $registered_classes = []) {
 		$this->registered_classes = $registered_classes;
@@ -38,8 +38,8 @@ class Injector implements Injector_Interface {
 	/**
 	 * Registers a class instance
 	 *
-	 * @param string $class_name
-	 * @param object $instance
+	 * @param string $class_name class name
+	 * @param object $instance   instance
 	 * @return void
 	 */
 	public function register(string $class_name, object $instance) {
@@ -49,8 +49,8 @@ class Injector implements Injector_Interface {
 	/**
 	 * Resolves a class instance
 	 *
-	 * @param string $class_name
-	 * @param array  $dependencies
+	 * @param string $class_name   class name
+	 * @param array  $dependencies dependencies
 	 * @return object
 	 */
 	public function resolve(string $class_name, array $dependencies = []): object {
@@ -68,8 +68,8 @@ class Injector implements Injector_Interface {
 	/**
 	 * Resolves a fresh class instance
 	 *
-	 * @param string $class_name
-	 * @param array  $dependencies
+	 * @param string $class_name   class name
+	 * @param array  $dependencies dependencies
 	 * @return object
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object {
@@ -79,8 +79,8 @@ class Injector implements Injector_Interface {
 	/**
 	 * Creates a fresh class instance
 	 *
-	 * @param string $class_name
-	 * @param array  $dependencies
+	 * @param string $class_name   class name
+	 * @param array  $dependencies dependencies
 	 * @return object
 	 */
 	protected function createFreshInstance(string $class_name, array $dependencies):object {

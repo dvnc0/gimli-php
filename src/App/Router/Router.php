@@ -38,12 +38,26 @@ class Router{
 	protected Dispatch $Dispatch;
 	protected string $allowed_methods = "GET|PUT|POST|DELETE|PATCH";
 	
-
+	/**
+	 * Constructor
+	 * 
+	 * @param Application $Application Application
+	 * 
+	 * @return void
+	 */
 	public function __construct(Application $Application) {
 		$this->Application = $Application;
 		$this->Dispatch    = $this->Injector->resolve(Dispatch::class);
 	}
 
+	/**
+	 * add a GET route
+	 * 
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return Router
+	 */
 	public function get(string $route, string|callable|array $callback) {
 		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
 			$callback = implode('@', $callback);
@@ -52,6 +66,14 @@ class Router{
 		return $this;
 	}
 
+	/**
+	 * add a POST route
+	 * 
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return Router
+	 */
 	public function post(string $route, string|callable|array $callback) {
 		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
 			$callback = implode('@', $callback);
@@ -60,6 +82,14 @@ class Router{
 		return $this;
 	}
 
+	/**
+	 * add a PUT route
+	 * 
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return Router
+	 */
 	public function put(string $route, string|callable|array $callback) {
 		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
 			$callback = implode('@', $callback);
@@ -68,6 +98,14 @@ class Router{
 		return $this;
 	}
 
+	/**
+	 * add a PATCH route
+	 * 
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return Router
+	 */
 	public function patch(string $route, string|callable|array $callback) {
 		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
 			$callback = implode('@', $callback);
@@ -76,6 +114,14 @@ class Router{
 		return $this;
 	}
 
+	/**
+	 * add a DELETE route
+	 * 
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return Router
+	 */
 	public function delete(string $route, string|callable|array $callback) {
 		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
 			$callback = implode('@', $callback);
@@ -84,6 +130,14 @@ class Router{
 		return $this;
 	}
 
+	/**
+	 * add GET, POST, PUT, PATCH, DELETE routes
+	 * 
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return Router
+	 */
 	public function any(string $route, string|callable|array $callback) {
 		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
 			$callback = implode('@', $callback);
@@ -96,6 +150,15 @@ class Router{
 		return $this;
 	}
 
+	/**
+	 * add a route
+	 * 
+	 * @param string $method   method for route
+	 * @param string $route    route
+	 * @param mixed  $callback callback
+	 * 
+	 * @return void
+	 */
 	public function addRoute(string $method, string $route, string|callable $callback) {
 		$route_with_group    = $this->current_group . $route;
 		$this->current_route = $route_with_group;
@@ -111,16 +174,35 @@ class Router{
 		}
 	}
 
+	/**
+	 * add a middleware to a route
+	 * 
+	 * @param string $middleware middleware to add
+	 * 
+	 * @return Router
+	 */
 	public function addMiddleware(string $middleware): object {
 		$this->routes[$this->current_type][$this->current_route]['middleware'] = $middleware;
 		return $this;
 	}
 
+	/**
+	 * add a middleware group
+	 * 
+	 * @param string $middleware middleware to add
+	 * 
+	 * @return Router
+	 */
 	public function addGroupMiddleware(string $middleware): object {
 		$this->group_middleware = $middleware;
 		return $this;
 	}
 
+	/**
+	 * run the router
+	 * 
+	 * @return void
+	 */
 	public function run() {
 		$search_keys   = array_keys($this->patterns);
 		$replace_regex = array_values($this->patterns);
@@ -184,6 +266,13 @@ class Router{
 
 	}
 
+	/**
+	 * call a middleware
+	 * 
+	 * @param string $Middleware middleware to call
+	 * 
+	 * @return Middleware_Response
+	 */
 	protected function callMiddleware(string $Middleware): Middleware_Response {
 		$instance = $this->Injector->resolve($Middleware);
 
@@ -194,7 +283,14 @@ class Router{
 		return $instance->process();
 	}
 
-	public function __get($name) {
+	/**
+	 * magic method
+	 * 
+	 * @param non-empty-string $name property name
+	 * 
+	 * @return object
+	 */
+	public function __get(string $name) {
 		if (property_exists($this, $name)) {
 			return $this->{$name};
 		}
