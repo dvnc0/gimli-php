@@ -8,6 +8,15 @@ An adaptable micro PHP framework that tries to stay out of your way.
 ## Installation
 `composer require danc0/gimliduck-php`
 
+Create a `.htaccess` file that looks something like this to point requests to your `index.php` file
+
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]
+```
+
 ## Usage
 Creating a GimliDuck application is simple, because it should be.
 
