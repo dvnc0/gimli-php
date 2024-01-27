@@ -106,4 +106,50 @@ class Config_Test extends TestCase {
 		$this->assertEquals($Config->has('foo.bar'), FALSE);
 		$this->assertEquals($Config->has('foo'), FALSE);
 	}
+
+	public function testThatConfigDoesNotAutoLoadRandomProperty() {
+
+		$mock_config_array = $this->getConfigArray();
+		$mock_config_array['foo'] = 'bar';
+
+		$Config = new Config($mock_config_array);
+
+		$this->assertFalse($Config->has('foo'));
+	}
+
+	public function testThatSetDoesNotSetRandomProperty() {
+
+		$mock_config_array = $this->getConfigArray();
+
+		$Config = new Config($mock_config_array);
+
+		$this->expectException(Exception::class);
+		$this->expectExceptionMessage('foo is not a valid environment setting.');
+
+		$Config->set('foo', 'bar');
+	}
+
+	public function testSetWithDotNotationDoesNotSetRandomValueOnArray() {
+
+		$mock_config_array = $this->getConfigArray();
+
+		$Config = new Config($mock_config_array);
+
+		$this->expectException(Exception::class);
+		$this->expectExceptionMessage('foo is not a valid environment setting.');
+
+		$Config->set('database.foo', 'bar');
+	}
+
+	public function testSetWithDotNotationDoesNotSetRandomClassProperty() {
+
+		$mock_config_array = $this->getConfigArray();
+
+		$Config = new Config($mock_config_array);
+
+		$this->expectException(Exception::class);
+		$this->expectExceptionMessage('foo is not a valid environment setting.');
+
+		$Config->set('foo.bar', 'baz');
+	}
 }

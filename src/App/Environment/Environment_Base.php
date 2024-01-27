@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Gimli\Environment;
 
+use Exception;
+
 class Environment_Base {
 	/**
 	 * Construct
@@ -56,13 +58,24 @@ class Environment_Base {
 	 * @return void
 	 */
 	public function set(string $key, $value): void {
+		// check if key exists as class prop
+		if (strpos($key, '.') === false && !property_exists($this, $key)) {
+			throw new Exception("{$key} is not a valid environment setting.");
+		}
+
 		if (strpos($key, '.') !== FALSE) {
 			$keys   = explode('.', $key);
 			$object = $this;
 			foreach ($keys as $key) {
 				if (is_array($object)) {
+					if (!isset($object[$key])) {
+						throw new Exception("{$key} is not a valid environment setting.");
+					}
 					$object = &$object[$key];
 					continue;
+				}
+				if (!property_exists($object, $key)) {
+					throw new Exception("{$key} is not a valid environment setting.");
 				}
 				$object = &$object->{$key};
 			}
