@@ -59,7 +59,7 @@ class Environment_Base {
 	 */
 	public function set(string $key, $value): void {
 		// check if key exists as class prop
-		if (strpos($key, '.') === false && !property_exists($this, $key)) {
+		if (strpos($key, '.') === FALSE && !property_exists($this, $key)) {
 			throw new Exception("{$key} is not a valid environment setting.");
 		}
 
