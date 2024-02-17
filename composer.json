@@ -1,6 +1,6 @@
 {    
     "name": "danc0/gimliduck-php",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "type": "library",
     "description": "GimliDuck is an adaptable micro PHP framework that tries to stay out of your way.",
     "authors": [
