@@ -67,18 +67,16 @@ class Gimli_Container {
 	}
 
 	/**
-	 * magic method
-	 * 
-	 * @param string $name      non-empty-string property name
-	 * @param array  $arguments arguments
-	 * 
-	 * @return null
+	 * Magic method
+	 *
+	 * @param non-empty-string $name property name
+	 * @return mixed
 	 */
-	public function __call(string $name, array $arguments) {
-		if (method_exists($this, $name)) {
-			return $this->{$name}(...$arguments);
+	public function __get(string $name) {
+		if (property_exists($this, $name)) {
+			return $this->{$name};
 		}
-
-		return NULL;
+		$name_as_method = 'get' . ucfirst($name);
+		return $this->Container->{$name_as_method}();
 	}
 }
