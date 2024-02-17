@@ -10,6 +10,7 @@ use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\View\View_Engine_Interface;
 use Gimli\Session\Session_Interface;
+use Gimli\Module_Container_Base;
 
 /**
  * @property Injector_Interface $Injector
@@ -35,6 +36,11 @@ class Application {
 	protected Gimli_Container $Container;
 
 	/**
+	 * @var Module_Container_Base $Module_Container
+	 */
+	public Module_Container_Base $Module_Container;
+
+	/**
 	 * @var Config $Config
 	 */
 	public Config $Config;
@@ -56,9 +62,10 @@ class Application {
 	 * @param array            $server_variables $_SERVER values
 	 */
 	public function __construct(string $app_root, array $server_variables) {
-		$this->app_root  = $app_root;
-		$this->Request   = new Request($server_variables);
-		$this->Container = new Gimli_Container($this);
+		$this->app_root         = $app_root;
+		$this->Request          = new Request($server_variables);
+		$this->Container        = new Gimli_Container($this);
+		$this->Module_Container = new Module_Container_Base($this);
 	}
 
 	/**
