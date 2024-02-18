@@ -7,7 +7,7 @@ use Gimli\Injector\Injector_Interface;
 use Gimli\Http\Request;
 use Gimli\Gimli_Container;
 use Gimli\Router\Router;
-use Gimli\Environment\Config;
+use Gimli\Environment\Environment_Base;
 use Gimli\View\View_Engine_Interface;
 use Gimli\Session\Session_Interface;
 use Gimli\Environment\Container_Base;
@@ -15,7 +15,7 @@ use Gimli\Environment\Container_Base;
 /**
  * @property Injector_Interface $Injector
  * @property Router $Router
- * @property Config $Config
+ * @property Environment_Base $Config
  * @property View_Engine_Interface $View
  * @property Session_Interface $Session
  * @property Container_Base $Module
@@ -37,9 +37,9 @@ class Application {
 	protected Gimli_Container $Container;
 
 	/**
-	 * @var Config $Config
+	 * @var Environment_Base $Config
 	 */
-	public Config $Config;
+	public Environment_Base $Config;
 
 	/**
 	 * @var View_Engine_Interface $View
