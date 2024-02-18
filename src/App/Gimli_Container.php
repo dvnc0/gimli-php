@@ -43,6 +43,16 @@ class Gimli_Container {
 	}
 
 	/**
+	 * Set the dependency injector instance
+	 *
+	 * @param Injector_Interface $Injector
+	 * @return void
+	 */
+	public function setCustomInjector(Injector_Interface $Injector) {
+		$this->Injector = $Injector;
+	}
+
+	/**
 	 * Get the dependency injector instance
 	 *
 	 * @return Injector_Interface

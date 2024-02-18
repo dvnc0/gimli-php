@@ -69,6 +69,16 @@ class Application {
 	}
 
 	/**
+	 * Set the custom dependency injector
+	 *
+	 * @param Injector_Interface $Injector Injector instance
+	 * @return void
+	 */
+	public function setCustomInjector(Injector_Interface $Injector): void {
+		$this->Container->setCustomInjector($Injector);
+	}
+
+	/**
 	 * Magic method
 	 *
 	 * @param non-empty-string $name property name
@@ -78,6 +88,7 @@ class Application {
 		if (property_exists($this, $name)) {
 			return $this->{$name};
 		}
+
 		$name_as_method = 'get' . ucfirst($name);
 		return $this->Container->{$name_as_method}();
 	}
