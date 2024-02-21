@@ -23,6 +23,9 @@ class Environment_Base {
 	 */
 	public function setEnvironmentSettings(array $environment_settings): void {
 		foreach (get_class_vars(get_class($this)) as $key => $value) {
+			if (isset($environment_settings[$key]) && is_bool($value)) {
+				$environment_settings[$key] = (bool) $environment_settings[$key];
+			}
 			$this->{$key} = $environment_settings[$key] ?? $value;
 		}
 	}
