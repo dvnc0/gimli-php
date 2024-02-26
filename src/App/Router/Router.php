@@ -51,6 +51,20 @@ class Router {
 	}
 
 	/**
+	 * add a route group
+	 * 
+	 * @param string   $group    group
+	 * @param callable $callback callback
+	 * 
+	 * @return void
+	 */
+	public function addGroup(string $group, callable $callback) {
+		$this->current_group = $group;
+		$callback();
+		$this->current_group = '';
+	}
+
+	/**
 	 * add a GET route
 	 * 
 	 * @param string                $route    route
