@@ -56,12 +56,13 @@ class Router {
 	 * @param string   $group    group
 	 * @param callable $callback callback
 	 * 
-	 * @return void
+	 * @return Router
 	 */
 	public function addGroup(string $group, callable $callback) {
 		$this->current_group = $group;
 		$callback();
 		$this->current_group = '';
+		return $this;
 	}
 
 	/**
