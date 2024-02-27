@@ -3,22 +3,28 @@ declare(strict_types=1);
 
 namespace Gimli\Router;
 
+use Gimli\Http\Response;
+
 class Dispatch {
 
 	/**
 	 * dispatch changes
 	 *
-	 * @param mixed $data data
+	 * @param Response $Response Response from Controllers
 	 * @return void
 	 */
-	public function dispatch($data) {
-		http_response_code($data->response_code);
+	public function dispatch(Response $Response) {
+		http_response_code($Response->response_code);
 
-		if ($data->is_json) {
+		foreach ($Response->headers as $header) {
+			header($header);
+		}
+
+		if ($Response->is_json) {
 			header("Content-Type: application/json");
 		}
 
-		echo $data->response_body ?? '';
+		echo $Response->response_body ?? '';
 		return;
 	}
 }

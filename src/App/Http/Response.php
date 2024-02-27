@@ -31,6 +31,11 @@ class Response
 	public bool $is_json = FALSE;
 
 	/**
+	 * @var array $headers
+	 */
+	public array $headers = [];
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $response_body response body
@@ -77,6 +82,18 @@ class Response
 		$this->response_body = json_encode(['success' => $success, 'body' => $response_body, 'data' => $data]);
 		$this->response_code = $response_code;
 		$this->data          = $data;
+		return $this;
+	}
+
+	/**
+	 * Set headers for Dispatcher to add
+	 * 
+	 * @param string $header header
+	 * 
+	 * @return Response
+	 */
+	public function setHeader(string $header) {
+		$this->headers[] = $header;
 		return $this;
 	}
 }
