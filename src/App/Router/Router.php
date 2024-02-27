@@ -25,7 +25,7 @@ class Router {
 	protected string $current_route        = '';
 	protected string $current_group        = '';
 	protected string $current_type         = '';
-	protected string $group_middleware     = '';
+	protected array $group_middleware     = [];
 	protected bool $trailing_slash_matters = TRUE;
 	protected array $patterns              = [
 		':all' => "([^/]+)",
@@ -54,14 +54,17 @@ class Router {
 	 * add a route group
 	 * 
 	 * @param string   $group    group
-	 * @param callable $callback callback
+	 * @param callable $callback 
+	 * @param array    $middleware
 	 * 
 	 * @return Router
 	 */
-	public function addGroup(string $group, callable $callback) {
+	public function addGroup(string $group, callable $callback, array $middleware = []) {
 		$this->current_group = $group;
+		$this->group_middleware = $middleware;
 		$callback();
 		$this->current_group = '';
+		$this->group_middleware = [];
 		return $this;
 	}
 
@@ -185,31 +188,21 @@ class Router {
 		];
 
 		if (!empty($this->group_middleware)) {
-			$this->addMiddleware($this->group_middleware);
+			foreach($this->group_middleware as $middleware) {
+				$this->routes[$method][$route_with_group]['middleware'] = $middleware;
+			}
 		}
 	}
 
 	/**
 	 * add a middleware to a route
 	 * 
-	 * @param string $middleware middleware to add
+	 * @param Middleware_Base $middleware middleware to add
 	 * 
 	 * @return Router
 	 */
-	public function addMiddleware(string $middleware): object {
+	public function addMiddleware(Middleware_Base $middleware): object {
 		$this->routes[$this->current_type][$this->current_route]['middleware'] = $middleware;
-		return $this;
-	}
-
-	/**
-	 * add a middleware group
-	 * 
-	 * @param string $middleware middleware to add
-	 * 
-	 * @return Router
-	 */
-	public function addGroupMiddleware(string $middleware): object {
-		$this->group_middleware = $middleware;
 		return $this;
 	}
 
@@ -284,18 +277,16 @@ class Router {
 	/**
 	 * call a middleware
 	 * 
-	 * @param string $Middleware middleware to call
+	 * @param Middleware_Base $Middleware middleware to call
 	 * 
 	 * @return Middleware_Response
 	 */
-	protected function callMiddleware(string $Middleware): Middleware_Response {
-		$instance = $this->Injector->resolve($Middleware);
-
-		if (!$instance instanceof Middleware_Base) {	
+	protected function callMiddleware(Middleware_Base $Middleware): Middleware_Response {
+		if (!$Middleware instanceof Middleware_Base) {	
 			throw new Exception("Middleware was not an instance of Middleware_Base: " . $Middleware);
 		}
 
-		return $instance->process();
+		return $Middleware->process();
 	}
 
 	/**
