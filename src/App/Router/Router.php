@@ -60,11 +60,13 @@ class Router {
 	 * @return Router
 	 */
 	public function addGroup(string $group, callable $callback, array $middleware = []) {
-		$this->current_group = $group;
-		$this->group_middleware = $middleware;
+		$existing_group = $this->current_group ?? '';
+		$existing_group_middleware = $this->group_middleware ?? [];
+		$this->current_group = $this->current_group . $group;
+		$this->group_middleware = array_merge($this->group_middleware, $middleware);
 		$callback();
-		$this->current_group = '';
-		$this->group_middleware = [];
+		$this->current_group = $existing_group;
+		$this->group_middleware = $existing_group_middleware;
 		return $this;
 	}
 
