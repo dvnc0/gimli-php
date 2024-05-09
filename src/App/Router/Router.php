@@ -36,7 +36,13 @@ class Router {
 		':id' => "([0-9_-]+)",
 	];
 	protected Dispatch $Dispatch;
-	protected string $allowed_methods = "GET|PUT|POST|DELETE|PATCH";
+	protected array $allowed_methods = [ 
+		"GET",
+		"PUT",
+		"POST",
+		"DELETE",
+		"PATCH"
+	];
 	
 	/**
 	 * Constructor
@@ -79,9 +85,7 @@ class Router {
 	 * @return Router
 	 */
 	public function get(string $route, string|callable|array $callback) {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
+		$callback = $this->getFormattedCallbackForRoute($callback);
 		$this->addRoute('GET', $route, $callback);
 		return $this;
 	}
@@ -95,9 +99,7 @@ class Router {
 	 * @return Router
 	 */
 	public function post(string $route, string|callable|array $callback) {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
+		$callback = $this->getFormattedCallbackForRoute($callback);
 		$this->addRoute('POST', $route, $callback);
 		return $this;
 	}
@@ -111,9 +113,7 @@ class Router {
 	 * @return Router
 	 */
 	public function put(string $route, string|callable|array $callback) {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
+		$callback = $this->getFormattedCallbackForRoute($callback);
 		$this->addRoute('PUT', $route, $callback);
 		return $this;
 	}
@@ -127,9 +127,7 @@ class Router {
 	 * @return Router
 	 */
 	public function patch(string $route, string|callable|array $callback) {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
+		$callback = $this->getFormattedCallbackForRoute($callback);
 		$this->addRoute('PATCH', $route, $callback);
 		return $this;
 	}
@@ -143,9 +141,7 @@ class Router {
 	 * @return Router
 	 */
 	public function delete(string $route, string|callable|array $callback) {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
+		$callback = $this->getFormattedCallbackForRoute($callback);
 		$this->addRoute('DELETE', $route, $callback);
 		return $this;
 	}
@@ -159,15 +155,26 @@ class Router {
 	 * @return Router
 	 */
 	public function any(string $route, string|callable|array $callback) {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
+		$callback = $this->getFormattedCallbackForRoute($callback);
 		$this->addRoute('GET', $route, $callback);
 		$this->addRoute('POST', $route, $callback);
 		$this->addRoute('PUT', $route, $callback);
 		$this->addRoute('PATCH', $route, $callback);
 		$this->addRoute('DELETE', $route, $callback);
 		return $this;
+	}
+
+	/**
+	 * Return a formatted callback string
+	 *
+	 * @param  string|callable|array $callback the formatted callback
+	 * @return string
+	 */
+	protected function getFormattedCallbackForRoute(string|callable|array $callback): string {
+		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
+			$callback = implode('@', $callback);
+		}
+		return $callback;
 	}
 
 	/**
@@ -225,7 +232,7 @@ class Router {
 		
 		$type = $this->Request->REQUEST_METHOD;
 
-		if (!in_array($type, explode('|', $this->allowed_methods))) {
+		if (!in_array($type, $this->allowed_methods)) {
 			throw new Exception("Request method {$type} not allowed");
 		}
 		
