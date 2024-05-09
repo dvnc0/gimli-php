@@ -83,7 +83,7 @@ class Injector implements Injector_Interface {
 	 * @param array  $dependencies dependencies
 	 * @return object
 	 */
-	protected function createFreshInstance(string $class_name, array $dependencies):object {
+	protected function createFreshInstance(string $class_name, array $dependencies): object {
 		$dependencies[Application::class] = $this->Application;
 		$dependencies[Injector::class]    = $this;
 
@@ -91,32 +91,56 @@ class Injector implements Injector_Interface {
 		$constructor = $reflection->getConstructor();
 
 		if (empty($constructor)) {
-			$instance = new $class_name();
-		} else {
-			$constructor_params = $constructor->getParameters();
-			$constructor_args   = [];
+			$instance                            = new $class_name();
+			$this->resolved_classes[$class_name] = $instance;
 
-			foreach ($constructor_params as $param) {
-				$param_class = $param->getType()->getName(); // @phpstan-ignore-line
-				$param_name  = $param->getName();
+			return $instance;
+		}
 
+		$constructor_params = $constructor->getParameters();
+		$constructor_args   = [];
+
+		foreach ($constructor_params as $param) {
+			$param_type  = $param->getType();
+			$param_class = $param_type === NULL ? '' : $param_type->getName(); // @phpstan-ignore-line
+			$param_name  = $param->getName();
+
+			if (!empty($param_class)) {
 				if (!empty($dependencies[$param_class])) {
 					$constructor_args[] = $dependencies[$param_class];
 					continue;
-				} else if (!empty($param_class) && class_exists($param_class)) {
+				} 
+				
+				if (class_exists($param_class)) {
 					$constructor_args[] = $this->resolve($param_class);
-					continue;
-				} else {
 					continue;
 				}
 			}
 
-			$instance = $reflection->newInstanceArgs($constructor_args);
+			if (!empty($param_name) && !empty($dependencies[$param_name])) {
+				$constructor_args[] = $dependencies[$param_name];
+				continue;
+			}
+
+			if ($param->isDefaultValueAvailable()) {
+				$constructor_args[] = $param->getDefaultValue();
+				continue;
+			}
+
+			if ($param->allowsNull()) {
+				$constructor_args[] = NULL;
+				continue;
+			}
+
+			continue;
 		}
+
+		$instance = $reflection->newInstanceArgs($constructor_args);
 
 		$this->resolved_classes[$class_name] = $instance;
 
 		return $instance;
+			
 	}
 
 }

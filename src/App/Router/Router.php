@@ -25,7 +25,7 @@ class Router {
 	protected string $current_route        = '';
 	protected string $current_group        = '';
 	protected string $current_type         = '';
-	protected array $group_middleware     = [];
+	protected array $group_middleware      = [];
 	protected bool $trailing_slash_matters = TRUE;
 	protected array $patterns              = [
 		':all' => "([^/]+)",
@@ -53,19 +53,19 @@ class Router {
 	/**
 	 * add a route group
 	 * 
-	 * @param string   $group    group
-	 * @param callable $callback 
-	 * @param array    $middleware
+	 * @param string   $group      group
+	 * @param callable $callback   the callback
+	 * @param array    $middleware the middleware
 	 * 
 	 * @return Router
 	 */
 	public function addGroup(string $group, callable $callback, array $middleware = []) {
-		$existing_group = $this->current_group ?? '';
+		$existing_group            = $this->current_group ?? '';
 		$existing_group_middleware = $this->group_middleware ?? [];
-		$this->current_group = $this->current_group . $group;
-		$this->group_middleware = array_merge($this->group_middleware, $middleware);
+		$this->current_group       = $this->current_group . $group;
+		$this->group_middleware    = array_merge($this->group_middleware, $middleware);
 		$callback();
-		$this->current_group = $existing_group;
+		$this->current_group    = $existing_group;
 		$this->group_middleware = $existing_group_middleware;
 		return $this;
 	}

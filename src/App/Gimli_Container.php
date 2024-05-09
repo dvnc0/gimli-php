@@ -8,7 +8,6 @@ use Gimli\Injector\Injector;
 use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\View\View_Engine_Interface;
-use Gimli\View\Latte_Engine;
 
 /**
  * @property Injector_Interface $Injector
@@ -45,7 +44,7 @@ class Gimli_Container {
 	/**
 	 * Set the dependency injector instance
 	 *
-	 * @param Injector_Interface $Injector
+	 * @param Injector_Interface $Injector The custom injector to use
 	 * @return void
 	 */
 	public function setCustomInjector(Injector_Interface $Injector) {
@@ -87,6 +86,6 @@ class Gimli_Container {
 			return $this->{$name};
 		}
 		$name_as_method = 'get' . ucfirst($name);
-		return $this->Container->{$name_as_method}();
+		return $this->{$name_as_method}();
 	}
 }
