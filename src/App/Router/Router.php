@@ -20,14 +20,45 @@ use Exception;
  * @property Request $Request
  */
 class Router {
+	/**
+	 * @var Application $Application
+	 */
 	protected Application $Application;
-	protected array $routes                = [];
-	protected string $current_route        = '';
-	protected string $current_group        = '';
-	protected string $current_type         = '';
-	protected array $group_middleware      = [];
+
+	/**
+	 * @var array $routes
+	 */
+	protected array $routes = [];
+
+	/**
+	 * @var string $current_route
+	 */
+	protected string $current_route = '';
+
+	/**
+	 * @var string $current_group
+	 */
+	protected string $current_group = '';
+
+	/**
+	 * @var string $current_type
+	 */
+	protected string $current_type = '';
+
+	/**
+	 * @var array $group_middleware
+	 */
+	protected array $group_middleware = [];
+
+	/**
+	 * @var bool $trailing_slash_matters
+	 */
 	protected bool $trailing_slash_matters = TRUE;
-	protected array $patterns              = [
+
+	/**
+	 * @var array $patterns
+	 */
+	protected array $patterns = [
 		':all' => "([^/]+)",
 		':alpha' => "([A-Za-z_-]+)",
 		':alphanumeric' => "([\w-]+)",
@@ -35,7 +66,15 @@ class Router {
 		':numeric' => "([0-9_-.]+)",
 		':id' => "([0-9_-]+)",
 	];
+
+	/**
+	 * @var Dispatch $Dispatch
+	 */
 	protected Dispatch $Dispatch;
+
+	/**
+	 * @var array $allowed_methods
+	 */
 	protected array $allowed_methods = [ 
 		"GET",
 		"PUT",
@@ -70,7 +109,9 @@ class Router {
 		$existing_group_middleware = $this->group_middleware ?? [];
 		$this->current_group       = $this->current_group . $group;
 		$this->group_middleware    = array_merge($this->group_middleware, $middleware);
+		
 		$callback();
+		
 		$this->current_group    = $existing_group;
 		$this->group_middleware = $existing_group_middleware;
 		return $this;
@@ -156,11 +197,11 @@ class Router {
 	 */
 	public function any(string $route, string|callable|array $callback) {
 		$callback = $this->getFormattedCallbackForRoute($callback);
-		$this->addRoute('GET', $route, $callback);
-		$this->addRoute('POST', $route, $callback);
-		$this->addRoute('PUT', $route, $callback);
-		$this->addRoute('PATCH', $route, $callback);
-		$this->addRoute('DELETE', $route, $callback);
+
+		foreach ($this->allowed_methods as $method) {
+			$this->addRoute($method, $route, $callback);
+		}
+
 		return $this;
 	}
 
@@ -271,8 +312,8 @@ class Router {
 			call_user_func_array($route_match['route_info']['handler'], $route_match['args'] ?: []);
 			return;
 		}
-		[$className, $method] = explode('@', $route_match['route_info']['handler']);
-		$class_to_call        = $this->Injector->resolve($className);
+		[$class_name, $method] = explode('@', $route_match['route_info']['handler']);
+		$class_to_call        = $this->Injector->resolve($class_name);
 
 		$response_object = new Response;
 		$response        = call_user_func_array([$class_to_call, $method], [$this->Request, $response_object, ...$route_match['args']]);

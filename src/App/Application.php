@@ -89,6 +89,10 @@ class Application {
 			return $this->{$name};
 		}
 
+		if (isset($this->Module) && method_exists($this->Module, $name)) {
+			return $this->Module->{$name}();
+		}
+
 		$name_as_method = 'get' . ucfirst($name);
 		return $this->Container->{$name_as_method}();
 	}
