@@ -128,7 +128,8 @@ class Application {
 		$Router = $this->Injector->resolve(Router::class);
 		$Router->Request = $this->Injector->resolve(Request::class);
 		$Router->addRoutes($routes);
-		return $Router->run();
+		$Router->run();
+		return;
 	}
 
 }
