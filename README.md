@@ -18,24 +18,23 @@ RewriteRule ^ index.php [L]
 ```
 
 ## Usage
-Creating a GimliDuck application is simple, because it should be.
+Creating a GimliDuck application is simple:
 
 ```php
-<?php
 declare(strict_types=1);
-
-include_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Gimli\Application;
+use Gimli\Router\Route;
 
-$App = new Application(__DIR__, $_SERVER);
-$Router = $App->Router;
+$App = Application::create(__DIR__, $_SERVER);
+$App->Config = $App->Injector->resolveFresh(Config::class, ['environment_settings' => []]);
 
-$Router->get('/', function(){
-	echo "Hello World"
+Route::get('/', function(){
+	echo "Hello World";
 });
 
-$Router->run();
+$App->run();
 ```
 That is really all you need to get started. You can add more like a template engine, a config file, etc, but you don't **have** to.
 
@@ -44,20 +43,26 @@ There are a few things you can do with your route callbacks... pass a string, a 
 
 ```php
 
-$Router->get('/', function(){
+Route::get('/', function(){
 	echo "Hello World"
 });
 
-$Router->get('/', Home_Controller::class . '@homePage');
+Route::get('/', Home_Controller::class . '@homePage');
 
-$Router->get('/', [Home_Controller::class, 'homePage']);
+Route::get('/', [Home_Controller::class, 'homePage']);
 ```
 Any of those work, it's up to you how you do it.
 
 You can add middleware if you need some extra defense
 
 ```php
-$Router->get('/', [Home_Controller::class, 'homePage'])->addMiddleware(Logged_In_Middleware::class);
+Route::get('/', [Home_Controller::class, 'homePage'])->addMiddleware(Logged_In_Middleware::class);
 ```
 
 That should be an instance of `Gimli\Middleware\Middleware_Base` and you need to define the `abstract process` method, which returns `Gimli\Middleware\Middleware_Response`. Middleware does have access to the Application instance including the Injector and whatever else you decide to set on it.
+
+You can also add groups, define a default route file that should load, and load additional route files to help organize your routes.
+
+### Dependency Injection
+
+You can use the built in Injector to bind or register dependencies. You can also resolve dependencies from the Injector. You can add anything you need to the Injector and access it throughout your application through the `Application` instance.

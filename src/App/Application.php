@@ -108,6 +108,10 @@ class Application {
 	 * @throws Exception
 	 */
 	protected function registerWebRoutes(): void {
+		if ($this->Config->use_web_route_file === FALSE) {
+			return;
+		}
+		
 		if (!file_exists($this->app_root . $this->Config->web_route_file)) {
 			throw new Exception('Web route file not found: ' . $this->app_root . $this->Config->web_route_file);
 		}

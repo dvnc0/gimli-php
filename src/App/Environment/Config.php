@@ -26,4 +26,7 @@ class Config extends Environment_Base {
 
 	/** @var string $web_route_file */
 	public string $web_route_file = '/App/Routes/web.php';
+
+	/** @var bool $use_web_route_file */
+	public bool $use_web_route_file = FALSE;
 }
