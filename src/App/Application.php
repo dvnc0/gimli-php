@@ -9,6 +9,7 @@ use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\Injector\Injector;
 use Exception;
+use Gimli\Router\Route;
 
 /**
  * @property Injector_Interface $Injector
@@ -75,11 +76,11 @@ class Application {
 	 *
 	 * @param non-empty-string $app_root         The application root path
 	 * @param array            $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector Injector instance
 	 */
 	protected function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
 		$this->app_root  = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
-		$this->registerWebRoutes();
 	}
 
 	/**
@@ -107,7 +108,6 @@ class Application {
 	 * @throws Exception
 	 */
 	protected function registerWebRoutes(): void {
-		// TODO: make this configurable
 		if (!file_exists($this->app_root . $this->Config->web_route_file)) {
 			throw new Exception('Web route file not found: ' . $this->app_root . $this->Config->web_route_file);
 		}
@@ -152,11 +152,13 @@ class Application {
 
 	/**
 	 * Run the application
-	 *
-	 * @param array $routes Routes to add
+	 * 
 	 * @return void
 	 */
-	public function run(array $routes): void {
+	public function run(): void {
+		// might need to rethink this
+		$this->registerWebRoutes();
+		$routes = Route::build();
 		$Router = $this->Injector->resolve(Router::class);
 		$Router->Request = $this->Injector->resolve(Request::class);
 		$Router->addRoutes($routes);
