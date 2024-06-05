@@ -31,26 +31,6 @@ class Router {
 	protected array $routes = [];
 
 	/**
-	 * @var string $current_route
-	 */
-	protected string $current_route = '';
-
-	/**
-	 * @var string $current_group
-	 */
-	protected string $current_group = '';
-
-	/**
-	 * @var string $current_type
-	 */
-	protected string $current_type = '';
-
-	/**
-	 * @var array $group_middleware
-	 */
-	protected array $group_middleware = [];
-
-	/**
 	 * @var bool $trailing_slash_matters
 	 */
 	protected bool $trailing_slash_matters = TRUE;
@@ -96,164 +76,19 @@ class Router {
 	}
 
 	/**
-	 * add a route group
+	 * add routes
 	 * 
-	 * @param string   $group      group
-	 * @param callable $callback   the callback
-	 * @param array    $middleware the middleware
-	 * 
-	 * @return Router
-	 */
-	public function addGroup(string $group, callable $callback, array $middleware = []) {
-		$existing_group            = $this->current_group ?? '';
-		$existing_group_middleware = $this->group_middleware ?? [];
-		$this->current_group       = $this->current_group . $group;
-		$this->group_middleware    = array_merge($this->group_middleware, $middleware);
-		
-		$callback();
-		
-		$this->current_group    = $existing_group;
-		$this->group_middleware = $existing_group_middleware;
-		return $this;
-	}
-
-	/**
-	 * add a GET route
-	 * 
-	 * @param string                $route    route
-	 * @param string|callable|array $callback callback
-	 * 
-	 * @return Router
-	 */
-	public function get(string $route, string|callable|array $callback) {
-		$callback = $this->getFormattedCallbackForRoute($callback);
-		$this->addRoute('GET', $route, $callback);
-		return $this;
-	}
-
-	/**
-	 * add a POST route
-	 * 
-	 * @param string                $route    route
-	 * @param string|callable|array $callback callback
-	 * 
-	 * @return Router
-	 */
-	public function post(string $route, string|callable|array $callback) {
-		$callback = $this->getFormattedCallbackForRoute($callback);
-		$this->addRoute('POST', $route, $callback);
-		return $this;
-	}
-
-	/**
-	 * add a PUT route
-	 * 
-	 * @param string                $route    route
-	 * @param string|callable|array $callback callback
-	 * 
-	 * @return Router
-	 */
-	public function put(string $route, string|callable|array $callback) {
-		$callback = $this->getFormattedCallbackForRoute($callback);
-		$this->addRoute('PUT', $route, $callback);
-		return $this;
-	}
-
-	/**
-	 * add a PATCH route
-	 * 
-	 * @param string                $route    route
-	 * @param string|callable|array $callback callback
-	 * 
-	 * @return Router
-	 */
-	public function patch(string $route, string|callable|array $callback) {
-		$callback = $this->getFormattedCallbackForRoute($callback);
-		$this->addRoute('PATCH', $route, $callback);
-		return $this;
-	}
-
-	/**
-	 * add a DELETE route
-	 * 
-	 * @param string                $route    route
-	 * @param string|callable|array $callback callback
-	 * 
-	 * @return Router
-	 */
-	public function delete(string $route, string|callable|array $callback) {
-		$callback = $this->getFormattedCallbackForRoute($callback);
-		$this->addRoute('DELETE', $route, $callback);
-		return $this;
-	}
-
-	/**
-	 * add GET, POST, PUT, PATCH, DELETE routes
-	 * 
-	 * @param string                $route    route
-	 * @param string|callable|array $callback callback
-	 * 
-	 * @return Router
-	 */
-	public function any(string $route, string|callable|array $callback) {
-		$callback = $this->getFormattedCallbackForRoute($callback);
-
-		foreach ($this->allowed_methods as $method) {
-			$this->addRoute($method, $route, $callback);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Return a formatted callback string
-	 *
-	 * @param  string|callable|array $callback the formatted callback
-	 * @return string
-	 */
-	protected function getFormattedCallbackForRoute(string|callable|array $callback): string {
-		if (is_array($callback) && count($callback) === 2 && is_string($callback[0]) && is_string($callback[1])) {
-			$callback = implode('@', $callback);
-		}
-		return $callback;
-	}
-
-	/**
-	 * add a route
-	 * 
-	 * @param string          $method   method for route
-	 * @param string          $route    route
-	 * @param string|callable $callback callback
+	 * @param array $routes routes to add
 	 * 
 	 * @return void
+	 * @throws Exception
 	 */
-	public function addRoute(string $method, string $route, string|callable $callback) {
-		$route_with_group    = $this->current_group . $route;
-		$this->current_route = $route_with_group;
-		$this->current_type  = $method;
-		
-		$this->routes[$method][$route_with_group] = [
-			'route' => $route_with_group,
-			'handler' => $callback,
-		];
-
-		if (!empty($this->group_middleware)) {
-			foreach($this->group_middleware as $middleware) {
-				$this->routes[$method][$route_with_group]['middleware'] = $middleware;
-			}
+	public function addRoutes(array $routes): void {
+		if (empty($routes)) {
+			throw new Exception("No routes provided");
 		}
-	}
 
-	/**
-	 * add a middleware to a route
-	 * 
-	 * @param Middleware_Base $middleware middleware to add
-	 * 
-	 * @return Router
-	 */
-	public function addMiddleware(Middleware_Base $middleware): object {
-		$this->routes[$this->current_type][$this->current_route]['middleware'] = $middleware;
-		return $this;
+		$this->routes = $routes;
 	}
 
 	/**
@@ -302,9 +137,11 @@ class Router {
 		$this->Request->route_data = $route_match;
 
 		if (!empty($route_match['route_info']['middleware'])) {
-			$middleware_response = $this->callMiddleware($route_match['route_info']['middleware']);
-			if (!$middleware_response->success) {
-				header("Location: " . $middleware_response->forward);
+			foreach($route_match['route_info']['middleware'] as $middleware) {
+				$middleware_response = $this->callMiddleware($middleware);
+				if (!$middleware_response->success) {
+					header("Location: " . $middleware_response->forward);
+				}
 			}
 		}
 
@@ -330,6 +167,7 @@ class Router {
 	 * @param Middleware_Base $Middleware middleware to call
 	 * 
 	 * @return Middleware_Response
+	 * @throws Exception
 	 */
 	protected function callMiddleware(Middleware_Base $Middleware): Middleware_Response {
 		if (!$Middleware instanceof Middleware_Base) {	

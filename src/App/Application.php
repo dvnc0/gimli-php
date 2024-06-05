@@ -5,22 +5,23 @@ namespace Gimli;
 
 use Gimli\Injector\Injector_Interface;
 use Gimli\Http\Request;
-use Gimli\Gimli_Container;
 use Gimli\Router\Router;
 use Gimli\Environment\Environment_Base;
-use Gimli\View\View_Engine_Interface;
-use Gimli\Session\Session_Interface;
-use Gimli\Environment\Container_Base;
+use Gimli\Injector\Injector;
+use Exception;
 
 /**
  * @property Injector_Interface $Injector
  * @property Router $Router
  * @property Environment_Base $Config
- * @property View_Engine_Interface $View
- * @property Session_Interface $Session
- * @property Container_Base $Module
  */
 class Application {
+
+	/**
+	 * @var Application|null $instance
+	 */
+	protected static ?Application $instance = null;
+
 	/**
 	 * @var non-empty-string $app_root
 	 */
@@ -32,29 +33,42 @@ class Application {
 	protected Request $Request;
 
 	/**
-	 * @var Gimli_Container $Container
-	 */
-	protected Gimli_Container $Container;
-
-	/**
 	 * @var Environment_Base $Config
 	 */
 	public Environment_Base $Config;
 
 	/**
-	 * @var View_Engine_Interface $View
+	 * @var Injector_Interface $Injector
 	 */
-	public View_Engine_Interface $View;
+	public Injector_Interface $Injector;
 
 	/**
-	 * @var Session_Interface $Session
+	 * Create the instance of the Application class
+	 *
+	 * @param non-empty-string $app_root         The application root path
+	 * @param array            $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector Injector instance
+	 * @return Application
 	 */
-	public Session_Interface $Session;
+	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = null): Application {
+		if (is_null(self::$instance)) {
+			self::$instance = new Application($app_root, $server_variables, $Injector);
+		}
+		return self::$instance;
+	}
 
 	/**
-	 * @var Container_Base $Module
+	 * Get the instance of the Application class
+	 *
+	 * @return Application
+	 * @throws Exception
 	 */
-	public Container_Base $Module;
+	public static function get(): Application {
+		if (is_null(self::$instance)) {
+			throw new Exception('Application instance not created');
+		}
+		return self::$instance;
+	}
 
 	/**
 	 * Constructor
@@ -62,10 +76,27 @@ class Application {
 	 * @param non-empty-string $app_root         The application root path
 	 * @param array            $server_variables $_SERVER values
 	 */
-	public function __construct(string $app_root, array $server_variables) {
+	protected function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
 		$this->app_root  = $app_root;
-		$this->Request   = new Request($server_variables);
-		$this->Container = new Gimli_Container($this);
+		$this->registerCoreServices($server_variables, $Injector);
+	}
+
+	/**
+	 * Register core services with the DI container
+	 *
+	 * @param array $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector Injector instance
+	 * @return void
+	 */
+	protected function registerCoreServices(array $server_variables, ?Injector_Interface $Injector = null): void {
+		if (!is_null($Injector)) {
+			$this->setCustomInjector($Injector);
+		} else {
+			$this->Injector = new Injector($this);
+		}
+
+		$this->Injector->bind(Request::class, fn() => new Request($server_variables));
+		$this->Injector->bind(Router::class, fn() => new Router($this));
 	}
 
 	/**
@@ -75,25 +106,29 @@ class Application {
 	 * @return void
 	 */
 	public function setCustomInjector(Injector_Interface $Injector): void {
-		$this->Container->setCustomInjector($Injector);
+		$this->Injector = $Injector;
 	}
 
 	/**
-	 * Magic method
+	 * Check if the application is running in CLI mode
 	 *
-	 * @param non-empty-string $name property name
-	 * @return mixed
+	 * @return bool
 	 */
-	public function __get(string $name) {
-		if (property_exists($this, $name)) {
-			return $this->{$name};
-		}
-
-		if (isset($this->Module) && method_exists($this->Module, $name)) {
-			return $this->Module->{$name}();
-		}
-
-		$name_as_method = 'get' . ucfirst($name);
-		return $this->Container->{$name_as_method}();
+	public function isCli(): bool {
+		return \PHP_SAPI === 'cli';
 	}
+
+	/**
+	 * Run the application
+	 *
+	 * @param array $routes Routes to add
+	 * @return void
+	 */
+	public function run(array $routes): void {
+		$Router = $this->Injector->resolve(Router::class);
+		$Router->Request = $this->Injector->resolve(Request::class);
+		$Router->addRoutes($routes);
+		return $Router->run();
+	}
+
 }

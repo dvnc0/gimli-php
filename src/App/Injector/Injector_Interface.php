@@ -12,7 +12,17 @@ interface Injector_Interface {
 	 * 
 	 * @return void
 	 */
-	public function register(string $class_name, object $instance);
+	public function register(string $class_name, object $instance): void;
+
+	/**
+	 * bind a class to a creation method
+	 * 
+	 * @param string   $class_name class name
+	 * @param callable $callback   callback
+	 * 
+	 * @return void
+	 */
+	public function bind(string $class_name, callable $callback): void;
 
 	/**
 	 * resolves a class instance

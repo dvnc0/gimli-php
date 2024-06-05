@@ -20,6 +20,11 @@ class Injector implements Injector_Interface {
 	protected array $registered_classes = [];
 
 	/**
+	 * @var array $bindings
+	 */
+	protected array $bindings = [];
+
+	/**
 	 * @var Application $Application
 	 */
 	protected Application $Application;
@@ -42,8 +47,21 @@ class Injector implements Injector_Interface {
 	 * @param object $instance   instance
 	 * @return void
 	 */
-	public function register(string $class_name, object $instance) {
+	public function register(string $class_name, object $instance): void {
 		$this->registered_classes[$class_name] = $instance;
+		return;
+	}
+
+	/**
+	 * Binds a class to a creation method
+	 *
+	 * @param string   $class_name class name
+	 * @param callable $callback   callback
+	 * @return void
+	 */
+	public function bind(string $class_name, callable $callback): void {
+		$this->bindings[$class_name] = $callback;
+		return;
 	}
 
 	/**
@@ -60,6 +78,13 @@ class Injector implements Injector_Interface {
 
 		if (!empty($this->registered_classes[$class_name])) {
 			return $this->registered_classes[$class_name];
+		}
+
+		if (!empty($this->bindings[$class_name])) {
+			$callback = $this->bindings[$class_name];
+			$instance = call_user_func($callback);
+			$this->resolved_classes[$class_name] = $instance;
+			return $instance;
 		}
 
 		return $this->createFreshInstance($class_name, $dependencies);
