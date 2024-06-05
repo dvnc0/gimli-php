@@ -6,14 +6,14 @@ namespace Gimli;
 use Gimli\Injector\Injector_Interface;
 use Gimli\Http\Request;
 use Gimli\Router\Router;
-use Gimli\Environment\Environment_Base;
+use Gimli\Environment\Config;
 use Gimli\Injector\Injector;
 use Exception;
 
 /**
  * @property Injector_Interface $Injector
  * @property Router $Router
- * @property Environment_Base $Config
+ * @property Config $Config
  */
 class Application {
 
@@ -33,9 +33,9 @@ class Application {
 	protected Request $Request;
 
 	/**
-	 * @var Environment_Base $Config
+	 * @var Config $Config
 	 */
-	public Environment_Base $Config;
+	public Config $Config;
 
 	/**
 	 * @var Injector_Interface $Injector
@@ -79,6 +79,7 @@ class Application {
 	protected function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
 		$this->app_root  = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
+		$this->registerWebRoutes();
 	}
 
 	/**
@@ -97,6 +98,37 @@ class Application {
 
 		$this->Injector->bind(Request::class, fn() => new Request($server_variables));
 		$this->Injector->bind(Router::class, fn() => new Router($this));
+	}
+
+	/**
+	 * Register the web routes
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+	protected function registerWebRoutes(): void {
+		// TODO: make this configurable
+		if (!file_exists($this->app_root . $this->Config->web_route_file)) {
+			throw new Exception('Web route file not found: ' . $this->app_root . $this->Config->web_route_file);
+		}
+
+		require_once $this->app_root . $this->Config->web_route_file;
+	}
+
+	/**
+	 * Load custom route files
+	 *
+	 * @param array $routes Route files to load
+	 * @return void
+	 * @throws Exception
+	 */
+	public function loadRouteFiles(array $routes): void {
+		foreach ($routes as $route) {
+			if (!file_exists($this->app_root . '/' . $route)) {
+				throw new Exception('Route file not found: ' . $this->app_root . '/' . $route);
+			}
+			require_once $this->app_root . '/' . $route;
+		}
 	}
 
 	/**

@@ -36,6 +36,11 @@ class Router {
 	protected bool $trailing_slash_matters = TRUE;
 
 	/**
+	 * @var Request $Request
+	 */
+	public Request $Request;
+
+	/**
 	 * @var array $patterns
 	 */
 	protected array $patterns = [
