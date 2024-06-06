@@ -43,4 +43,13 @@ interface Injector_Interface {
 	 * @return object
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object;
+
+	/**
+	 * check if a class exists
+	 * 
+	 * @param string $class_name class name
+	 * 
+	 * @return bool
+	 */
+	public function exists(string $key): bool;
 }

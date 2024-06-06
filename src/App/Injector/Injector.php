@@ -102,6 +102,17 @@ class Injector implements Injector_Interface {
 	}
 
 	/**
+	 * Checks if a class exists
+	 *
+	 * @param string $key class name
+	 * @return bool
+	 */
+	public function exists(string $key): bool {
+		return !empty($this->resolved_classes[$key]) || !empty($this->registered_classes[$key]) || !empty($this->bindings[$key]);
+	
+	}
+
+	/**
 	 * Creates a fresh class instance
 	 *
 	 * @param string $class_name   class name

@@ -28,7 +28,6 @@ use Gimli\Application;
 use Gimli\Router\Route;
 
 $App = Application::create(__DIR__, $_SERVER);
-$App->Config = $App->Injector->resolveFresh(Config::class, ['environment_settings' => []]);
 
 Route::get('/', function(){
 	echo "Hello World";

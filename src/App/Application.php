@@ -9,7 +9,9 @@ use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\Injector\Injector;
 use Exception;
+use Gimli\Core\Event_Handler;
 use Gimli\Router\Route;
+use Gimli\Session\Session;
 
 /**
  * @property Injector_Interface $Injector
@@ -79,6 +81,11 @@ class Application {
 	 * @param Injector_Interface|null $Injector Injector instance
 	 */
 	protected function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
+
+		if (session_status() === PHP_SESSION_NONE) {
+			session_start();
+		}
+		
 		$this->app_root  = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
 	}
@@ -99,6 +106,11 @@ class Application {
 
 		$this->Injector->bind(Request::class, fn() => new Request($server_variables));
 		$this->Injector->bind(Router::class, fn() => new Router($this));
+		
+		$this->Config = $this->Injector->resolve(Config::class);
+
+		$this->Injector->register(Event_Handler::class, new Event_Handler);
+		$this->Injector->register('Session', new Session);
 	}
 
 	/**
@@ -111,7 +123,7 @@ class Application {
 		if ($this->Config->use_web_route_file === FALSE) {
 			return;
 		}
-		
+
 		if (!file_exists($this->app_root . $this->Config->web_route_file)) {
 			throw new Exception('Web route file not found: ' . $this->app_root . $this->Config->web_route_file);
 		}
