@@ -29,4 +29,10 @@ class Config extends Environment_Base {
 
 	/** @var bool $use_web_route_file */
 	public bool $use_web_route_file = FALSE;
+
+	/** @var bool $enable_latte */
+	public bool $enable_latte = TRUE;
+
+	/** @var string $api_route_file */
+	public string $template_base_dir = 'App/views';
 }

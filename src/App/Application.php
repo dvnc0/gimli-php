@@ -12,6 +12,7 @@ use Exception;
 use Gimli\Core\Event_Handler;
 use Gimli\Router\Route;
 use Gimli\Session\Session;
+use Gimli\View\Latte_Engine;
 
 /**
  * @property Injector_Interface $Injector
@@ -110,7 +111,13 @@ class Application {
 		$this->Config = $this->Injector->resolve(Config::class);
 
 		$this->Injector->register(Event_Handler::class, new Event_Handler);
-		$this->Injector->register('Session', new Session);
+		$this->Injector->register(Session::class, new Session);
+		
+		if ($this->Config->enable_latte === TRUE) {
+			$this->Injector->register(Latte_Engine::class, new Latte_Engine($this->Config->template_base_dir, $this->app_root));
+		}
+
+		return;
 	}
 
 	/**
