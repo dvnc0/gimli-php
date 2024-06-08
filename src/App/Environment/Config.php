@@ -34,5 +34,5 @@ class Config extends Environment_Base {
 	public bool $enable_latte = TRUE;
 
 	/** @var string $api_route_file */
-	public string $template_base_dir = 'App/views';
+	public string $template_base_dir = 'App/views/';
 }

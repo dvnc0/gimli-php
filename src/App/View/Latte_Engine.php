@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Gimli\View;
 
-use Gimli\View\View_Engine_Interface;
-
-class Latte_Engine implements View_Engine_Interface
-{
+class Latte_Engine {
 	protected string $template_base_dir;
 	protected string $app_root_dir;
 	
@@ -62,8 +59,10 @@ $latte->addFunction(
 				}
 );
 
+		$template_path_full = implode('/', array_filter([$this->app_root_dir, $this->template_base_dir, $template_path], 'strlen'));
+		$template_path_full = str_replace('//', '/', $template_path_full);
 
-		$output = $latte->renderToString($this->template_base_dir . $template_path, $template_data);
+		$output = $latte->renderToString($template_path_full, $template_data);
 
 		return $output;
 	}

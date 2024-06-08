@@ -10,6 +10,7 @@ use Gimli\Environment\Config;
 use Gimli\Injector\Injector;
 use Exception;
 use Gimli\Core\Event_Handler;
+use Gimli\Http\Response;
 use Gimli\Router\Route;
 use Gimli\Session\Session;
 use Gimli\View\Latte_Engine;
@@ -53,8 +54,22 @@ class Application {
 	 * @param array            $server_variables $_SERVER values
 	 * @param Injector_Interface|null $Injector Injector instance
 	 * @return Application
+	 * @throws Exception
 	 */
 	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = null): Application {
+
+		if (empty($app_root)) {
+			throw new Exception('Application root path not set');
+		}
+
+		if (!is_dir($app_root)) {
+			throw new Exception('Application root path not found: ' . $app_root);
+		}
+
+		if (empty($server_variables)) {
+			throw new Exception('$_SERVER variables not set');
+		}
+
 		if (is_null(self::$instance)) {
 			self::$instance = new Application($app_root, $server_variables, $Injector);
 		}
@@ -107,6 +122,7 @@ class Application {
 
 		$this->Injector->bind(Request::class, fn() => new Request($server_variables));
 		$this->Injector->bind(Router::class, fn() => new Router($this));
+		$this->Injector->bind(Response::class, fn() => new Response);
 		
 		$this->Config = $this->Injector->resolve(Config::class);
 
@@ -135,6 +151,10 @@ class Application {
 			throw new Exception('Web route file not found: ' . $this->app_root . $this->Config->web_route_file);
 		}
 
+		if (!is_readable($this->app_root . $this->Config->web_route_file)) {
+			throw new Exception('Web route file not readable: ' . $this->app_root . $this->Config->web_route_file);
+		}
+
 		require_once $this->app_root . $this->Config->web_route_file;
 	}
 
@@ -150,6 +170,11 @@ class Application {
 			if (!file_exists($this->app_root . '/' . $route)) {
 				throw new Exception('Route file not found: ' . $this->app_root . '/' . $route);
 			}
+
+			if (!is_readable($this->app_root . '/' . $route)) {
+				throw new Exception('Route file not readable: ' . $this->app_root . '/' . $route);
+			}
+
 			require_once $this->app_root . '/' . $route;
 		}
 	}

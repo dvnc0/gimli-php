@@ -7,10 +7,10 @@ use Gimli\Application;
 use Gimli\Router\Dispatch;
 use Gimli\Injector\Injector;
 use Gimli\Http\Request;
-use Gimli\Http\Response;
 use Gimli\Middleware\Middleware_Base;
 use Gimli\Middleware\Middleware_Response;
 use Exception;
+use ReflectionNamedType;
 
 /**
  * Router
@@ -129,6 +129,9 @@ class Router {
 			$possible_route = str_replace($search_keys, $replace_regex, $route['route']);
 			if (preg_match('#^' . $possible_route . '$#', $uri, $route_match)) {
 				$route_match['args']       = array_slice($route_match, 1);
+				if (!empty($route['arg_names'])) {
+					$route_match['args']       = array_combine($route['arg_names'], $route_match['args']);
+				}
 				$route_match['route_info'] = $route;
 				break;
 			}
@@ -155,15 +158,53 @@ class Router {
 			return;
 		}
 		[$class_name, $method] = explode('@', $route_match['route_info']['handler']);
-		$class_to_call        = $this->Injector->resolve($class_name);
+		$class_to_call         = $this->Injector->resolve($class_name);
 
-		$response_object = new Response;
-		$response        = call_user_func_array([$class_to_call, $method], [$this->Request, $response_object, ...$route_match['args']]);
+		$method_args = $this->getArgumentsForMethod($class_to_call, $method, $route_match['args']);
+
+		$response = call_user_func_array([$class_to_call, $method], $method_args);
 
 		$this->Dispatch->dispatch($response);
 
 		return;
 
+	}
+
+	/**
+	 * get arguments for method
+	 * 
+	 * @param object $class_to_call class to call
+	 * @param string $method method to call
+	 * @param array $route_match_args route match args
+	 * 
+	 * @return array
+	 */
+	protected function getArgumentsForMethod(object $class_to_call, string $method, array $route_match_args): array {
+		$method_args = (new \ReflectionMethod($class_to_call, $method))->getParameters();
+
+		$method_args_types = [];
+		
+		foreach($method_args as $arg) {
+			$type = $arg->getType();
+        	if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+				$method_args_types[] = $type->getName();
+			}
+			else {
+				$method_args_types[] = null;
+			}
+
+			continue;
+		}
+		
+		foreach($method_args_types as $key => $type) {
+			if ($type === null) {
+				$method_args[$key] = $route_match_args;
+			} else {
+				$method_args[$key] = $this->Injector->resolve($type);
+			}
+		}
+
+		return $method_args;
 	}
 
 	/**

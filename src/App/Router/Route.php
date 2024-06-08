@@ -37,6 +37,11 @@ class Route {
 	protected array $routes = [];
 
 	/**
+	 * @var string $arg_name_pattern
+	 */
+	protected string $arg_name_pattern = '(#[a-zA-Z0-9_-]+)';
+
+	/**
 	 * Constructor
 	 */
 	private function __construct() {
@@ -199,6 +204,12 @@ class Route {
 	 * @return Route
 	 */
 	public function addRoute(string $method, string $route, string|array|callable $callback) {
+
+		$arg_names = [];
+		preg_match_all('/' . $this->arg_name_pattern . '/', $route, $matches);
+		$arg_names = preg_replace('/\#/', '', $matches[1]);
+		$route = preg_replace('/' . $this->arg_name_pattern . '/', '', $route);
+
 		$route_with_group    = $this->current_group . $route;
 		$this->current_route = $route_with_group;
 		$this->current_type  = $method;
@@ -208,6 +219,7 @@ class Route {
 		$this->routes[$method][$route_with_group] = [
 			'route' => $route_with_group,
 			'handler' => $callback_formatted,
+			'arg_names' => $arg_names,
 		];
 
 		if (!empty($this->group_middleware)) {
