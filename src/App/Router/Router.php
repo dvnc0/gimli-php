@@ -50,6 +50,7 @@ class Router {
 		':integer' => "([0-9_-]+)",
 		':numeric' => "([0-9_-.]+)",
 		':id' => "([0-9_-]+)",
+		':slug' => "([A-Za-z0-9_-]+)",
 	];
 
 	/**
@@ -157,6 +158,12 @@ class Router {
 			call_user_func_array($route_match['route_info']['handler'], $route_match['args'] ?: []);
 			return;
 		}
+
+		// if no @ add @__invoke
+		if (strpos($route_match['route_info']['handler'], '@') === FALSE) {
+			$route_match['route_info']['handler'] .= '@__invoke';
+		}
+
 		[$class_name, $method] = explode('@', $route_match['route_info']['handler']);
 		$class_to_call         = $this->Injector->resolve($class_name);
 
