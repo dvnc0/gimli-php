@@ -71,8 +71,10 @@ $App->Injector->bind(PDO::class, function() use ($App) {
 	return new PDO($dsn, $database['user'], $database['password'], $options);
 });
 
-// Load routes from a file
-require_once APP_ROOT . '/App/routes/web.php';
+// Load routes from a file(s)
+$App->loadRouteFiles([
+	'App/routes/web.php',
+]);
 
 // Run Application
 $App->run();
