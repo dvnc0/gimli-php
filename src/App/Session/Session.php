@@ -6,10 +6,6 @@ namespace Gimli\Session;
 use Gimli\Session\Session_Interface;
 
 class Session implements Session_Interface {
-	/**
-	 * @var array<string, mixed> $session
-	 */
-	protected array $session = [];
 
 	/**
 	 * Constructor
@@ -18,7 +14,6 @@ class Session implements Session_Interface {
 		if (session_status() === PHP_SESSION_NONE) {
 			session_start();
 		}
-		$this->session = $_SESSION;
 	}
 
 	/**
@@ -31,7 +26,7 @@ class Session implements Session_Interface {
 	public function get(string $key): mixed {
 		if (strpos($key, '.') !== FALSE) {
 			$keys  = explode('.', $key);
-			$value = $this->session;
+			$value = $_SESSION;
 			foreach ($keys as $key) {
 				if (isset($value[$key])) {
 					$value = $value[$key];
@@ -42,7 +37,7 @@ class Session implements Session_Interface {
 			return $value;
 		}
 
-		return $this->session[$key] ?? NULL;
+		return $_SESSION[$key] ?? NULL;
 	}
 
 	/**
@@ -56,7 +51,7 @@ class Session implements Session_Interface {
 	public function set(string $key, mixed $value): void {
 		if (strpos($key, '.') !== FALSE) {
 			$keys    = explode('.', $key);
-			$session = &$this->session;
+			$session = &$_SESSION;
 			foreach ($keys as $key) {
 				if (!isset($session[$key])) {
 					$session[$key] = [];
@@ -67,7 +62,7 @@ class Session implements Session_Interface {
 			return;
 		}
 
-		$this->session[$key] = $value;
+		$_SESSION[$key] = $value;
 	}
 
 	/**
@@ -80,7 +75,7 @@ class Session implements Session_Interface {
 	public function delete(string $key): void {
 		if (strpos($key, '.') !== FALSE) {
 			$keys    = explode('.', $key);
-			$session = &$this->session;
+			$session = &$_SESSION;
 			foreach ($keys as $key) {
 				if (!isset($session[$key])) {
 					return;
@@ -91,7 +86,7 @@ class Session implements Session_Interface {
 			return;
 		}
 
-		unset($this->session[$key]);
+		unset($_SESSION[$key]);
 	}
 
 	/**
@@ -113,7 +108,7 @@ class Session implements Session_Interface {
 	public function has(string $key): bool {
 		if (strpos($key, '.') !== FALSE) {
 			$keys  = explode('.', $key);
-			$value = $this->session;
+			$value = $_SESSION;
 			foreach ($keys as $key) {
 				if (isset($value[$key])) {
 					$value = $value[$key];
@@ -124,6 +119,6 @@ class Session implements Session_Interface {
 			return TRUE;
 		}
 
-		return isset($this->session[$key]);
+		return isset($_SESSION[$key]);
 	}
 }
