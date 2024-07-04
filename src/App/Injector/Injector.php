@@ -98,6 +98,13 @@ class Injector implements Injector_Interface {
 	 * @return object
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object {
+		if (!empty($this->bindings[$class_name])) {
+			$callback = $this->bindings[$class_name];
+			$instance = call_user_func($callback);
+			$this->resolved_classes[$class_name] = $instance;
+			return $instance;
+		}
+		
 		return $this->createFreshInstance($class_name, $dependencies);
 	}
 
