@@ -121,4 +121,13 @@ class Session implements Session_Interface {
 
 		return isset($_SESSION[$key]);
 	}
+
+	/**
+	 * getAll method
+	 * 
+	 * @return array
+	 */
+	public function getAll(): array {
+		return $_SESSION;
+	}
 }
