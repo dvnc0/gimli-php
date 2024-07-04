@@ -185,11 +185,11 @@ class Route {
 	/**
 	 * Add a middleware to a route
 	 *
-	 * @param Middleware_Base $middleware Middleware instance
+	 * @param string $middleware Middleware class
 	 *
 	 * @return Route
 	 */
-	public function addMiddleware(Middleware_Base $middleware): object {
+	public function addMiddleware(string $middleware): object {
 		$this->routes[$this->current_type][$this->current_route]['middleware'][] = $middleware;
 		return $this;
 	}

@@ -144,12 +144,12 @@ class Router {
 		}
 
 		$this->Request->route_data = $route_match;
-
 		if (!empty($route_match['route_info']['middleware'])) {
 			foreach($route_match['route_info']['middleware'] as $middleware) {
 				$middleware_response = $this->callMiddleware($middleware);
-				if (!$middleware_response->success) {
+				if ($middleware_response->success === false) {
 					header("Location: " . $middleware_response->forward);
+					return;
 				}
 			}
 		}
@@ -217,12 +217,13 @@ class Router {
 	/**
 	 * call a middleware
 	 * 
-	 * @param Middleware_Base $Middleware middleware to call
+	 * @param string $Middleware middleware to call
 	 * 
 	 * @return Middleware_Response
 	 * @throws Exception
 	 */
-	protected function callMiddleware(Middleware_Base $Middleware): Middleware_Response {
+	protected function callMiddleware(string $Middleware_Class): Middleware_Response {
+		$Middleware = $this->Injector->resolve($Middleware_Class);
 		if (!$Middleware instanceof Middleware_Base) {	
 			throw new Exception("Middleware was not an instance of Middleware_Base: " . $Middleware);
 		}
