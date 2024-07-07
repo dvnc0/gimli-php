@@ -35,7 +35,7 @@ class Latte_Engine {
 
 $latte->addFunction(
 				'getVue', function(string $path) {
-				$file = file_get_contents($this->app_root_dir . 'public/js/manifest.json');
+				$file = file_get_contents($this->app_root_dir . '/public/js/manifest.json');
 				$file = json_decode($file, TRUE);
 				if (empty($file[$path])) {
 					return;
@@ -48,7 +48,7 @@ $latte->addFunction(
 
 $latte->addFunction(
 				'getCss', function(string $path) {
-				$file = file_get_contents($this->app_root_dir . 'public/js/manifest.json');
+				$file = file_get_contents($this->app_root_dir . '/public/js/manifest.json');
 				$file = json_decode($file, TRUE);
 				if (empty($file[$path])) {
 					return;
