@@ -53,9 +53,9 @@ $latte->addFunction(
 				if (empty($file[$path])) {
 					return;
 				}
-				$file_to_load = $file[$path];
+				$file_to_load = $file[$path]['css'];
 
-				echo "<link href='/public/js/{$file_to_load['file']}' rel='stylesheet'>";
+				echo "<link href='/public/js/{$file_to_load[0]}' rel='stylesheet'>";
 				}
 );
 
