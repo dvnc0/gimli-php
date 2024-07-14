@@ -55,7 +55,7 @@ class Config {
 			'password' => '',
 			'port' => 3306,
 		],
-		'autoload_routes' => FALSE,
+		'autoload_routes' => TRUE,
 		'route_directory' => '/App/Routes/',
 		'enable_latte' => TRUE,
 		'template_base_dir' => 'App/views/'
