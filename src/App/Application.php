@@ -153,8 +153,10 @@ class Application {
 			return;
 		}
 
-		if (empty($this->Config->route_directory)) {
-			throw new Route_Loader_Exception('Web route file not set');
+		// I have no clue why this needs to be like this here but nowhere else.
+		// Without using get() it throws a fatal I need to look into this more.
+		if (empty($this->Config->get('route_directory'))) {
+			throw new Route_Loader_Exception('Web route directory not set ' . $this->Config->route_directory);
 		}
 
 		if(!is_dir($this->app_root . $this->Config->route_directory)) {
@@ -179,15 +181,15 @@ class Application {
 	 */
 	public function loadRouteFiles(array $routes): void {
 		foreach ($routes as $route) {
-			if (!file_exists($this->app_root . '/' . $route)) {
-				throw new Route_Loader_Exception('Route file not found: ' . $this->app_root . '/' . $route);
+			if (!file_exists($route)) {
+				throw new Route_Loader_Exception('Route file not found: ' . $route);
 			}
 
-			if (!is_readable($this->app_root . '/' . $route)) {
-				throw new Route_Loader_Exception('Route file not readable: ' . $this->app_root . '/' . $route);
+			if (!is_readable($route)) {
+				throw new Route_Loader_Exception('Route file not readable: ' . $route);
 			}
 
-			require_once $this->app_root . '/' . $route;
+			require_once $route;
 		}
 	}
 
