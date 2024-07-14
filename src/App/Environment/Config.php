@@ -3,36 +3,210 @@ declare(strict_types=1);
 
 namespace Gimli\Environment;
 
-use Gimli\Environment\Environment_Base;
+/**
+ * @property bool $is_live
+ * @property bool $is_dev
+ * @property bool $is_staging
+ * @property bool $is_cli
+ * @property bool $is_unit_test
+ * @property array $database
+ * @property string $web_route_file
+ * @property bool $autoload_routes
+ * @property string $route_directory
+ * @property bool $enable_latte
+ * @property string $template_base_dir
+ */
+class Config {
 
-class Config extends Environment_Base {
-	/** @var bool $is_live */
-	public bool $is_live = FALSE;
+	/**
+	 * The base config array defaults
+	 *
+	 * @var array{
+	 * 		is_live: bool,
+	 * 		is_dev: bool,
+	 * 		is_staging: bool,
+	 * 		is_cli: bool,
+	 * 		is_unit_test: bool,
+	 * 		database: array{
+	 * 			driver: string,
+	 * 			host: string,
+	 * 			database: string,
+	 * 			username: string,
+	 * 			password: string,
+	 * 			port: int
+	 * 		},
+	 * 		autoload_routes: bool,
+	 * 		route_directory: string,
+	 * 		enable_latte: bool,
+	 * 		template_base_dir: string
+	 * }
+	 */
+	protected array $config = [
+		'is_live' => FALSE,
+		'is_dev' => TRUE,
+		'is_staging' => FALSE,
+		'is_cli' => FALSE,
+		'is_unit_test' => FALSE,
+		'database' => [
+			'driver' => 'mysql',
+			'host' => '',
+			'database' => '',
+			'username' => '',
+			'password' => '',
+			'port' => 3306,
+		],
+		'autoload_routes' => FALSE,
+		'route_directory' => '/App/Routes/',
+		'enable_latte' => TRUE,
+		'template_base_dir' => 'App/views/'
+	];
 
-	/** @var bool $is_dev */
-	public bool $is_dev = FALSE;
+	/**
+	 * Config constructor.
+	 *
+	 * @param array $config
+	 */
+	public function __construct(array $config) {
+		$this->load($config);
+	}
 
-	/** @var bool $is_staging */
-	public bool $is_staging = FALSE;
+	/**
+	 * Get a config value
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function __get(string $name) {
+		if (strpos($name, '.') !== FALSE) {
+			$keys = explode('.', $name);
+			$object = $this->config;
+			foreach ($keys as $key) {
+				if (is_array($object)) {
+					$object = $object[$key];
+					continue;
+				}
+				$object = $object->{$key};
+			}
+			return $object;
+		}
 
-	/** @var bool $is_cli */
-	public bool $is_cli = FALSE;
+		if (array_key_exists($name, $this->config)) {
+			return $this->config[$name];
+		}
+	}
 
-	/** @var bool $is_unit_test */
-	public bool $is_unit_test = FALSE;
+	/**
+	 * get a config value
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function get(string $name) {
+		if (strpos($name, '.') !== FALSE) {
+			$keys = explode('.', $name);
+			$object = $this->config;
+			foreach ($keys as $key) {
+				if (is_array($object)) {
+					$object = $object[$key];
+					continue;
+				}
+				$object = $object->{$key};
+			}
+			return $object;
+		}
 
-	/** @var array $database */
-	public array $database = [];
+		if (array_key_exists($name, $this->config)) {
+			return $this->config[$name];
+		}
+	}
 
-	/** @var string $web_route_file */
-	public string $web_route_file = '/App/Routes/web.php';
+	/**
+	 * Set a config value
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 * @return void
+	 */
+	public function set(string $name, $value) {
+		if (strpos($name, '.') !== FALSE) {
+			$keys = explode('.', $name);
+			$object = &$this->config;
+			foreach ($keys as $key) {
+				if (is_array($object)) {
+					$object = &$object[$key];
+					continue;
+				}
+				$object = &$object->{$key};
+			}
+			$object = $value;
+			return;
+		}
 
-	/** @var bool $use_web_route_file */
-	public bool $use_web_route_file = FALSE;
+		if (array_key_exists($name, $this->config)) {
+			$this->config[$name] = $value;
+		}
+	}
 
-	/** @var bool $enable_latte */
-	public bool $enable_latte = TRUE;
+	/**
+	 * Load the config
+	 *
+	 * @param array $config
+	 * @return void
+	 */
+	public function load(array $config) {
+		foreach ($config as $key => $value) {
+			if (array_key_exists($key, $this->config)) {
+				$this->config[$key] = $value;
+			}
+		}
+	}
 
-	/** @var string $api_route_file */
-	public string $template_base_dir = 'App/views/';
+	/**
+	 * Get the config
+	 *
+	 * @return array
+	 */
+	public function getConfig(): array {
+		return $this->config;
+	}
+
+	/**
+	 * Get the config as a JSON string
+	 *
+	 * @return string
+	 */
+	public function getJson(): string {
+		return json_encode($this->config);
+	}
+
+	/**
+	 * Check if a key exists in the config
+	 *
+	 * @param string $key
+	 * @return bool
+	 */
+	public function has(string $key): bool {
+		if (strpos($key, '.') !== FALSE) {
+			$keys = explode('.', $key);
+			$object = $this->config;
+			foreach ($keys as $key) {
+				if (is_array($object)) {
+					if (!isset($object[$key])) {
+						return FALSE;
+					}
+					$object = $object[$key];
+					continue;
+				}
+
+				if (!isset($object->{$key})) {
+					return FALSE;
+				}
+
+				$object = $object->{$key};
+			}
+			return TRUE;
+		}
+
+		return array_key_exists($key, $this->config);
+	}
 }

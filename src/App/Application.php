@@ -8,17 +8,23 @@ use Gimli\Http\Request;
 use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\Injector\Injector;
-use Exception;
 use Gimli\Core\Event_Handler;
+use Gimli\Exceptions\Gimli_Application_Exception;
+use Gimli\Exceptions\Route_Loader_Exception;
 use Gimli\Http\Response;
 use Gimli\Router\Route;
 use Gimli\Session\Session;
 use Gimli\View\Latte_Engine;
 
 /**
+ * Main application container
+ * 
  * @property Injector_Interface $Injector
  * @property Router $Router
  * @property Config $Config
+ * 
+ * @throws Route_Loader_Exception
+ * @throws Gimli_Application_Exception
  */
 class Application {
 
@@ -54,20 +60,20 @@ class Application {
 	 * @param array            $server_variables $_SERVER values
 	 * @param Injector_Interface|null $Injector Injector instance
 	 * @return Application
-	 * @throws Exception
+	 * @throws Gimli_Application_Exception
 	 */
 	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = null): Application {
 
 		if (empty($app_root)) {
-			throw new Exception('Application root path not set');
+			throw new Gimli_Application_Exception('Application root path not set');
 		}
 
 		if (!is_dir($app_root)) {
-			throw new Exception('Application root path not found: ' . $app_root);
+			throw new Gimli_Application_Exception('Application root path not found: ' . $app_root);
 		}
 
 		if (empty($server_variables)) {
-			throw new Exception('$_SERVER variables not set');
+			throw new Gimli_Application_Exception('$_SERVER variables not set');
 		}
 
 		if (is_null(self::$instance)) {
@@ -80,11 +86,11 @@ class Application {
 	 * Get the instance of the Application class
 	 *
 	 * @return Application
-	 * @throws Exception
+	 * @throws Gimli_Application_Exception
 	 */
 	public static function get(): Application {
 		if (is_null(self::$instance)) {
-			throw new Exception('Application instance not created');
+			throw new Gimli_Application_Exception('Application instance not created');
 		}
 		return self::$instance;
 	}
@@ -140,22 +146,28 @@ class Application {
 	 * Register the web routes
 	 *
 	 * @return void
-	 * @throws Exception
+	 * @throws Route_Loader_Exception
 	 */
 	protected function registerWebRoutes(): void {
-		if ($this->Config->use_web_route_file === FALSE) {
+		if ($this->Config->autoload_routes === FALSE) {
 			return;
 		}
 
-		if (!file_exists($this->app_root . $this->Config->web_route_file)) {
-			throw new Exception('Web route file not found: ' . $this->app_root . $this->Config->web_route_file);
+		if (empty($this->Config->route_directory)) {
+			throw new Route_Loader_Exception('Web route file not set');
 		}
 
-		if (!is_readable($this->app_root . $this->Config->web_route_file)) {
-			throw new Exception('Web route file not readable: ' . $this->app_root . $this->Config->web_route_file);
+		if(!is_dir($this->app_root . $this->Config->route_directory)) {
+			throw new Route_Loader_Exception('Route directory not found: ' . $this->app_root . $this->Config->route_directory);
 		}
 
-		require_once $this->app_root . $this->Config->web_route_file;
+		$routes = glob($this->app_root . $this->Config->route_directory . '*.php');
+
+		if (empty($routes)) {
+			throw new Route_Loader_Exception('No route files found in directory: ' . $this->app_root . $this->Config->route_directory);
+		}
+
+		$this->loadRouteFiles($routes);
 	}
 
 	/**
@@ -163,16 +175,16 @@ class Application {
 	 *
 	 * @param array $routes Route files to load
 	 * @return void
-	 * @throws Exception
+	 * @throws Route_Loader_Exception
 	 */
 	public function loadRouteFiles(array $routes): void {
 		foreach ($routes as $route) {
 			if (!file_exists($this->app_root . '/' . $route)) {
-				throw new Exception('Route file not found: ' . $this->app_root . '/' . $route);
+				throw new Route_Loader_Exception('Route file not found: ' . $this->app_root . '/' . $route);
 			}
 
 			if (!is_readable($this->app_root . '/' . $route)) {
-				throw new Exception('Route file not readable: ' . $this->app_root . '/' . $route);
+				throw new Route_Loader_Exception('Route file not readable: ' . $this->app_root . '/' . $route);
 			}
 
 			require_once $this->app_root . '/' . $route;
