@@ -66,7 +66,7 @@ class Config {
 	 *
 	 * @param array $config
 	 */
-	public function __construct(array $config) {
+	public function __construct(array $config = []) {
 		$this->load($config);
 	}
 
