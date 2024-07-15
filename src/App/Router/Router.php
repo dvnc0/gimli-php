@@ -197,20 +197,23 @@ class Router {
 				$method_args_types[] = $type->getName();
 			}
 			else {
-				$method_args_types[] = null;
+				$method_args_types[] = [$arg->getType()->getName() => $arg->getName()];
 			}
 
 			continue;
 		}
-		
+
 		foreach($method_args_types as $key => $type) {
-			if ($type === null) {
-				$method_args[$key] = $route_match_args;
+			if (is_array($type)) {
+				$route_match_key = array_values($type)[0];
+				$cast_type = array_keys($type)[0];
+				$value = $route_match_args[$route_match_key];
+				settype($value, $cast_type);
+				$method_args[$key] = $value;
 			} else {
 				$method_args[$key] = $this->Injector->resolve($type);
 			}
 		}
-
 		return $method_args;
 	}
 

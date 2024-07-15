@@ -53,28 +53,10 @@ $App = Application::create(APP_ROOT, $_SERVER);
 
 // set up your config and add it to the Application
 $config_file = parse_ini_file(APP_ROOT . '/App/Core/config.ini', true);
-$config_file['template_base_dir'] = APP_ROOT . '/App/views';
-$App->Config = $App->Injector->resolveFresh(Config::class, ['environment_settings' => $config_file]);
+$App->Config = $App->Injector->resolveFresh(Config::class, ['config' => $config_file]);
 
 // Register a cache class with the Injector
 $App->Injector->register(Cache::class, Cache::getCache($App->Config->admin_cache));
-
-// Bind PDO object creation method to Injector
-$App->Injector->bind(PDO::class, function() use ($App) {
-	$database = $App->Config->admin_database;
-	$dsn = "mysql:host={$database['host']};dbname={$database['name']}";
-	$options = [
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::ATTR_EMULATE_PREPARES => false,
-	];
-	return new PDO($dsn, $database['user'], $database['password'], $options);
-});
-
-// Load routes from a file(s)
-$App->loadRouteFiles([
-	'App/routes/web.php',
-]);
 
 // Run Application
 $App->run();
@@ -83,8 +65,14 @@ $App->run();
 The `Application` class also registers the basic Event handler and Session class when it is created. Additionally, if your config includes `enable_latte` the Latte template engine will be added to the Application instance using the config value for `template_base_dir` as the template directory.
 
 ### Declaring Routes
-There are a few things you can do with your route callbacks... pass a string, a callable, or an array.
-
+By default Gimli will require any files in the `App/Routes` directory. You can disable this by setting `autoload_routes` to `false` in your config file. You can change the directory by setting the value of `route_directory` in your config file. You can also load additional route files with the following method:
+```php
+// Load routes from a file(s)
+$App->loadRouteFiles([
+	'App/routes/web.php',
+]);
+```
+There are a few things you can do with your route callbacks... pass a string, a callable, or an array. 
 ```php
 
 Route::get('/', function(){
@@ -109,6 +97,44 @@ Route::get('/', [Home_Controller::class, 'homePage'])->addMiddleware(Logged_In_M
 That should be an instance of `Gimli\Middleware\Middleware_Base` and you need to define the `abstract process` method, which returns `Gimli\Middleware\Middleware_Response`. Middleware does have access to the Application instance including the Injector and whatever else you decide to set on it.
 
 You can also add groups, define a default route file that should load, and load additional route files to help organize your routes.
+
+Your routes can also contain variable arguments that meet the following patterns:
+
+```php
+protected array $patterns = [
+	':all' => "([^/]+)",
+	':alpha' => "([A-Za-z_-]+)",
+	':alphanumeric' => "([\w-]+)",
+	':integer' => "([0-9_-]+)",
+	':numeric' => "([0-9_-.]+)",
+	':id' => "([0-9_-]+)",
+	':slug' => "([A-Za-z0-9_-]+)",
+];
+```
+You will need to add their variable name using the `#` symbol in the route definition. 
+
+```php
+Route::get('/user/:integer#id', [User_Controller::class, 'getUser']);
+```
+
+This variable name is passed to the router and set as a dependency for your controller method. You should use the defined variable name as an argument in your controller method. The value will be typecast based on the available types to `settype`, possible types:
+
+```
+integer or int
+float or double
+string
+array
+object
+boolean or bool
+```
+
+Example controller method:
+
+```php
+public function getUser(Response $Response, int $id): Response {
+	// do something with $id
+}
+```
 
 ### Dependency Injection
 
@@ -153,3 +179,6 @@ class Dashboard_Landing_Controller {
 }
 ```
 The method parameters are also resolved by the Injector when the Route dispatches the method.
+
+### Database - WIP
+There is a basic PDO wrapper `Mysql_Database` as well as a `Pdo_Manager` class you can use to manage database queries. The `Pdo_Manager` class returns and instance of `PDO` and can be used to run queries directly. The `Mysql_Database` class is a wrapper around the `Pdo_Manager` class and provides some basic query methods.

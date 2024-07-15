@@ -153,12 +153,32 @@ class Config {
 	 * @param array $config
 	 * @return void
 	 */
-	public function load(array $config) {
-		foreach ($config as $key => $value) {
-			if (array_key_exists($key, $this->config)) {
-				$this->config[$key] = $value;
-			}
+	public function load(array $config): void {
+		if (empty($config)) {
+			return;
 		}
+
+		$this->config = $this->loadConfigFile($this->config, $config);
+	}
+
+	/**
+	 * Load the config file
+	 *
+	 * @param array $config
+	 * @param array $new_config
+	 * @return void
+	 */
+	protected function loadConfigFile(array $config, array $new_config): array {
+		foreach ($new_config as $key => $value) {
+			if (is_array($value)) {
+				$config[$key] = $this->loadConfigFile($config[$key], $value);
+				continue;
+			}
+
+			$config[$key] = $value;
+		}
+
+		return $config;
 	}
 
 	/**
