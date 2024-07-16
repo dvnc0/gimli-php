@@ -7,7 +7,7 @@ use Generator;
 use Gimli\Database\Pdo_Manager;
 use PDO;
 
-class Mysql_Database {
+class Database {
 
 	/**
 	 * @var PDO $db
