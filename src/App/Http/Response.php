@@ -59,7 +59,7 @@ class Response
 	 * @param int    $response_code response code
 	 * @return Response
 	 */
-	public function setResponse(string $response_body, bool $success = TRUE, array $data = [], int $response_code = 200) {
+	public function setResponse(string $response_body = '', bool $success = TRUE, array $data = [], int $response_code = 200) {
 		$this->success       = $success;
 		$this->response_body = $response_body;
 		$this->response_code = $response_code;
@@ -76,7 +76,7 @@ class Response
 	 * @param int    $response_code response code
 	 * @return Response
 	 */
-	public function setJsonResponse(string $response_body, bool $success = TRUE, array $data = [], int $response_code = 200) {
+	public function setJsonResponse(string $response_body = '', bool $success = TRUE, array $data = [], int $response_code = 200) {
 		$this->is_json       = TRUE;
 		$this->success       = $success;
 		$this->response_body = json_encode(['success' => $success, 'body' => $response_body, 'data' => $data]);

@@ -45,12 +45,12 @@ class Router {
 	 */
 	protected array $patterns = [
 		':all' => "([^/]+)",
-		':alpha' => "([A-Za-z_-]+)",
-		':alphanumeric' => "([\w-]+)",
-		':integer' => "([0-9_-]+)",
-		':numeric' => "([0-9_-.]+)",
-		':id' => "([0-9_-]+)",
-		':slug' => "([A-Za-z0-9_-]+)",
+		':alphanumeric' => "([\w-_]+)",
+		':alpha' => "([A-Za-z-_]+)",
+		':integer' => "([0-9-_]+)",
+		':numeric' => "([0-9-_.]+)",
+		':id' => "([0-9-_]+)",
+		':slug' => "([A-Za-z0-9-_]+)",
 	];
 
 	/**
