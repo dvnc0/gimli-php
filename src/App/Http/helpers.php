@@ -12,12 +12,12 @@ if (!function_exists('Gimli\Http\response')) {
 	 *
 	 * @param string $response_body
 	 * @param bool $success
-	 * @param int $status
-	 * @return void
+	 * @param int $response_code
+	 * @return Response
 	 */
-	function response(string $response_body = '', bool $success = TRUE, int $status = 200): Response {
+	function response(string $response_body = '', bool $success = TRUE, int $response_code = 200, array $data = []): Response {
 		$Response = Application::get()->Injector->resolve(Response::class);
-		$Response->setResponse($response_body, $success, $status);
+		$Response->setResponse(response_body: $response_body, success: $success, response_code: $response_code, data: $data);
 		return $Response;
 	}
 }
@@ -27,13 +27,13 @@ if (!function_exists('Gimli\Http\redirect')) {
 	 * Redirects to a URL
 	 *
 	 * @param string $url
-	 * @param int $status
-	 * @return void
+	 * @param int $response_code
+	 * @return Response
 	 */
-	function redirect(string $url, int $status = 302): Response {
+	function redirect(string $url, int $response_code = 302): Response {
 		$Response = Application::get()->Injector->resolve(Response::class);
 		$Response->setHeader('Location: ' . $url);
-		$Response->setResponse(response_code: $status);
+		$Response->setResponse(response_code: $response_code);
 		return $Response;
 	}
 }
@@ -44,13 +44,13 @@ if (!function_exists('Gimli\Http\json_response')) {
 	 *
 	 * @param array $data
 	 * @param bool $success
-	 * @param int $status
+	 * @param int $response_code
 	 * @param string $response_body
-	 * @return void
+	 * @return Response
 	 */
-	function json_response(array $data, bool $success, int $status = 200, string $response_body = ''): Response {
+	function json_response(array $data, bool $success, int $response_code = 200, string $response_body = ''): Response {
 		$Response = Application::get()->Injector->resolve(Response::class);
-		$Response->setJsonResponse($response_body, $success, $data, $status);
+		$Response->setJsonResponse($response_body, $success, $data, $response_code);
 		return $Response;
 	}
 }
@@ -62,7 +62,7 @@ if (!function_exists('Gimli\Http\redirect_on_success')) {
 	 * @param string $url
 	 * @param bool $success
 	 * @param string $message
-	 * @return void
+	 * @return Response
 	 */
 	function redirect_on_success(string $url, bool $success, string $message = ''): Response {
 		$Response = Application::get()->Injector->resolve(Response::class);
@@ -83,7 +83,7 @@ if (!function_exists('Gimli\Http\redirect_on_failure')) {
 	 * @param string $url
 	 * @param bool $success
 	 * @param string $message
-	 * @return void
+	 * @return Response
 	 */
 	function redirect_on_failure(string $url, bool $success, string $message = ''): Response {
 		$Response = Application::get()->Injector->resolve(Response::class);
