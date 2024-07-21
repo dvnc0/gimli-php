@@ -17,7 +17,8 @@
             "Gimli\\": "src/App/"
         },
 		"files": [
-            "src/App/Http/helpers.php"
+            "src/App/Http/helpers.php",
+			"src/App/Database/helpers.php"
         ]
     },
     "require": {
