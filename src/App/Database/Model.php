@@ -38,7 +38,9 @@ class Model {
 	 */
 	public function __construct(
 		protected Database $Database,
-	) {}
+	) {
+		$this->ignored_fields[] = $this->primary_key;
+	}
 
 	/**
 	 * Save the model

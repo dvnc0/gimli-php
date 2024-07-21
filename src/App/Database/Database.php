@@ -57,6 +57,7 @@ class Database {
 		$set = [];
 		foreach ($data as $key => $value) {
 			$set[] = "{$key} = :{$key}";
+			$params[":{$key}"] = $value;
 		}
 		$set = implode(', ', $set);
 		$sql = "UPDATE {$table} SET {$set} WHERE {$where}";
