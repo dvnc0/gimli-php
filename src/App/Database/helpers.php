@@ -36,7 +36,7 @@ if (!function_exists('Gimli\Database\fetch_row')) {
 
 if (!function_exists('Gimli\Database\fetch_all')) {
 	/**
-	 * Fetches a single field
+	 * Fetch all rows
 	 *
 	 * @param string $sql
 	 * @param array $params
