@@ -61,7 +61,6 @@ class Database {
 		}
 		$set = implode(', ', $set);
 		$sql = "UPDATE {$table} SET {$set} WHERE {$where}";
-		$params = array_merge($data, $params);
 		return $this->execute($sql, $params);
 	}
 

@@ -69,7 +69,6 @@ if (!function_exists('Gimli\Http\redirect_on_success')) {
 		$response_code = $success ? 302 : 200;
 		if ($success) {
 			$Response->setHeader('Location: ' . $url);
-			$Response->setResponse(response_code: 302);
 		}
 		$Response->setResponse(response_body: $message, success: $success, response_code: $response_code);
 		return $Response;
@@ -90,7 +89,6 @@ if (!function_exists('Gimli\Http\redirect_on_failure')) {
 		$response_code = $success ? 200 : 302;
 		if (!$success) {
 			$Response->setHeader('Location: ' . $url);
-			$Response->setResponse(response_code: 302);
 		}
 		$Response->setResponse(response_body: $message, success: $success, response_code: $response_code);
 		return $Response;
