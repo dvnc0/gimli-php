@@ -89,7 +89,7 @@ class Database {
 	public function fetchAll(string $sql, array $params = []): array {
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
 	/**
@@ -102,7 +102,7 @@ class Database {
 	public function fetchRow(string $sql, array $params = []): array {
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
-		return $stmt->fetch(PDO::FETCH_ASSOC);
+		return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
 	/**
