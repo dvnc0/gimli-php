@@ -38,9 +38,7 @@ class Model {
 	 */
 	public function __construct(
 		protected Database $Database,
-	) {
-		$this->ignored_fields[] = $this->primary_key;
-	}
+	) {}
 
 	/**
 	 * Save the model
@@ -80,7 +78,7 @@ class Model {
 		$this->beforeSave();
 		$data = [];
 		foreach ($this as $key => $value) {
-			if (!in_array($key, $this->ignored_fields)) {
+			if (!in_array($key, $this->ignored_fields) && $key !== $this->primary_key) {
 				$data[$key] = $value;
 			}
 		}
