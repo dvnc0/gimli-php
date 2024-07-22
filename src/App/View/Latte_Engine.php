@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Gimli\View;
 
+use function Gimli\Environment\get_config_value;
+
 class Latte_Engine {
 	protected string $template_base_dir;
 	protected string $app_root_dir;
@@ -30,11 +32,17 @@ class Latte_Engine {
 	 */
 	public function render(string $template_path, array $template_data = []): string {
 		$latte = new \Latte\Engine;
-		
-		$latte->setTempDirectory($this->app_root_dir . '/tmp');
 
-$latte->addFunction(
-				'getVue', function(string $path) {
+		$temp_dir = get_config_value('template_temp_dir');
+
+		if (substr($temp_dir, 0, 1) !== '/') {
+			$temp_dir = '/' . $temp_dir;
+		}
+		
+		$latte->setTempDirectory($this->app_root_dir . $temp_dir);
+
+		$latte->addFunction(
+			'getVue', function(string $path) {
 				$file = file_get_contents($this->app_root_dir . '/public/js/manifest.json');
 				$file = json_decode($file, TRUE);
 				if (empty($file[$path])) {
@@ -43,11 +51,11 @@ $latte->addFunction(
 				$file_to_load = $file[$path];
 
 				echo "<script src='/public/js/{$file_to_load['file']}' type='module' defer crossorigin></script>";
-				}
-);
+			}
+		);
 
-$latte->addFunction(
-				'getCss', function(string $path) {
+		$latte->addFunction(
+			'getCss', function(string $path) {
 				$file = file_get_contents($this->app_root_dir . '/public/js/manifest.json');
 				$file = json_decode($file, TRUE);
 				if (empty($file[$path])) {
@@ -56,8 +64,8 @@ $latte->addFunction(
 				$file_to_load = $file[$path]['css'];
 
 				echo "<link href='/public/js/{$file_to_load[0]}' rel='stylesheet'>";
-				}
-);
+			}
+		);
 
 		$template_path_full = implode('/', array_filter([$this->app_root_dir, $this->template_base_dir, $template_path], 'strlen'));
 		$template_path_full = str_replace('//', '/', $template_path_full);

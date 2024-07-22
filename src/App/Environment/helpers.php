@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Environment;
+namespace Gimli\Environment;
 
 use Gimli\Application;
 
-if (!function_exists('get_config')) {
+if (!function_exists('Gimli\Environment\get_config')) {
 	/**
 	 * Get the config.
 	 *
@@ -16,7 +16,7 @@ if (!function_exists('get_config')) {
 	}
 }
 
-if (!function_exists('get_config_value')) {
+if (!function_exists('Gimli\Environment\get_config_value')) {
 	/**
 	 * get a value from config
 	 * @param string $key
@@ -28,7 +28,7 @@ if (!function_exists('get_config_value')) {
 	}
 }
 
-if (!function_exists('config_has')) {
+if (!function_exists('Gimli\Environment\config_has')) {
 	/**
 	 * check if a key exists in the config
 	 * @param string $key

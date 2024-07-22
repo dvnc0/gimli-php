@@ -138,6 +138,13 @@ public function getUser(Response $Response, int $id): Response {
 }
 ```
 
+Controllers should return a `Gimli\Http\Response` object. There are helper methods that return formatted `Response` objects to help limit some conditional logic:
+- `response` A basic Response
+- `redirect` Redirect Response
+- `redirect_on_success` Redirect if the response is successful
+- `redirect_on_failure` Redirect if the response is not successful
+- `json_response` JSON Response
+
 ### Dependency Injection
 
 You can use the built in Injector to bind or register dependencies. You can also resolve dependencies from the Injector. You can add anything you need to the Injector and access it throughout your application through the `Application` instance.
@@ -182,5 +189,17 @@ class Dashboard_Landing_Controller {
 ```
 The method parameters are also resolved by the Injector when the Route dispatches the method.
 
-### Database - WIP
-There is a basic PDO wrapper `Mysql_Database` as well as a `Pdo_Manager` class you can use to manage database queries. The `Pdo_Manager` class returns and instance of `PDO` and can be used to run queries directly. The `Mysql_Database` class is a wrapper around the `Pdo_Manager` class and provides some basic query methods.
+There are also Injector helper methods that cut down on some inline code. Typically if you wanted to inject a class inline you could do it with `$this->Application->Injector->resolve(Some_Class::class)` or `Application::get()->Injector->resolve(Some_Class::class)`. The methods `resolve` and `resolve_fresh` are available to cut on that inline code.
+
+### Database
+There is a basic PDO wrapper `Database` as well as a `Pdo_Manager` class you can use to manage database queries. The `Pdo_Manager` class returns and instance of `PDO` and can be used to run queries directly. The `Database` class is a wrapper around the `Pdo_Manager` class and provides some basic query methods. There is also a very basic `Model` base class and additional helper methods for `Database`, like elsewhere these methods handle the dependency injection and call the methods on the injected `Database` class. The helpers are:
+- `fetch_column`
+- `fetch_row` 
+- `fetch_all`
+- `row_exists`
+
+### Config Helpers
+There are also a few Config helpers:
+- `get_config` to get the entire config array
+- `get_config_value` to get a specific value from the config array
+- `config_has` to check if a key exists in the config array

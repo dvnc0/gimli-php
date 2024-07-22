@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Injector;
+namespace Gimli\Injector;
 
 use Gimli\Application;
 
-if (!function_exists('resolve')) {
+if (!function_exists('Gimli\Injector\resolve')) {
 	/**
 	 * Resolve the dependency.
 	 *
@@ -17,7 +17,7 @@ if (!function_exists('resolve')) {
 	}
 }
 
-if (!function_exists('resolve_fresh')) {
+if (!function_exists('Gimli\Injector\resolve_fresh')) {
 	/**
 	 * Resolve the dependency with a fresh instance.
 	 *
