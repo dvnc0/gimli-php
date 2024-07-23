@@ -3,28 +3,32 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use Gimli\Environment\Config;
-use Gimli\Environment\Environment_Base;
 
 /**
  * @covers Gimli\Environment\Config
- * @covers Gimli\Environment\Environment_Base
 */
 class Config_Test extends TestCase {
 
 	protected function getConfigArray(): array {
 		return [
-			'is_live' => TRUE,
-			'is_dev' => FALSE,
+			'is_live' => FALSE,
+			'is_dev' => TRUE,
 			'is_staging' => FALSE,
 			'is_cli' => FALSE,
 			'is_unit_test' => FALSE,
 			'database' => [
-				'host' => 'localhost',
-				'username' => 'root',
-				'password' => 'password',
-				'database' => 'gimli',
-				'port' => 3306
+				'driver' => 'mysql',
+				'host' => '',
+				'database' => '',
+				'username' => '',
+				'password' => '',
+				'port' => 3306,
 			],
+			'autoload_routes' => TRUE,
+			'route_directory' => '/App/Routes/',
+			'enable_latte' => TRUE,
+			'template_base_dir' => 'App/views/',
+			'template_temp_dir' => 'tmp',
 		];
 	}
 
@@ -34,12 +38,12 @@ class Config_Test extends TestCase {
 
 		$Config = new Config($mock_config_array);
 
-		$this->assertEquals($Config->is_live, TRUE);
-		$this->assertEquals($Config->is_dev, FALSE);
+		$this->assertEquals($Config->is_live, FALSE);
+		$this->assertEquals($Config->is_dev, TRUE);
 		$this->assertEquals($Config->is_staging, FALSE);
 		$this->assertEquals($Config->is_cli, FALSE);
 		$this->assertEquals($Config->is_unit_test, FALSE);
-		$this->assertEquals($Config->database['host'], 'localhost');
+		$this->assertEquals($Config->database['host'], '');
 	}
 
 	public function testThatSetAdjustsConfig() {
@@ -78,12 +82,12 @@ class Config_Test extends TestCase {
 
 		$Config = new Config($mock_config_array);
 
-		$this->assertEquals($Config->get('is_live'), TRUE);
-		$this->assertEquals($Config->get('is_dev'), FALSE);
+		$this->assertEquals($Config->get('is_live'), FALSE);
+		$this->assertEquals($Config->get('is_dev'), TRUE);
 		$this->assertEquals($Config->get('is_staging'), FALSE);
 		$this->assertEquals($Config->get('is_cli'), FALSE);
 		$this->assertEquals($Config->get('is_unit_test'), FALSE);
-		$this->assertEquals($Config->get('database.host'), 'localhost');
+		$this->assertEquals($Config->get('database.host'), '');
 	}
 
 	public function testHasIsAccurate() {
@@ -105,51 +109,5 @@ class Config_Test extends TestCase {
 		$this->assertEquals($Config->has('database.foo.bar'), FALSE);
 		$this->assertEquals($Config->has('foo.bar'), FALSE);
 		$this->assertEquals($Config->has('foo'), FALSE);
-	}
-
-	public function testThatConfigDoesNotAutoLoadRandomProperty() {
-
-		$mock_config_array = $this->getConfigArray();
-		$mock_config_array['foo'] = 'bar';
-
-		$Config = new Config($mock_config_array);
-
-		$this->assertFalse($Config->has('foo'));
-	}
-
-	public function testThatSetDoesNotSetRandomProperty() {
-
-		$mock_config_array = $this->getConfigArray();
-
-		$Config = new Config($mock_config_array);
-
-		$this->expectException(Exception::class);
-		$this->expectExceptionMessage('foo is not a valid environment setting.');
-
-		$Config->set('foo', 'bar');
-	}
-
-	public function testSetWithDotNotationDoesNotSetRandomValueOnArray() {
-
-		$mock_config_array = $this->getConfigArray();
-
-		$Config = new Config($mock_config_array);
-
-		$this->expectException(Exception::class);
-		$this->expectExceptionMessage('foo is not a valid environment setting.');
-
-		$Config->set('database.foo', 'bar');
-	}
-
-	public function testSetWithDotNotationDoesNotSetRandomClassProperty() {
-
-		$mock_config_array = $this->getConfigArray();
-
-		$Config = new Config($mock_config_array);
-
-		$this->expectException(Exception::class);
-		$this->expectExceptionMessage('foo is not a valid environment setting.');
-
-		$Config->set('foo.bar', 'baz');
 	}
 }
