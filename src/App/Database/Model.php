@@ -135,6 +135,18 @@ class Model {
 	}
 
 	/**
+	 * Load the model from a data set, used with Seeders
+	 *
+	 * @param array $data the data to load the Model with
+	 */
+	public function loadFromDataSet(array $data): void {
+		foreach ($data as $key => $value) {
+			$this->$key = $value;
+		}
+		$this->is_loaded = true;
+	}
+
+	/**
 	 * Before save hook
 	 */
 	protected function beforeSave(): void {
