@@ -3,8 +3,58 @@ declare(strict_types=1);
 
 namespace Gimli\Database\Faker;
 
+use function Gimli\Injector\resolve_fresh;
+
 class Faker {
 
+	/**
+	 * @var array $lookup_table
+	 */
+	protected array $lookup_table = [
+		'int' => 'getRandomInt',
+		'integer' => 'getRandomInt',
+		'number' => 'getRandomInt',
+		'cents' => 'getRandomInt',
+		'float' => 'getRandomFloat',
+		'decimal' => 'getRandomFloat',
+		'money' => 'getRandomFloat',
+		'price' => 'getRandomFloat',
+		'one_of' => 'oneOf',
+		'date' => 'randomDate',
+		'bool' => 'getRandomBool',
+		'email' => 'email',
+		'unique_id' => 'getRandomString',
+		'random_string' => 'getRandomString',
+		'first_name' => 'firstName',
+		'last_name' => 'lastName',
+		'full_name' => 'fullName',
+		'full_name_with_middle' => 'fullNameWithMiddleName',
+		'full_name_with_middle_initial' => 'fullNameWithMiddleInitial',
+		'middle_name' => 'middleName',
+		'middle_initial' => 'middleInitial',
+		'words' => 'words',
+		'sentence' => 'words',
+		'short_text' => 'words',
+		'password' => 'password',
+		'username' => 'username',
+		'paragraph' => 'paragraphs',
+		'long_text' => 'paragraphs',
+		'phone_number' => 'phoneNumber',
+		'url' => 'url',
+		'address' => 'fullAddress',
+		'city' => 'city',
+		'state' => 'state',
+		'zip' => 'zip',
+		'state_full' => 'stateLong',
+		'phone_number' => 'phoneNumber',
+		'tiny_int' => 'tinyInt',
+	];
+
+	/**
+	 * construct
+	 * 
+	 * @param int $seed
+	 */
 	public function __construct(
 		protected int $seed
 	) {}
@@ -35,72 +85,15 @@ class Faker {
 	 * @return mixed
 	 */
 	public function generateField(array $field): mixed {
-		$Faker_Factory = new Faker_Factory($this->seed);
-		switch ($field['type']) {
-			case 'int':
-			case 'integer':
-			case 'number':
-			case 'cents':
-				return $Faker_Factory->getRandomInt(...$field['args']);
-			case 'float':
-			case 'decimal':
-			case 'money':
-			case 'price':
-				return $Faker_Factory->getRandomFloat(...$field['args']);
-			case 'one_of':
-				return $Faker_Factory->oneOf($field['args']);
-			case 'date':
-				return $Faker_Factory->randomDate($field['args']['format'], $field['args']['min'] ?? '1970-01-01', $field['args']['max'] ?? '2024-01-01');
-			case 'bool':
-				return $Faker_Factory->getRandomBool();
-			case 'email':
-				return $Faker_Factory->email();
-			case 'unique_id':
-			case 'random_string':
-				return $Faker_Factory->getRandomString($field['args']['length'], $field['args']['prefix'] ?? '');
-			case 'first_name':
-				return $Faker_Factory->firstName();
-			case 'last_name':
-				return $Faker_Factory->lastName();
-			case 'full_name':
-				return $Faker_Factory->fullName();
-			case 'full_name_with_middle':
-				return $Faker_Factory->fullNameWithMiddleName();
-			case 'full_name_with_middle_initial':
-				return $Faker_Factory->fullNameWithMiddleInitial();
-			case 'middle_name':
-				return $Faker_Factory->middleName();
-			case 'middle_initial':
-				return $Faker_Factory->middleInitial();
-			case 'words':
-			case 'sentence':
-			case 'short_text':
-				return $Faker_Factory->words($field['args']['count'] ?? 3);
-			case 'password':
-				return $Faker_Factory->password($field['args']['password'] ?? 'password', $field['args']['salt'] ?? 'salt');
-			case 'username':
-				return $Faker_Factory->username();
-			case 'paragraph':
-			case 'long_text':
-				return $Faker_Factory->paragraphs($field['args']['count'] ?? 3);
-			case 'phone_number':
-				return $Faker_Factory->phoneNumber();
-			case 'url':
-				return $Faker_Factory->url();
-			case 'address':
-				return $Faker_Factory->fullAddress();
-			case 'city':
-				return $Faker_Factory->city();
-			case 'state':
-				return $Faker_Factory->state();
-			case 'zip':
-				return $Faker_Factory->zip();
-			case 'state_full':
-				return $Faker_Factory->stateLong();
-			case 'phone_number':
-				return $Faker_Factory->phoneNumber();
-			default:
-				return $Faker_Factory->words(1);
+		$Faker_Factory = resolve_fresh(Faker_Factory::class, ['seed' => $this->seed]);
+		if (array_key_exists($field['type'], $this->lookup_table)) {
+			$method = $this->lookup_table[$field['type']];
+			if ($method === 'oneOf') {
+				return $Faker_Factory->$method($field['args']);
+			}
+			return $Faker_Factory->$method(...$field['args']);
 		}
+
+		return null;
 	}
 }

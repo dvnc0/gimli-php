@@ -6,6 +6,8 @@ namespace Gimli\Database;
 use ReflectionClass;
 
 use function Gimli\Injector\resolve;
+use function Gimli\Injector\resolve_fresh;
+
 use Gimli\Database\Faker\Faker;
 
 class Seeder_Factory {
@@ -58,20 +60,49 @@ class Seeder_Factory {
 	/**
 	 * Return an array of faked data
 	 *
-	 * @param int $seed
+	 * @param int|null $seed
 	 * @return array
 	 */
-	public function getSeededData(): array {
-		if (empty($this->seed)) {
-			$this->seed = self::getRandomSeed();
-		}
-		
-		$Faker = resolve(Faker::class, ['seed' => $this->seed]);
+	public function getSeededData(int|null $seed = null): array {
+		$seed_to_use = $seed ?? $this->seed;
+
+		$Faker = resolve_fresh(Faker::class, ['seed' => $seed_to_use]);
 		$schema = $this->getSeedSchema();
 
 		$data = $Faker->buildDataSet($schema, $this->with_data);
 
 		return $data;
+	}
+
+	/**
+	 * Create the record and save to the database
+	 * Creates any callback records as well
+	 *
+	 * @return int
+	 */
+	public function create(): int {
+		$count = $this->count ?? 1;
+		$iterated_seed = $this->seed;
+		for ($i = 0; $i < $count; $i++) {
+			$result_set = $this->getSeededData($iterated_seed);
+			$iterated_seed += 1;
+
+			$model = resolve($this->class_name);
+			$model->loadFromDataSet($result_set);
+			$model->save();
+			
+			if (empty($this->callback)) {
+				continue;
+			}
+
+			$callback_array = call_user_func($this->callback, $result_set);
+			foreach ($callback_array as $callback) {
+				$callback->seed($iterated_seed);
+				$iterated_seed = $callback->create();
+			}
+		}
+
+		return $iterated_seed;
 	}
 
 	/**

@@ -198,6 +198,149 @@ There is a basic PDO wrapper `Database` as well as a `Pdo_Manager` class you can
 - `fetch_all`
 - `row_exists`
 
+### Model Seeders
+There is a basic seeder class that can be used to seed your database. This relies on attributes placed in the model classes to instruct the `Seeder_Factory` how to create the data.
+
+```php
+<?php
+declare(strict_types=1);
+
+namespace Gimli\Database;
+
+use Gimli\Database\Model;
+use Gimli\Database\Seed;
+
+
+class User_Model extends Model {
+	
+	/**
+	 * @var string $table_name
+	 */
+	protected string $table_name = 'users';
+
+	
+	/**
+	 * ID
+	 * 
+	 * @var int $id 
+	 */
+	public $id;
+
+	/**
+	 * Unique_Id
+	 * 
+	 * @var string $unique_id 
+	 */
+	#[Seed(type: 'unique_id', args: ['length' => 12])]
+	public $unique_id;
+
+	/**
+	 * Username
+	 * 
+	 * @var string $username 
+	 */
+	#[Seed(type: 'username')]
+	public $username;
+
+	/**
+	 * Email
+	 * 
+	 * @var string $email 
+	 */
+	#[Seed(type: 'email')]
+	public $email;
+
+	/**
+	 * Password
+	 * 
+	 * @var string $password 
+	 */
+	#[Seed(type: 'password')]
+	public $password;
+
+	/**
+	 * Is_Active
+	 * 
+	 * @var int $is_active 
+	 */
+	#[Seed(type: 'tiny_int')]
+	public $is_active;
+
+	/**
+	 * First Name
+	 * 
+	 * @var string $first_name 
+	 */
+	#[Seed(type: 'first_name')]
+	public $first_name;
+
+	/**
+	 * Last Name
+	 * 
+	 * @var string $last_name 
+	 */
+	#[Seed(type: 'last_name')]
+	public $last_name;
+
+	/**
+	 * Status
+	 * 
+	 * @var int $status 
+	 */
+	#[Seed(type: 'one_of', args: [0,1])]
+	public $status;
+
+	/**
+	 * Created_At
+	 * 
+	 * @var string $created_at 
+	 */
+	#[Seed(type: 'date', args: ['format' => 'Y-m-d H:i:s', 'min' => '2021-01-01', 'max' => '2021-04-01 00:00:00'])]
+	public $created_at;
+
+	/**
+	 * Updated_At
+	 * 
+	 * @var string $updated_at 
+	 */
+	#[Seed(type: 'date', args: ['format' => 'Y-m-d H:i:s', 'min' => '2021-04-01 00:02:00'])]
+	public $updated_at;
+
+	/**
+	 * bio
+	 * 
+	 * @var string $about 
+	 */
+	#[Seed(type: 'paragraph', args: ['count' => 1])]
+	public $about;
+}
+```
+
+You can then seed the database with the following code:
+
+```php
+Seeder_Factory::make(User_Model::class)
+	->seed(123)
+	->count(1)
+	->create();
+```
+
+Instead of create you can call `getSeededData` to get the data that would be inserted into the database. This is useful for testing or manually loading a Model without saving it. You can also pass a callback method that will be given the data of the initial Model. This helps to seed related data. The callback should return an array of `Seeder_Factory` instances.
+
+```php
+Seeder_Factory::make(User_Model::class)
+	->seed(123)
+	->count(1)
+	->callback(function($data) {
+		return [
+			Seeder_Factory::make(User_Hobby_Model::class)->with(['user_id' => $data['id']]),
+			Seeder_Factory::make(User_Group_Model::class)->with(['user_id' => $data['id']]),
+		]
+	})
+	->create();
+```
+The passed seed ensures the data remains the same each time that seeder is run, resulting in reproducible datasets. The `Seeder_Factory` class has a `getRandomSeed` method that will return a random seed value. This is useful for creating random data that you don't need to be reproducible, or to generate a random seed you can copy and use.
+
 ### Config Helpers
 There are also a few Config helpers:
 - `get_config` to get the entire config array

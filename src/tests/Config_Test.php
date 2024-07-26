@@ -52,14 +52,14 @@ class Config_Test extends TestCase {
 
 		$Config = new Config($mock_config_array);
 
-		$Config->set('is_live', FALSE);
-		$Config->set('is_dev', TRUE);
+		$Config->set('is_live', TRUE);
+		$Config->set('is_dev', FALSE);
 		$Config->set('is_staging', TRUE);
 		$Config->set('is_cli', TRUE);
 		$Config->set('is_unit_test', TRUE);
 
-		$this->assertEquals($Config->is_live, FALSE);
-		$this->assertEquals($Config->is_dev, TRUE);
+		$this->assertEquals($Config->is_live, TRUE);
+		$this->assertEquals($Config->is_dev, FALSE);
 		$this->assertEquals($Config->is_staging, TRUE);
 		$this->assertEquals($Config->is_cli, TRUE);
 		$this->assertEquals($Config->is_unit_test, TRUE);
