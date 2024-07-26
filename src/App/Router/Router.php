@@ -103,6 +103,10 @@ class Router {
 	 * @return void
 	 */
 	public function run() {
+		if ($this->Application->isCli()) {
+			$this->processCliRequest();
+			return;
+		}
 		$search_keys   = array_keys($this->patterns);
 		$replace_regex = array_values($this->patterns);
 		$uri           = explode('?', $this->Request->REQUEST_URI)[0];
@@ -232,6 +236,38 @@ class Router {
 		}
 
 		return $Middleware->process();
+	}
+
+	/**
+	 * process a cli request
+	 * 
+	 * @return void
+	 */
+	protected function processCliRequest(): void {
+		$cli_args = $this->Request->argv;
+
+		$cli_routes = $this->routes['CLI'];
+		$cli_command = $cli_args[1] ?? 'help';
+
+		if (!array_key_exists($cli_command, $cli_routes)) {
+			echo "Command not found";
+			return;
+		}	
+
+		$cli_route = $cli_routes[$cli_command];
+
+		if (is_callable($cli_route['handler'])) {
+			call_user_func_array($cli_route['handler'], array_slice($cli_args, 2));
+			return;
+		}
+
+		$handler = $cli_route['handler'];
+
+		$instance = $this->Injector->resolve($handler);
+		$method_args = $this->getArgumentsForMethod($instance, '__invoke', ['args' => array_slice($cli_args, 2)]);
+		$response = call_user_func_array([$instance, '__invoke'], $method_args);
+
+		$this->Dispatch->dispatch($response);
 	}
 
 	/**

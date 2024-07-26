@@ -65,7 +65,13 @@ class Request
 			$this->get = $_GET;
 		}
 		
-		$this->headers = getallheaders();
+		if (PHP_SAPI !== 'cli') {
+			$this->headers = getallheaders();
+		}
+
+		$this->argc = $server_values['argc'] ?? 0;
+		$this->argv = $server_values['argv'] ?? [];
+		
 	}
 
 	/**

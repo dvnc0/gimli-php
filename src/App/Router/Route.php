@@ -149,6 +149,20 @@ class Route {
 	}
 
 	/**
+	 * Add a CLI route
+	 *
+	 * @param string                $route    route
+	 * @param string|callable|array $callback callback
+	 *
+	 * @return Route
+	 */
+	public static function cli(string $route, string|array|callable $callback): Route {
+		$Route = static::getInstance();
+		$Route->addRoute('CLI', $route, $callback);
+		return $Route;
+	}
+
+	/**
 	 * Add routes to a group
 	 *
 	 * @param  string   $group      group prefix
