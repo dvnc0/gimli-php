@@ -143,7 +143,6 @@ class Model {
 		foreach ($data as $key => $value) {
 			$this->$key = $value;
 		}
-		$this->is_loaded = true;
 	}
 
 	/**
