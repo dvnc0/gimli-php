@@ -83,6 +83,8 @@ Route::get('/', function(){
 
 // Single action controller, must use __invoke method
 Route::get('/', Home_Controller::class);
+// cli routes are single action Job classes
+Route::cli('build-cache', Cache_Job::class);
 
 Route::get('/', Home_Controller::class . '@homePage');
 
@@ -144,6 +146,8 @@ Controllers should return a `Gimli\Http\Response` object. There are helper metho
 - `redirect_on_success` Redirect if the response is successful
 - `redirect_on_failure` Redirect if the response is not successful
 - `json_response` JSON Response
+
+Job files are also given the following arguments `subcommand`, `options`, and `flags`. The `options` argument is an array of arrays containing the name and value. The `flags` argument is an array with the given flags. The `subcommand` argument is just a string if a subcommand was given.
 
 ### Dependency Injection
 
