@@ -37,16 +37,21 @@ class Cli_Parser {
 				if ($this->peak($i, $parts) === $lexemes['dash']) {
 					$option = explode($lexemes['equal'], $arg);
 					if (empty($option[1])) {
-						if (preg_match($lexemes['word'], $this->args[$index + 1]) > 0) {
+						if (!empty($this->args[$index + 1]) && preg_match($lexemes['word'], $this->args[$index + 1]) > 0) {
 							[$option[1], $new_index] = $this->findOptionValue($index);
 							$index = $new_index - 1;
 						}
 					}
-					$arg_output['options'][] = [
-						'option' => str_replace('--', '', $option[0]),
-						'value' => $option[1],
-					];
-					continue;
+					if (!empty($option[1])) {
+						$arg_output['options'][] = [
+							'option' => str_replace('--', '', $option[0]),
+							'value' => $option[1],
+						];
+						continue;
+					} else {
+						$arg_output['flags'][] = str_replace('--', '', $option[0]);
+						continue;
+					}
 				}
 			}
 
