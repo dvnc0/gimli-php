@@ -12,6 +12,8 @@ use Gimli\Middleware\Middleware_Response;
 use Exception;
 use ReflectionNamedType;
 
+use function Gimli\Injector\resolve;
+
 /**
  * Router
  *
@@ -263,8 +265,13 @@ class Router {
 
 		$handler = $cli_route['handler'];
 
+		$parsed_args = resolve(Cli_Parser::class, ['args' => array_slice($cli_args, 2)])->parse();
+		$sub = $parsed_args['subcommand'] ?? '';
+		$options = $parsed_args['options'] ?? [];
+		$flags = $parsed_args['flags'] ?? [];
+
 		$instance = $this->Injector->resolve($handler);
-		$method_args = $this->getArgumentsForMethod($instance, '__invoke', ['args' => array_slice($cli_args, 2)]);
+		$method_args = $this->getArgumentsForMethod($instance, '__invoke', ['subcommand' => $sub, 'options' => $options, 'flags' => $flags]);
 		$response = call_user_func_array([$instance, '__invoke'], $method_args);
 
 		$this->Dispatch->dispatch($response);
