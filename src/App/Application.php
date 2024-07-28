@@ -8,13 +8,13 @@ use Gimli\Http\Request;
 use Gimli\Router\Router;
 use Gimli\Environment\Config;
 use Gimli\Injector\Injector;
-use Gimli\Core\Event_Handler;
 use Gimli\Exceptions\Gimli_Application_Exception;
 use Gimli\Exceptions\Route_Loader_Exception;
 use Gimli\Http\Response;
 use Gimli\Router\Route;
 use Gimli\Session\Session;
 use Gimli\View\Latte_Engine;
+use Gimli\Events\Event_Manager;
 
 /**
  * Main application container
@@ -132,7 +132,7 @@ class Application {
 		
 		$this->Config = $this->Injector->resolve(Config::class);
 
-		$this->Injector->register(Event_Handler::class, new Event_Handler);
+		$this->Injector->register(Event_Manager::class, new Event_Manager);
 		$this->Injector->register(Session::class, new Session);
 		
 		if ($this->Config->enable_latte === TRUE) {
