@@ -29,14 +29,27 @@ class Event_Manager {
 		$this->subscribers[$event][] = $callback;
 	}
 
-		/**
+	/**
+	 * Register classes
+	 * 
+	 * @param array $classes_to_register
+	 * 
+	 * @return void
+	 */
+	public function register(array $classes_to_register): void  {
+		foreach ($classes_to_register as $class_name) {
+			$this->registerClass($class_name);
+		}
+	}
+
+	/**
 	 * Register a class
 	 * 
 	 * @param string $class_name
 	 * 
 	 * @return void
 	 */
-	public function register(string $class_name): void  {
+	public function registerClass(string $class_name): void {
 		$reflection = new ReflectionClass($class_name);
 		$attributes = $reflection->getAttributes(Event::class);
 		foreach ($attributes as $attribute) {
