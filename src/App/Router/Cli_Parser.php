@@ -18,7 +18,6 @@ class Cli_Parser {
 			'dash' => '-',
 			'word' => '/[a-zA-Z0-9_-]+/',
 			'equal' => '=',
-			'space' => '\s',
 		];
 
 		$arg_output = [
@@ -33,26 +32,22 @@ class Cli_Parser {
 			$i = 0;
 			$char = $parts[$i];
 
-			if ($char === $lexemes['dash']) {
-				if ($this->peak($i, $parts) === $lexemes['dash']) {
-					$option = explode($lexemes['equal'], $arg);
-					if (empty($option[1])) {
-						if (!empty($this->args[$index + 1]) && preg_match($lexemes['word'], $this->args[$index + 1]) > 0) {
-							[$option[1], $new_index] = $this->findOptionValue($index);
-							$index = $new_index - 1;
-						}
-					}
-					if (!empty($option[1])) {
-						$arg_output['options'][] = [
-							'option' => str_replace('--', '', $option[0]),
-							'value' => $option[1],
-						];
-						continue;
-					} else {
-						$arg_output['flags'][] = str_replace('--', '', $option[0]);
-						continue;
-					}
+			if ($char === $lexemes['dash'] && $this->peak($i, $parts) === $lexemes['dash']) {
+				$option = explode($lexemes['equal'], $arg);
+				if ($this->isOptionWithNoEqual($option[1] ?? '', $index, $lexemes['word'])) {
+					[$option[1], $new_index] = $this->findOptionValue($index);
+					$index = $new_index - 1;
 				}
+
+				if (!empty($option[1])) {
+					$arg_output['options'][] = [
+						'option' => str_replace('--', '', $option[0]),
+						'value' => $option[1],
+					];
+					continue;
+				}
+
+				$arg_output['flags'][] = str_replace('--', '', $option[0]);
 			}
 
 			if ($char === $lexemes['dash']) {
@@ -71,13 +66,31 @@ class Cli_Parser {
 	}
 
 	/**
+	 * Check if the option has no equal
+	 * --foo-bar some value vs --foo-bar=some value
+	 * 
+	 * @param string $option
+	 * @param int $index
+	 * @param string $lexeme
+	 * 
+	 * @return bool
+	 */
+	protected function isOptionWithNoEqual(string $option, int $index, string $lexeme): bool {
+		return (
+			empty($option) 
+			&& !empty($this->args[$index + 1]) 
+			&& preg_match($lexeme, $this->args[$index + 1]) > 0
+		) === true;
+	}
+
+	/**
 	 * Find the option value
 	 * 
 	 * @param int $index
 	 * 
 	 * @return array
 	 */
-	public function findOptionValue(int $index): array {
+	protected function findOptionValue(int $index): array {
 		$lexemes = [
 			'dash' => '-',
 			'word' => '/[a-zA-Z0-9_-]+/',
@@ -108,7 +121,7 @@ class Cli_Parser {
 	 * 
 	 * @return string
 	 */
-	public function peak(int $index, array $value): string {
+	protected function peak(int $index, array $value): string {
 		return $value[$index + 1];
 	}
 }
