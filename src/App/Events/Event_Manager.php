@@ -63,7 +63,7 @@ class Event_Manager {
 					$callback->execute($args);
 					continue;
 				}
-				call_user_func_array($callback, $args);
+				call_user_func_array($callback, [$event, $args]);
 			}
 		}
 	}
