@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Gimli\Core;
+namespace Gimli\Events;
+
+use function Gimli\Injector\resolve_fresh;
 
 class Event_Handler {
 	/**
@@ -20,10 +22,10 @@ class Event_Handler {
 	 * Subscribe to an event
 	 *
 	 * @param string $event    event
-	 * @param callable $callback callback
+	 * @param callable|Event_Interface $callback callback
 	 * @return void
 	 */
-	public function subscribe(string $event, callable $callback): void {
+	public function subscribe(string $event, callable|Event_Interface $callback): void {
 		if (!isset($this->subscribers[$event])) {
 			$this->subscribers[$event] = [];
 		}
@@ -40,6 +42,10 @@ class Event_Handler {
 	public function publish(string $event, array $args = []): void {
 		if (isset($this->subscribers[$event])) {
 			foreach ($this->subscribers[$event] as $callback) {
+				if (is_a($callback, Event_Interface::class)) {
+					resolve_fresh($callback)->execute($args);
+					continue;
+				}
 				call_user_func_array($callback, $args);
 			}
 		}
