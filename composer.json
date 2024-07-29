@@ -20,7 +20,8 @@
             "src/App/Http/helpers.php",
 			"src/App/Database/helpers.php",
 			"src/App/Injector/helpers.php",
-			"src/App/Environment/helpers.php"
+			"src/App/Environment/helpers.php",
+			"src/App/Events/helpers.php"
         ]
     },
     "require": {

@@ -7,7 +7,7 @@ use Gimli\Application;
 use Gimli\Router\Dispatch;
 use Gimli\Injector\Injector;
 use Gimli\Http\Request;
-use Gimli\Middleware\Middleware_Base;
+use Gimli\Middleware\Middleware_Interface;
 use Gimli\Middleware\Middleware_Response;
 use Exception;
 use ReflectionNamedType;
@@ -233,8 +233,8 @@ class Router {
 	 */
 	protected function callMiddleware(string $Middleware_Class): Middleware_Response {
 		$Middleware = $this->Injector->resolve($Middleware_Class);
-		if (!$Middleware instanceof Middleware_Base) {	
-			throw new Exception("Middleware was not an instance of Middleware_Base: " . $Middleware);
+		if (is_a($Middleware, Middleware_Interface::class) === false) {	
+			throw new Exception("Middleware did not implement Middleware_Interface: " . $Middleware);
 		}
 
 		return $Middleware->process();

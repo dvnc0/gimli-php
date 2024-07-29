@@ -98,7 +98,7 @@ You can add middleware if you need some extra defense
 Route::get('/', [Home_Controller::class, 'homePage'])->addMiddleware(Logged_In_Middleware::class);
 ```
 
-That should be an instance of `Gimli\Middleware\Middleware_Base` and you need to define the `abstract process` method, which returns `Gimli\Middleware\Middleware_Response`. Middleware does have access to the Application instance including the Injector and whatever else you decide to set on it.
+That should be a class that implements `Gimli\Middleware\Middleware_Interface` which requires a `process` method that returns `Gimli\Middleware\Middleware_Response`. Middleware does have access to the Application instance including the Injector and whatever else you decide to set on it.
 
 You can also add groups, define a default route file that should load, and load additional route files to help organize your routes.
 

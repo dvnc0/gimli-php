@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Gimli\Router;
 
-use Gimli\Middleware\Middleware_Base;
-
 class Route {
 	/**
 	 * @var Route|null $instance
@@ -176,10 +174,12 @@ class Route {
 		return $Route;
 	}
 
-	/**
-	 * Add a middleware to a route
+	/** 
+	 * Add a route group
 	 *
-	 * @param Middleware_Base $middleware Middleware instance
+	 * @param string   $group      group prefix
+	 * @param callable $callback   callback to add routes
+	 * @param array    $middleware routes middleware
 	 *
 	 * @return Route
 	 */
