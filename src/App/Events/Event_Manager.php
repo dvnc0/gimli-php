@@ -5,6 +5,7 @@ namespace Gimli\Events;
 
 use ReflectionClass;
 use Gimli\Events\Event;
+use Gimli\Events\Event_Interface;
 
 use function Gimli\Injector\resolve_fresh;
 
@@ -72,10 +73,12 @@ class Event_Manager {
 	public function publish(string $event, array $args = []): void {
 		if (isset($this->subscribers[$event])) {
 			foreach ($this->subscribers[$event] as $callback) {
-				if (is_a($callback, Event_Interface::class)) {
+				if (is_string($callback)) {
 					$callback_instance = resolve_fresh($callback);
-					$callback_instance->execute($args);
-					continue;
+					if (is_a($callback_instance, Event_Interface::class)) {
+						$callback_instance->execute($event, $args);
+						continue;
+					}
 				}
 				call_user_func_array($callback, [$event, $args]);
 			}
