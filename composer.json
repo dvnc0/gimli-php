@@ -21,7 +21,8 @@
 			"src/App/Database/helpers.php",
 			"src/App/Injector/helpers.php",
 			"src/App/Environment/helpers.php",
-			"src/App/Events/helpers.php"
+			"src/App/Events/helpers.php",
+			"src/App/View/helpers.php"
         ]
     },
     "require": {
