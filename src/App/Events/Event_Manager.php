@@ -18,11 +18,11 @@ class Event_Manager {
 	 * Constructor
 	 * 
 	 * @param string $event
-	 * @param callable|Event_Interface $callback
+	 * @param callable|string $callback
 	 * 
 	 * @return void
 	 */
-	public function subscribe(string $event, callable|Event_Interface $callback): void {
+	public function subscribe(string $event, callable|string $callback): void {
 		if (!isset($this->subscribers[$event])) {
 			$this->subscribers[$event] = [];
 		}
@@ -55,7 +55,7 @@ class Event_Manager {
 		foreach ($attributes as $attribute) {
 			$event_name = $attribute->newInstance()->event_name;
 			if (is_a($class_name, Event_Interface::class, true)) {
-				$this->subscribe($event_name, resolve_fresh($class_name));
+				$this->subscribe($event_name, $class_name);
 				continue;
 			}
 		}
@@ -73,7 +73,8 @@ class Event_Manager {
 		if (isset($this->subscribers[$event])) {
 			foreach ($this->subscribers[$event] as $callback) {
 				if (is_a($callback, Event_Interface::class)) {
-					$callback->execute($args);
+					$callback_instance = resolve_fresh($callback);
+					$callback_instance->execute($args);
 					continue;
 				}
 				call_user_func_array($callback, [$event, $args]);
