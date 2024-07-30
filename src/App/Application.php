@@ -16,6 +16,8 @@ use Gimli\Session\Session;
 use Gimli\View\Latte_Engine;
 use Gimli\Events\Event_Manager;
 
+use function Gimli\Events\publish_event;
+
 /**
  * Main application container
  * 
@@ -219,12 +221,14 @@ class Application {
 	 */
 	public function run(): void {
 		// might need to rethink this
+		publish_event('gimli.application.start', ['time' => microtime(true)]);
 		$this->registerWebRoutes();
 		$routes = Route::build();
 		$Router = $this->Injector->resolve(Router::class);
 		$Router->Request = $this->Injector->resolve(Request::class);
 		$Router->addRoutes($routes);
 		$Router->run();
+		publish_event('gimli.application.end', ['time' => microtime(true)]);
 		return;
 	}
 
