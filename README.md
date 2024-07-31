@@ -8,6 +8,9 @@ An adaptable micro PHP framework that tries to stay out of your way.
 ## Installation
 `composer require danc0/gimliduck-php`
 
+Create a skeleton project with:
+`composer create-project danc0/gimli-skeleton`
+
 Add the [devtools](https://github.com/dvnc0/gimli-devtools) with `composer require --dev danc0/gimliduck-devtools`
 
 Create a `.htaccess` file that looks something like this to point requests to your `index.php` file
