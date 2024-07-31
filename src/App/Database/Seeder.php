@@ -10,7 +10,7 @@ use function Gimli\Injector\resolve_fresh;
 
 use Gimli\Database\Faker\Faker;
 
-class Seeder_Factory {
+class Seeder {
 
 	/**
 	 * @var int $seed
@@ -42,10 +42,10 @@ class Seeder_Factory {
 	 * @param string $table_name
 	 * @param array $fields
 	 * @param int $count
-	 * @return Seeder_Factory
+	 * @return Seeder
 	 */
-	public static function make(string $class_name): Seeder_Factory {
-		return new Seeder_Factory($class_name);
+	public static function make(string $class_name): Seeder {
+		return new Seeder($class_name);
 	}
 
 	/**
@@ -54,7 +54,7 @@ class Seeder_Factory {
 	 * @return int
 	 */
 	public static function getRandomSeed(): int {
-		return mt_rand(1, 1000000);
+		return mt_rand();
 	}
 
 	/**
@@ -111,7 +111,7 @@ class Seeder_Factory {
 	 * @param array $data
 	 * @return Seeder_Factory
 	 */
-	public function with(array $data): self {
+	public function using(array $data): self {
 		$this->with_data = $data;
 
 		return $this;

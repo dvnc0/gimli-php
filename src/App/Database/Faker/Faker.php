@@ -88,7 +88,7 @@ class Faker {
 		$Faker_Factory = resolve_fresh(Faker_Factory::class, ['seed' => $this->seed]);
 		if (array_key_exists($field['type'], $this->lookup_table)) {
 			$method = $this->lookup_table[$field['type']];
-			if ($method === 'oneOf') {
+			if ($method === 'options') {
 				return $Faker_Factory->$method($field['args']);
 			}
 			return $Faker_Factory->$method(...$field['args']);

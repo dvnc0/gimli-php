@@ -63,3 +63,34 @@ if (!function_exists('Gimli\Database\row_exists')) {
 		return !empty($row);
 	}
 }
+
+if (!function_exists('Gimli\Database\seed_model')) {
+
+	/**
+	 * Seed a model
+	 *
+	 * @param string $model
+	 * @param int $count
+	 * @param int|null $seed
+	 * @return int
+	 */
+	function seed_model(string $model, int $count = 1, int|null $seed = null): int {
+		$seed = $seed ?? Seeder::getRandomSeed();
+		return Seeder::make($model)->count($count)->seed($seed)->create();
+	}
+}
+
+if (!function_exists('Gimli\Database\seed_data')) {
+
+	/**
+	 * Seed a model, get data instead of insert
+	 *
+	 * @param string $model
+	 * @param int|null $seed
+	 * @return int
+	 */
+	function seed_data(string $model, int|null $seed = null): int {
+		$seed = $seed ?? Seeder::getRandomSeed();
+		return Seeder::make($model)->count(1)->seed($seed)->getSeededData();
+	}
+}

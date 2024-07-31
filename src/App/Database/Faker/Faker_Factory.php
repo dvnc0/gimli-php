@@ -69,7 +69,7 @@ class Faker_Factory {
 	 * @param array $options
 	 * @return mixed
 	 */
-	public function oneOf(array $options) {
+	public function options(array $options) {
 		return $options[mt_rand(0, count($options) - 1)];
 	}
 
@@ -81,7 +81,7 @@ class Faker_Factory {
 	 * @param string $max
 	 * @return string
 	 */
-	public function randomDate(string $format = 'Y-m-d H:i:s', string $min = '1970-01-01 00:00:00', string $max = '2024-01-01 00:00:00'): string {
+	public function date(string $format = 'Y-m-d H:i:s', string $min = '1970-01-01 00:00:00', string $max = '2024-01-01 00:00:00'): string {
 		$min = strtotime($min);
 		$max = strtotime($max);
 		$rand = mt_rand($min, $max);
@@ -93,7 +93,7 @@ class Faker_Factory {
 	 *
 	 * @return bool
 	 */
-	public function getRandomBool(): bool {
+	public function bool(): bool {
 		return (bool) mt_rand(0, 1);
 	}
 
@@ -107,14 +107,14 @@ class Faker_Factory {
 		$first_names = $this->getDataFile('first_names.json');
 		$last_names = $this->getDataFile('last_names.json');
 		$domain_name = $this->getDataFile('words.json');
-		$domain = $this->oneOf($domain_name);
-		$tld = $this->oneOf($domains);
-		$first_name = $this->oneOf($first_names);
-		$last_name = $this->oneOf($last_names);
+		$domain = $this->options($domain_name);
+		$tld = $this->options($domains);
+		$first_name = $this->options($first_names);
+		$last_name = $this->options($last_names);
 
 		if (mt_rand(0, 100) <= 20) {
 			$special_chars = ['\'', '-', '_', '!'];
-			$first_name = substr_replace($first_name, $this->oneOf($special_chars), mt_rand(0, strlen($first_name)), 0);
+			$first_name = substr_replace($first_name, $this->options($special_chars), mt_rand(0, strlen($first_name)), 0);
 		}
 
 		return strtolower($first_name) . '.' . strtolower($last_name) . '@' . $domain . $tld;
@@ -127,7 +127,7 @@ class Faker_Factory {
 	 */
 	public function firstName(): string {
 		$first_names = $this->getDataFile('first_names.json');
-		return ucfirst(strtolower($this->oneOf($first_names)));
+		return ucfirst(strtolower($this->options($first_names)));
 	}
 
 	/**
@@ -137,7 +137,7 @@ class Faker_Factory {
 	 */
 	public function lastName(): string {
 		$last_names = $this->getDataFile('last_names.json');
-		return ucfirst(strtolower($this->oneOf($last_names)));
+		return ucfirst(strtolower($this->options($last_names)));
 	}
 
 	/**
@@ -147,7 +147,7 @@ class Faker_Factory {
 	 */
 	public function middleName(): string {
 		$middle_names = $this->getDataFile('middle_names.json');
-		return ucfirst(strtolower($this->oneOf($middle_names)));
+		return ucfirst(strtolower($this->options($middle_names)));
 	}
 
 	/**
@@ -157,7 +157,7 @@ class Faker_Factory {
 	 */
 	public function middleInitial(): string {
 		$middle_names = $this->getDataFile('middle_names.json');
-		$middle_name = $this->oneOf($middle_names);
+		$middle_name = $this->options($middle_names);
 		return strtoupper($middle_name[0]);
 	}
 
@@ -241,8 +241,8 @@ class Faker_Factory {
 		$emotions = $this->getDataFile('emotions.json');
 		$animals = $this->getDataFile('animals.json');
 		
-		$emotion = $this->oneOf($emotions);
-		$animal = $this->oneOf($animals);
+		$emotion = $this->options($emotions);
+		$animal = $this->options($animals);
 
 		return $emotion . '_' . $animal . $this->getRandomInt(1, 100);
 	}
@@ -283,8 +283,8 @@ class Faker_Factory {
 	public function url(): string {
 		$domains = $this->getDataFile('domain_tlds.json');
 		$domain_name = $this->getDataFile('words.json');
-		$domain = $this->oneOf($domain_name);
-		$tld = $this->oneOf($domains);
+		$domain = $this->options($domain_name);
+		$tld = $this->options($domains);
 
 		return 'https://' . $domain . $tld;
 	}
@@ -296,7 +296,7 @@ class Faker_Factory {
 	 */
 	public function phoneNumber(): string{
 		$area_codes = $this->getDataFile('area_codes.json');
-		$area_code = $this->oneOf($area_codes);
+		$area_code = $this->options($area_codes);
 		$exchange_code = $this->getRandomInt(200, 999);
 		$subscriber_number = $this->getRandomInt(1000, 9999);
 
@@ -314,10 +314,10 @@ class Faker_Factory {
 		$state_names = $this->getDataFile('address_state.json');
 		$zip_codes = $this->getDataFile('address_zip.json');
 
-		$street = $this->oneOf($street_names);
-		$city_name = $this->oneOf($city_names);
-		$state_name = $this->oneOf($state_names);
-		$zip_code = $this->oneOf($zip_codes);
+		$street = $this->options($street_names);
+		$city_name = $this->options($city_names);
+		$state_name = $this->options($state_names);
+		$zip_code = $this->options($zip_codes);
 
 		return $street . ', ' . $city_name . ', ' . $state_name . ' ' . $zip_code;
 	}
@@ -329,7 +329,7 @@ class Faker_Factory {
 	 */
 	public function addressLine1(): string {
 		$street_names = $this->getDataFile('address_line_1.json');
-		$street = $this->oneOf($street_names);
+		$street = $this->options($street_names);
 		return $street;
 	}
 
@@ -340,7 +340,7 @@ class Faker_Factory {
 	 */
 	public function addressLine2(): string {
 		$street_names = $this->getDataFile('address_line_2.json');
-		$street = $this->oneOf($street_names);
+		$street = $this->options($street_names);
 		return $street;
 	}
 
@@ -351,7 +351,7 @@ class Faker_Factory {
 	 */
 	public function city(): string {
 		$city_names = $this->getDataFile('address_city.json');
-		$city_name = $this->oneOf($city_names);
+		$city_name = $this->options($city_names);
 		return $city_name;
 	}
 
@@ -362,7 +362,7 @@ class Faker_Factory {
 	 */
 	public function state(): string {
 		$state_names = $this->getDataFile('address_state.json');
-		$state_name = $this->oneOf($state_names);
+		$state_name = $this->options($state_names);
 		return $state_name;
 	}
 
@@ -373,7 +373,7 @@ class Faker_Factory {
 	 */
 	public function stateLong(): string {
 		$state_names = $this->getDataFile('state.json');
-		$state_name = $this->oneOf($state_names);
+		$state_name = $this->options($state_names);
 		$state_name = str_replace('_', ' ', $state_name);
 		return $state_name;
 	}
@@ -385,7 +385,7 @@ class Faker_Factory {
 	 */
 	public function zip(): string {
 		$zip_codes = $this->getDataFile('address_zip.json');
-		$zip_code = $this->oneOf($zip_codes);
+		$zip_code = $this->options($zip_codes);
 		return $zip_code;
 	}
 
@@ -395,6 +395,6 @@ class Faker_Factory {
 	 * @return integer
 	 */
 	public function tinyInt(): int {
-		return $this->oneOf([0, 1]);
+		return $this->options([0, 1]);
 	}
 }
