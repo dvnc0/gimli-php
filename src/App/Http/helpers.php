@@ -42,15 +42,15 @@ if (!function_exists('Gimli\Http\json_response')) {
 	/**
 	 * Returns a JSON response
 	 *
-	 * @param array $data
+	 * @param array $body
+	 * @param string $message
 	 * @param bool $success
 	 * @param int $response_code
-	 * @param string $response_body
 	 * @return Response
 	 */
-	function json_response(array $data, bool $success, int $response_code = 200, string $response_body = ''): Response {
+	function json_response(array $body, string $message = 'OK', bool $success = TRUE, int $response_code = 200): Response {
 		$Response = Application::get()->Injector->resolve(Response::class);
-		$Response->setJsonResponse($response_body, $success, $data, $response_code);
+		$Response->setJsonResponse($body, $message, $success, $response_code);
 		return $Response;
 	}
 }

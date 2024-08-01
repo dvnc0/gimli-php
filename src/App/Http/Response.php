@@ -70,18 +70,18 @@ class Response
 	/**
 	 * Sets the response body as JSON
 	 *
-	 * @param string $response_body response body
+	 * @param string $message response body
 	 * @param bool   $success       success or fail
-	 * @param array  $data          data
+	 * @param array  $body          body
 	 * @param int    $response_code response code
 	 * @return Response
 	 */
-	public function setJsonResponse(string $response_body = '', bool $success = TRUE, array $data = [], int $response_code = 200) {
+	public function setJsonResponse(array $body = [], string $message = 'OK', bool $success = TRUE, int $response_code = 200) {
 		$this->is_json       = TRUE;
 		$this->success       = $success;
-		$this->response_body = json_encode(['success' => $success, 'body' => $response_body, 'data' => $data]);
+		$this->response_body = json_encode(['success' => $success, 'body' => $body, 'text' => $message]);
 		$this->response_code = $response_code;
-		$this->data          = $data;
+		$this->data          = $body;
 		return $this;
 	}
 

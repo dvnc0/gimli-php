@@ -88,7 +88,7 @@ if (!function_exists('Gimli\Database\seed_data')) {
 	 * @param string $model
 	 * @param int|null $seed
 	 * @return int
-	 */
+	 */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 	function seed_data(string $model, int|null $seed = null): int {
 		$seed = $seed ?? Seeder::getRandomSeed();
 		return Seeder::make($model)->count(1)->seed($seed)->getSeededData();
