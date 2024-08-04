@@ -6,6 +6,17 @@ namespace Gimli\Database;
 use Gimli\Application;
 use Gimli\Database\Database;
 
+if (!function_exists('Gimli\Database\get_database')) {
+	/**
+	 * Get the database instance
+	 *
+	 * @return Database
+	 */
+	function get_database(): Database {
+		return Application::get()->Injector->resolve(Database::class);
+	}
+}
+
 if (!function_exists('Gimli\Database\fetch_column')) {
 	/**
 	 * Fetches a single column
