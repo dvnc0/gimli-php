@@ -6,7 +6,7 @@ namespace Gimli\View;
 use Gimli\Application;
 use Gimli\View\Latte_Engine;
 
-if (!function_exists('Gimli\View\view')) {
+if (!function_exists('Gimli\View\render')) {
 	/**
 	 * View helper
 	 * 
@@ -15,8 +15,8 @@ if (!function_exists('Gimli\View\view')) {
 	 * 
 	 * @return string
 	 */
-	function view(string $view, array $data = []): string {
+	function render(string $template, array $data = []): string {
 		$view = Application::get()->Injector->resolve(Latte_Engine::class);
-		return $view->render($view, $data);
+		return $view->render($template, $data);
 	}
 }
