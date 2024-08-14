@@ -54,9 +54,9 @@ class Event_Manager {
 		$reflection = new ReflectionClass($class_name);
 		$attributes = $reflection->getAttributes(Event::class);
 		foreach ($attributes as $attribute) {
-			$event_name = $attribute->newInstance()->event_name;
+			$event_key = $attribute->newInstance()->event_name;
 			if (is_a($class_name, Event_Interface::class, true)) {
-				$this->subscribe($event_name, $class_name);
+				$this->subscribe($event_key, $class_name);
 				continue;
 			}
 		}

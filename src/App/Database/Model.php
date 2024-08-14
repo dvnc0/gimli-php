@@ -91,7 +91,7 @@ class Model {
 
 		$this->Database->insert($this->table_name, $data);
 
-		$this->{$this->primary_key} = $this->Database->lastInsertId();
+		$this->{$this->primary_key} = (int) $this->Database->lastInsertId();
 
 		$this->is_loaded = true;
 		$this->afterSave();

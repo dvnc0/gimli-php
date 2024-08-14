@@ -5,7 +5,7 @@ namespace Gimli\Events;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS)]
 class Event {
 	/**
 	 * @param string $event_name
