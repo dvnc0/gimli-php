@@ -66,6 +66,7 @@ class Model {
 		}
 
 		$this->is_loaded = true;
+		$this->afterLoad();
 		return true;
 	}
 
@@ -143,6 +144,8 @@ class Model {
 		foreach ($data as $key => $value) {
 			$this->$key = $value;
 		}
+		$this->is_loaded = true;
+		$this->afterLoad();
 	}
 
 	/**
@@ -156,6 +159,10 @@ class Model {
 	 * After save hook
 	 */
 	protected function afterSave(): void {
+		return;
+	}
+
+	protected function afterLoad(): void {
 		return;
 	}
 }
