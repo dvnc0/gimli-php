@@ -112,6 +112,9 @@ class Application {
 		
 		$this->app_root  = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
+		if (!empty($this->Config->events)) {
+			$this->registerEvents($this->Config->events);
+		}
 	}
 
 	/**
@@ -172,6 +175,17 @@ class Application {
 		}
 
 		$this->loadRouteFiles($routes);
+	}
+
+	/**
+	 * Register events
+	 *
+	 * @param array $events Events to register
+	 * @return void
+	 */
+	protected function registerEvents(array $events): void {
+		$Event_Manager = $this->Injector->resolve(Event_Manager::class);
+		$Event_Manager->register($events);
 	}
 
 	/**

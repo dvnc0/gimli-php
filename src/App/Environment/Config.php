@@ -39,6 +39,7 @@ class Config {
 	 * 		route_directory: string,
 	 * 		enable_latte: bool,
 	 * 		template_base_dir: string
+	 * 		events: array
 	 * }
 	 */
 	protected array $config = [
@@ -60,6 +61,7 @@ class Config {
 		'enable_latte' => TRUE,
 		'template_base_dir' => 'App/views/',
 		'template_temp_dir' => 'tmp',
+		'events' => [],
 	];
 
 	/**

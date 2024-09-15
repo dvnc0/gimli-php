@@ -139,13 +139,28 @@ class Model {
 	 * Load the model from a data set, used with Seeders
 	 *
 	 * @param array $data the data to load the Model with
+	 * @param bool $is_loaded is the model loaded
+	 * @return void
 	 */
-	public function loadFromDataSet(array $data): void {
+	public function loadFromDataSet(array $data, bool $is_loaded = true): void {
 		foreach ($data as $key => $value) {
 			$this->$key = $value;
 		}
-		$this->is_loaded = true;
+		$this->is_loaded = $is_loaded;
 		$this->afterLoad();
+	}
+
+	/**
+	 * Create a new model from an array
+	 *
+	 * @param array $data the data to create the Model 
+	 * @return void
+	 */
+	public function createFromDataSet(array $data): void {
+		foreach ($data as $key => $value) {
+			$this->$key = $value;
+		}
+		$this->is_loaded = false;
 	}
 
 	/**
@@ -162,6 +177,9 @@ class Model {
 		return;
 	}
 
+	/**
+	 * After load hook
+	 */
 	protected function afterLoad(): void {
 		return;
 	}

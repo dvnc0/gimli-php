@@ -27,13 +27,13 @@
     },
     "require": {
         "php": ">=8.1",
-        "latte/latte": "^3.0"
+        "latte/latte": ">=3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9",
-        "squizlabs/php_codesniffer": "^3.7",
-        "phpstan/phpstan": "^1.8",
-        "phpunit/php-code-coverage": "^9.2"
+        "phpunit/phpunit": ">=11",
+        "squizlabs/php_codesniffer": ">=3.7",
+        "phpstan/phpstan": ">=1.8",
+        "phpunit/php-code-coverage": ">=9.2"
     },
     "scripts": {
         "test": "src/vendor/bin/phpunit src/tests/",
