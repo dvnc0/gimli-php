@@ -67,6 +67,13 @@ class Latte_Engine {
 			}
 		);
 
+		$latte->addFunction(
+			'csrf', function() {
+				$token = Csrf::generate();
+				echo "<input type='hidden' name='csrf_token' value='{$token}'>";
+			}
+		);
+
 		$template_path_full = implode('/', array_filter([$this->app_root_dir, $this->template_base_dir, $template_path], 'strlen'));
 		$template_path_full = str_replace('//', '/', $template_path_full);
 
