@@ -32,13 +32,13 @@ require_once __DIR__ . '/vendor/autoload.php';
 use Gimli\Application;
 use Gimli\Router\Route;
 
-$App = Application::create(__DIR__, $_SERVER);
+Application::create(__DIR__, $_SERVER);
 
 Route::get('/', function(){
 	echo "Hello World";
 });
 
-$App->run();
+Application::start();
 ```
 That is really all you need to get started. You can add more like a template engine, a config file, etc, but you don't **have** to.
 
@@ -206,7 +206,7 @@ There is a basic PDO wrapper `Database` as well as a `Pdo_Manager` class you can
 - `row_exists`
 
 ### Model Seeders
-There is a basic seeder class that can be used to seed your database. This relies on attributes placed in the model classes to instruct the `Seeder_Factory` how to create the data.
+There is a basic seeder class that can be used to seed your database. This relies on attributes placed in the model classes to instruct the `Seeder` how to create the data.
 
 ```php
 <?php
@@ -326,27 +326,27 @@ class User_Model extends Model {
 You can then seed the database with the following code:
 
 ```php
-Seeder_Factory::make(User_Model::class)
+Seeder::make(User_Model::class)
 	->seed(123)
 	->count(1)
 	->create();
 ```
 
-Instead of create you can call `getSeededData` to get the data that would be inserted into the database. This is useful for testing or manually loading a Model without saving it. You can also pass a callback method that will be given the data of the initial Model. This helps to seed related data. The callback should return an array of `Seeder_Factory` instances.
+Instead of create you can call `getSeededData` to get the data that would be inserted into the database. This is useful for testing or manually loading a Model without saving it. You can also pass a callback method that will be given the data of the initial Model. This helps to seed related data. The callback should return an array of `Seeder` instances.
 
 ```php
-Seeder_Factory::make(User_Model::class)
+Seeder::make(User_Model::class)
 	->seed(123)
 	->count(1)
 	->callback(function($data) {
 		return [
-			Seeder_Factory::make(User_Hobby_Model::class)->with(['user_id' => $data['id']]),
-			Seeder_Factory::make(User_Group_Model::class)->with(['user_id' => $data['id']]),
+			Seeder::make(User_Hobby_Model::class)->with(['user_id' => $data['id']]),
+			Seeder::make(User_Group_Model::class)->with(['user_id' => $data['id']]),
 		]
 	})
 	->create();
 ```
-The passed seed ensures the data remains the same each time that seeder is run, resulting in reproducible datasets. The `Seeder_Factory` class has a `getRandomSeed` method that will return a random seed value. This is useful for creating random data that you don't need to be reproducible, or to generate a random seed you can copy and use.
+The passed seed ensures the data remains the same each time that seeder is run, resulting in reproducible datasets. The `Seeder` class has a `getRandomSeed` method that will return a random seed value. This is useful for creating random data that you don't need to be reproducible, or to generate a random seed you can copy and use.
 
 ### Config Helpers
 There are also a few Config helpers:

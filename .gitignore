@@ -5,3 +5,4 @@ git-destroyer-config.json
 composer.lock
 .phpunit.cache
 src/tests/coverage
+.phpunit.result.cache

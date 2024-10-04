@@ -397,4 +397,14 @@ class Faker_Factory {
 	public function tinyInt(): int {
 		return $this->options([0, 1]);
 	}
+
+	/**
+	 * Force a value to always be something specific
+	 *
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	public function always($value) {
+		return $value;
+	}
 }

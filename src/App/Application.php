@@ -112,9 +112,6 @@ class Application {
 		
 		$this->app_root  = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
-		if (!empty($this->Config->events)) {
-			$this->registerEvents($this->Config->events);
-		}
 	}
 
 	/**
@@ -237,6 +234,9 @@ class Application {
 		// might need to rethink this
 		publish_event('gimli.application.start', ['time' => microtime(true)]);
 		$this->registerWebRoutes();
+		if (!empty($this->Config->get('events'))) {
+			$this->registerEvents($this->Config->events);
+		}
 		$routes = Route::build();
 		$Router = $this->Injector->resolve(Router::class);
 		$Router->Request = $this->Injector->resolve(Request::class);
@@ -244,6 +244,20 @@ class Application {
 		$Router->run();
 		publish_event('gimli.application.end', ['time' => microtime(true)]);
 		return;
+	}
+
+	/**
+	 * Static helper for running the application
+	 *
+	 * @return void
+	 * @throws Gimli_Application_Exception
+	 */
+	public static function start(): void {
+		if (self::$instance === null) {
+			throw new Gimli_Application_Exception('Application instance not created');
+		}
+
+		self::$instance->run();
 	}
 
 }

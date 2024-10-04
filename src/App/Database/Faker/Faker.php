@@ -48,6 +48,7 @@ class Faker {
 		'state_full' => 'stateLong',
 		'phone_number' => 'phoneNumber',
 		'tiny_int' => 'tinyInt',
+		'always' => 'always',
 	];
 
 	/**
