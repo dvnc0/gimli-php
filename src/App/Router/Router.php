@@ -259,13 +259,13 @@ class Router {
 		$cli_route = $cli_routes[$cli_command];
 
 		if (is_callable($cli_route['handler'])) {
-			call_user_func_array($cli_route['handler'], array_slice($cli_args, 2));
+			call_user_func_array($cli_route['handler'], array_slice($cli_args, 1));
 			return;
 		}
 
 		$handler = $cli_route['handler'];
 
-		$parsed_args = resolve(Cli_Parser::class, ['args' => array_slice($cli_args, 2)])->parse();
+		$parsed_args = resolve(Cli_Parser::class, ['args' => array_slice($cli_args, 1)])->parse();
 		$sub = $parsed_args['subcommand'] ?? '';
 		$options = $parsed_args['options'] ?? [];
 		$flags = $parsed_args['flags'] ?? [];
