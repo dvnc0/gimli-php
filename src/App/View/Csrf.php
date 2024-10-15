@@ -40,6 +40,7 @@ class Csrf
 		}
 
 		unset($tokens[$token]);
+		$Session->set('csrf_token', $tokens);
 
 		return true;
 	}
