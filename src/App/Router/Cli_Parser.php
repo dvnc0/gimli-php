@@ -40,10 +40,7 @@ class Cli_Parser {
 				}
 
 				if (!empty($option[1])) {
-					$arg_output['options'][] = [
-						'option' => str_replace('--', '', $option[0]),
-						'value' => $option[1],
-					];
+					$arg_output['options'][str_replace('--', '', $option[0])] = $option[1];
 					continue;
 				}
 
