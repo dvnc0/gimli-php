@@ -76,13 +76,14 @@ class Session implements Session_Interface {
 		if (strpos($key, '.') !== FALSE) {
 			$keys    = explode('.', $key);
 			$session = &$_SESSION;
+			$lastKey = array_pop($keys);
 			foreach ($keys as $key) {
 				if (!isset($session[$key])) {
 					return;
 				}
 				$session = &$session[$key];
 			}
-			unset($session);
+			unset($session[$lastKey]);
 			return;
 		}
 
