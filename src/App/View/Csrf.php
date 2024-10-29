@@ -14,7 +14,7 @@ class Csrf
 		$token = bin2hex(random_bytes(32));
 		$expire_time = time() + 60 * 15;
 		$Session = resolve(Session::class);
-		$tokens = $Session->get('csrf_tokens');
+		$tokens = $Session->get('csrf_token');
 		$tokens[$token] = $expire_time;
 		$Session->set('csrf_token', $tokens);
 		return $token;
