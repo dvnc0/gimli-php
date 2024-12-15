@@ -274,7 +274,7 @@ class Router {
 		$method_args = $this->getArgumentsForMethod($instance, '__invoke', ['subcommand' => $sub, 'options' => $options, 'flags' => $flags]);
 		$response = call_user_func_array([$instance, '__invoke'], $method_args);
 
-		$this->Dispatch->dispatch($response);
+		$this->Dispatch->dispatch($response, true);
 	}
 
 	/**
