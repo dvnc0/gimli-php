@@ -115,6 +115,32 @@ class Application {
 	}
 
 	/**
+	 * Set the Config object
+	 *
+	 * @param Config $Config Config object
+	 * @return Application
+	 */
+	public function setConfig(Config $Config): Application {
+		$this->Config = $Config;
+		return $this;
+	}
+
+	/**
+	 * Enable Latte template engine
+	 *
+	 * @return Application
+	 * @throws Gimli_Application_Exception
+	 */
+	public function enableLatte(): Application {
+		if (isset($this->Config) === false) {
+			throw new Gimli_Application_Exception('Enable Latte requires Config to be set');
+		}
+
+		$this->Injector->bind(Latte_Engine::class, fn() => new Latte_Engine($this->Config->template_base_dir, $this->app_root));
+		return $this;
+	}
+
+	/**
 	 * Register core services with the DI container
 	 *
 	 * @param array $server_variables $_SERVER values
@@ -136,10 +162,6 @@ class Application {
 
 		$this->Injector->register(Event_Manager::class, new Event_Manager);
 		$this->Injector->register(Session::class, new Session);
-		
-		if ($this->Config->enable_latte === TRUE) {
-			$this->Injector->register(Latte_Engine::class, new Latte_Engine($this->Config->template_base_dir, $this->app_root));
-		}
 
 		return;
 	}
@@ -233,6 +255,9 @@ class Application {
 	public function run(): void {
 		// might need to rethink this
 		publish_event('gimli.application.start', ['time' => microtime(true)]);
+		if (isset($this->Config) === false) {
+			throw new Gimli_Application_Exception('Please set the Config object using setConfig');
+		}
 		$this->registerWebRoutes();
 		if (!empty($this->Config->get('events'))) {
 			$this->registerEvents($this->Config->events);
