@@ -127,6 +127,6 @@ class Request
 	 * @return mixed
 	 */
 	public function getPostParam($key) {
-		return $this->post[$key] ?: NULL;
+		return $this->post[$key] ?? NULL;
 	}
 }
