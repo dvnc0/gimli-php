@@ -169,7 +169,7 @@ class Config {
 	 *
 	 * @param array $config
 	 * @param array $new_config
-	 * @return void
+	 * @return array
 	 */
 	protected function loadConfigFile(array $config, array $new_config): array {
 		foreach ($new_config as $key => $value) {

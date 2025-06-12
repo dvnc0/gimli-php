@@ -10,17 +10,17 @@ use Gimli\Injector\Injector_Interface;
 class Injector implements Injector_Interface {
 	
 	/**
-	 * @var array $resolved_classes
+	 * @var array<string, object> $resolved_classes
 	 */
 	protected array $resolved_classes = [];
 
 	/**
-	 * @var array $registered_classes
+	 * @var array<string, object> $registered_classes
 	 */
 	protected array $registered_classes = [];
 
 	/**
-	 * @var array $bindings
+	 * @var array<string, callable> $bindings
 	 */
 	protected array $bindings = [];
 
@@ -28,6 +28,11 @@ class Injector implements Injector_Interface {
 	 * @var Application $Application
 	 */
 	protected Application $Application;
+
+	/**
+	 * @var array $resolving
+	 */
+	protected array $resolving = [];
 
 	/**
 	 * Constructor
@@ -49,7 +54,6 @@ class Injector implements Injector_Interface {
 	 */
 	public function register(string $class_name, object $instance): void {
 		$this->registered_classes[$class_name] = $instance;
-		return;
 	}
 
 	/**
@@ -61,15 +65,15 @@ class Injector implements Injector_Interface {
 	 */
 	public function bind(string $class_name, callable $callback): void {
 		$this->bindings[$class_name] = $callback;
-		return;
 	}
 
 	/**
 	 * Resolves a class instance
 	 *
-	 * @param string $class_name   class name
-	 * @param array  $dependencies dependencies
-	 * @return object
+	 * @template T
+	 * @param  class-string<T>  $class_name
+	 * @param  array   $dependencies dependencies
+	 * @return T
 	 */
 	public function resolve(string $class_name, array $dependencies = []): object {
 		if (!empty($this->resolved_classes[$class_name])) {
@@ -87,22 +91,25 @@ class Injector implements Injector_Interface {
 			return $instance;
 		}
 
+		if (isset($this->resolving[$class_name])) {
+			throw new \RuntimeException("Circular dependency detected for class: {$class_name}");
+		}
+
 		return $this->createFreshInstance($class_name, $dependencies);
 	}
 
 	/**
 	 * Resolves a fresh class instance
 	 *
-	 * @param string $class_name   class name
-	 * @param array  $dependencies dependencies
-	 * @return object
+	 * @template T
+	 * @param  class-string<T>  $class_name
+	 * @param  array   $dependencies dependencies
+	 * @return T
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object {
 		if (!empty($this->bindings[$class_name])) {
 			$callback = $this->bindings[$class_name];
-			$instance = call_user_func($callback);
-			$this->resolved_classes[$class_name] = $instance;
-			return $instance;
+			return call_user_func($callback);
 		}
 		
 		return $this->createFreshInstance($class_name, $dependencies);
@@ -116,17 +123,19 @@ class Injector implements Injector_Interface {
 	 */
 	public function exists(string $key): bool {
 		return !empty($this->resolved_classes[$key]) || !empty($this->registered_classes[$key]) || !empty($this->bindings[$key]);
-	
 	}
 
 	/**
 	 * Creates a fresh class instance
 	 *
-	 * @param string $class_name   class name
-	 * @param array  $dependencies dependencies
-	 * @return object
+	 * @template T
+	 * @param  class-string<T>  $class_name
+	 * @param  array   $dependencies dependencies
+	 * @return T
 	 */
 	protected function createFreshInstance(string $class_name, array $dependencies): object {
+		$this->resolving[$class_name] = true;
+
 		$dependencies[Application::class] = $this->Application;
 		$dependencies[Injector::class]    = $this;
 
@@ -137,6 +146,7 @@ class Injector implements Injector_Interface {
 			$instance                            = new $class_name();
 			$this->resolved_classes[$class_name] = $instance;
 
+			unset($this->resolving[$class_name]);
 			return $instance;
 		}
 
@@ -144,9 +154,13 @@ class Injector implements Injector_Interface {
 		$constructor_args   = [];
 
 		foreach ($constructor_params as $param) {
-			$param_type  = $param->getType();
-			$param_class = $param_type === NULL ? '' : $param_type->getName(); // @phpstan-ignore-line
-			$param_name  = $param->getName();
+			$param_type = $param->getType();
+			$param_name = $param->getName();
+			$param_class = '';
+
+			if ($param_type instanceof \ReflectionNamedType && !$param_type->isBuiltin()) {
+				$param_class = $param_type->getName();
+			}
 
 			if (!empty($param_class)) {
 				if (!empty($dependencies[$param_class])) {
@@ -182,8 +196,95 @@ class Injector implements Injector_Interface {
 
 		$this->resolved_classes[$class_name] = $instance;
 
+		unset($this->resolving[$class_name]);
 		return $instance;
 			
+	}
+
+	/**
+	 * Resolves a class and calls a specific method
+	 *
+	 * @template T
+	 * @param  class-string<T>  $class_name
+	 * @param  string  $method_name
+	 * @param  array   $method_args
+	 * @param  array   $dependencies dependencies for class resolution
+	 * @return mixed
+	 */
+	public function call(string $class_name, string $method_name, array $method_args = [], array $dependencies = []): mixed {
+		$instance = $this->resolve($class_name, $dependencies);
+		
+		if (!method_exists($instance, $method_name)) {
+			throw new \BadMethodCallException("Method '{$method_name}' does not exist on class '{$class_name}'");
+		}
+
+		$reflection_method = new \ReflectionMethod($instance, $method_name);
+		$method_parameters = $reflection_method->getParameters();
+		$resolved_args = [];
+
+		// Auto-resolve method parameters with dependency injection
+		foreach ($method_parameters as $index => $param) {
+			$param_type = $param->getType();
+			$param_name = $param->getName();
+
+			// Check if argument was explicitly provided
+			if (array_key_exists($index, $method_args)) {
+				$resolved_args[] = $method_args[$index];
+				continue;
+			}
+
+			if (array_key_exists($param_name, $method_args)) {
+				$resolved_args[] = $method_args[$param_name];
+				continue;
+			}
+
+			// Try to resolve by typeo
+			if ($param_type && !$param_type->isBuiltin()) {
+				$param_class = $param_type->getName();
+				$resolved_args[] = $this->resolve($param_class);
+				continue;
+			}
+
+			// Use default value if available
+			if ($param->isDefaultValueAvailable()) {
+				$resolved_args[] = $param->getDefaultValue();
+				continue;
+			}
+
+			// Allow null if parameter allows it
+			if ($param->allowsNull()) {
+				$resolved_args[] = null;
+				continue;
+			}
+
+			throw new \InvalidArgumentException("Cannot resolve parameter '{$param_name}' for method '{$method_name}' on class '{$class_name}'");
+		}
+
+		return call_user_func_array([$instance, $method_name], $resolved_args);
+	}
+
+	/**
+	 * Extends a resolved class with additional functionality
+	 *
+	 * @template T
+	 * @param  class-string<T>  $class_name
+	 * @param  callable $callback
+	 * @param  array    $dependencies dependencies for class resolution
+	 * @return T
+	 */
+	public function extends(string $class_name, callable $callback, array $dependencies = []): object {
+		$instance = $this->resolve($class_name, $dependencies);
+		
+		// Call the callback with the instance and return the result
+		$result = call_user_func($callback, $instance);
+		
+		// If callback returns an object, use that as the extended instance
+		if (is_object($result)) {
+			return $result;
+		}
+		
+		// Otherwise, return the original instance (callback modified it in place)
+		return $instance;
 	}
 
 }

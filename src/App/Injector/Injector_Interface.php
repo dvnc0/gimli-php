@@ -27,20 +27,22 @@ interface Injector_Interface {
 	/**
 	 * resolves a class instance
 	 * 
-	 * @param string $class_name   class name
+	 * @template T
+	 * @param class-string<T> $class_name   class name
 	 * @param array  $dependencies dependencies
 	 * 
-	 * @return object
+	 * @return T
 	 */
 	public function resolve(string $class_name, array $dependencies = []): object;
 
 	/**
 	 * resolves a fresh class instance
 	 * 
-	 * @param string $class_name   class name
+	 * @template T
+	 * @param class-string<T> $class_name   class name
 	 * @param array  $dependencies dependencies
 	 * 
-	 * @return object
+	 * @return T
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object;
 
@@ -52,4 +54,28 @@ interface Injector_Interface {
 	 * @return bool
 	 */
 	public function exists(string $key): bool;
+
+	/**
+	 * resolves a class and calls a specific method
+	 * 
+	 * @param string $class_name   class name
+	 * @param string $method_name  method name to call
+	 * @param array  $method_args  arguments to pass to the method
+	 * @param array  $dependencies dependencies for class resolution
+	 * 
+	 * @return mixed
+	 */
+	public function call(string $class_name, string $method_name, array $method_args = [], array $dependencies = []): mixed;
+
+	/**
+	 * extends a resolved class with additional functionality
+	 * 
+	 * @template T
+	 * @param class-string<T> $class_name class name to extend
+	 * @param callable $callback   callback to extend the instance
+	 * @param array    $dependencies dependencies for class resolution
+	 * 
+	 * @return T
+	 */
+	public function extends(string $class_name, callable $callback, array $dependencies = []): object;
 }

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gimli\Environment;
 
-use Gimli\Application;
+use Gimli\Application_Registry;
 
 if (!function_exists('Gimli\Environment\get_config')) {
 	/**
@@ -12,7 +12,7 @@ if (!function_exists('Gimli\Environment\get_config')) {
 	 * @return array
 	 */
 	function get_config(): array {
-		return Application::get()->Config->getConfig();
+		return Application_Registry::get()->Config->getConfig();
 	}
 }
 
@@ -24,7 +24,7 @@ if (!function_exists('Gimli\Environment\get_config_value')) {
 	 * @return mixed
 	 */
 	function get_config_value(string $key): mixed {
-		return Application::get()->Config->get($key);
+		return Application_Registry::get()->Config->get($key);
 	}
 }
 
@@ -36,6 +36,6 @@ if (!function_exists('Gimli\Environment\config_has')) {
 	 * @return string
 	 */
 	function config_has(string $key): bool {
-		return Application::get()->Config->has($key);
+		return Application_Registry::get()->Config->has($key);
 	}
 }

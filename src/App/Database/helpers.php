@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gimli\Database;
 
 use Gimli\Application;
+use Gimli\Application_Registry;
 use Gimli\Database\Database;
 
 if (!function_exists('Gimli\Database\get_database')) {
@@ -13,7 +14,7 @@ if (!function_exists('Gimli\Database\get_database')) {
 	 * @return Database
 	 */
 	function get_database(): Database {
-		return Application::get()->Injector->resolve(Database::class);
+		return Application_Registry::get()->Injector->resolve(Database::class);
 	}
 }
 
@@ -26,7 +27,7 @@ if (!function_exists('Gimli\Database\fetch_column')) {
 	 * @return mixed
 	 */
 	function fetch_column(string $sql, array $params = []): mixed {
-		$Database = Application::get()->Injector->resolve(Database::class);
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
 		return $Database->fetchColumn($sql, $params);
 	}
 }
@@ -40,7 +41,7 @@ if (!function_exists('Gimli\Database\fetch_row')) {
 	 * @return array
 	 */
 	function fetch_row(string $sql, array $params = []): array {
-		$Database = Application::get()->Injector->resolve(Database::class);
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
 		return $Database->fetchRow($sql, $params);
 	}
 }
@@ -54,7 +55,7 @@ if (!function_exists('Gimli\Database\fetch_all')) {
 	 * @return mixed
 	 */
 	function fetch_all(string $sql, array $params = []): mixed {
-		$Database = Application::get()->Injector->resolve(Database::class);
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
 		return $Database->fetchAll($sql, $params);
 	}
 }
@@ -68,7 +69,7 @@ if (!function_exists('Gimli\Database\row_exists')) {
 	 * @return bool
 	 */
 	function row_exists(string $sql, array $params = []): bool {
-		$Database = Application::get()->Injector->resolve(Database::class);
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
 		$row = $Database->fetchRow($sql, $params);
 
 		return !empty($row);

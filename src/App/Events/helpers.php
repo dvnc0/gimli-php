@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gimli\Events;
 
-use Gimli\Application;
+use Gimli\Application_Registry;
 use Gimli\Events\Event_Manager;
 
 if (!function_exists('Gimli\Events\publish_event')) {
@@ -15,7 +15,7 @@ if (!function_exists('Gimli\Events\publish_event')) {
 	 * @return void
 	 */
 	function publish_event(string $event_name, array $args = []): void {
-		$Event_Manager = Application::get()->Injector->resolve(Event_Manager::class);
+		$Event_Manager = Application_Registry::get()->Injector->resolve(Event_Manager::class);
 		$Event_Manager->publish($event_name, $args);
 	}
 }
@@ -29,7 +29,7 @@ if (!function_exists('Gimli\Events\subscribe_event')) {
 	 * @return void
 	 */
 	function subscribe_event(string $event_name, callable|string $callback): void {
-		$Event_Manager = Application::get()->Injector->resolve(Event_Manager::class);
+		$Event_Manager = Application_Registry::get()->Injector->resolve(Event_Manager::class);
 		$Event_Manager->subscribe($event_name, $callback);
 	}
 }

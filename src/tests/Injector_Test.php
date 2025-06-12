@@ -61,4 +61,49 @@ class Injector_Test extends TestCase {
 		$this->assertInstanceOf(Config::class, $Injector->resolve(Config::class));
 		$this->assertInstanceOf(Config::class, $Injector->resolveFresh(Config::class));
 	}
+
+	public function testCallMethodResolvesClassAndCallsMethod() {
+		$Application = $this->getApplicationMock();
+		$Injector = new Injector($Application);
+
+		// Test calling a method without arguments
+		$result = $Injector->call(Config::class, 'get', ['template_base_dir']);
+		$this->assertIsString($result);
+	}
+
+	public function testCallMethodThrowsExceptionForNonExistentMethod() {
+		$Application = $this->getApplicationMock();
+		$Injector = new Injector($Application);
+
+		$this->expectException(\BadMethodCallException::class);
+		$Injector->call(Config::class, 'nonExistentMethod');
+	}
+
+	public function testExtendsMethodAllowsExtendingResolvedClass() {
+		$Application = $this->getApplicationMock();
+		$Injector = new Injector($Application);
+
+		// Test extending a class by adding a property
+		$extended = $Injector->extends(Config::class, function($instance) {
+			$instance->custom_property = 'test_value';
+			return $instance;
+		});
+
+		$this->assertInstanceOf(Config::class, $extended);
+		$this->assertEquals('test_value', $extended->custom_property);
+	}
+
+	public function testExtendsMethodWorksWithInPlaceModification() {
+		$Application = $this->getApplicationMock();
+		$Injector = new Injector($Application);
+
+		// Test extending a class without returning a new instance
+		$extended = $Injector->extends(Config::class, function($instance) {
+			$instance->another_property = 'another_value';
+			// Not returning anything - modifying in place
+		});
+
+		$this->assertInstanceOf(Config::class, $extended);
+		$this->assertEquals('another_value', $extended->another_property);
+	}
 }

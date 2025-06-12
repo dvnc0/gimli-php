@@ -31,11 +31,6 @@ use function Gimli\Events\publish_event;
 class Application {
 
 	/**
-	 * @var Application|null $instance
-	 */
-	protected static ?Application $instance = null;
-
-	/**
 	 * @var non-empty-string $app_root
 	 */
 	protected string $app_root;
@@ -56,16 +51,9 @@ class Application {
 	public Injector_Interface $Injector;
 
 	/**
-	 * Create the instance of the Application class
-	 *
-	 * @param non-empty-string $app_root         The application root path
-	 * @param array            $server_variables $_SERVER values
-	 * @param Injector_Interface|null $Injector Injector instance
-	 * @return Application
-	 * @throws Gimli_Application_Exception
+	 * Create a new Application instance (no longer singleton)
 	 */
 	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = null): Application {
-
 		if (empty($app_root)) {
 			throw new Gimli_Application_Exception('Application root path not set');
 		}
@@ -78,23 +66,8 @@ class Application {
 			throw new Gimli_Application_Exception('$_SERVER variables not set');
 		}
 
-		if (is_null(self::$instance)) {
-			self::$instance = new Application($app_root, $server_variables, $Injector);
-		}
-		return self::$instance;
-	}
-
-	/**
-	 * Get the instance of the Application class
-	 *
-	 * @return Application
-	 * @throws Gimli_Application_Exception
-	 */
-	public static function get(): Application {
-		if (is_null(self::$instance)) {
-			throw new Gimli_Application_Exception('Application instance not created');
-		}
-		return self::$instance;
+		// Always create a new instance - no singleton
+		return new Application($app_root, $server_variables, $Injector);
 	}
 
 	/**
@@ -104,13 +77,8 @@ class Application {
 	 * @param array            $server_variables $_SERVER values
 	 * @param Injector_Interface|null $Injector Injector instance
 	 */
-	protected function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
-
-		if (session_status() === PHP_SESSION_NONE) {
-			session_start();
-		}
-		
-		$this->app_root  = $app_root;
+	public function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
+		$this->app_root = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
 	}
 
@@ -177,20 +145,20 @@ class Application {
 			return;
 		}
 
-		// I have no clue why this needs to be like this here but nowhere else.
-		// Without using get() it throws a fatal I need to look into this more.
-		if (empty($this->Config->get('route_directory'))) {
-			throw new Route_Loader_Exception('Web route directory not set ' . $this->Config->route_directory);
+		$route_directory = $this->Config->get('route_directory');
+		if (empty($route_directory)) {
+			throw new Route_Loader_Exception('Web route directory not set');
 		}
 
-		if(!is_dir($this->app_root . $this->Config->route_directory)) {
-			throw new Route_Loader_Exception('Route directory not found: ' . $this->app_root . $this->Config->route_directory);
+		$full_route_path = rtrim($this->app_root, '/') . '/' . ltrim($route_directory, '/');
+		if (!is_dir($full_route_path)) {
+			throw new Route_Loader_Exception('Route directory not found: ' . $full_route_path);
 		}
 
-		$routes = glob($this->app_root . $this->Config->route_directory . '*.php');
+		$routes = glob($full_route_path . '*.php');
 
 		if (empty($routes)) {
-			throw new Route_Loader_Exception('No route files found in directory: ' . $this->app_root . $this->Config->route_directory);
+			throw new Route_Loader_Exception('No route files found in directory: ' . $full_route_path);
 		}
 
 		$this->loadRouteFiles($routes);
@@ -253,6 +221,7 @@ class Application {
 	 * @return void
 	 */
 	public function run(): void {
+		$this->initializeSession();
 		// might need to rethink this
 		publish_event('gimli.application.start', ['time' => microtime(true)]);
 		if (isset($this->Config) === false) {
@@ -272,17 +241,14 @@ class Application {
 	}
 
 	/**
-	 * Static helper for running the application
+	 * Initialize the session
 	 *
 	 * @return void
-	 * @throws Gimli_Application_Exception
 	 */
-	public static function start(): void {
-		if (self::$instance === null) {
-			throw new Gimli_Application_Exception('Application instance not created');
+	protected function initializeSession(): void {
+		if (session_status() === PHP_SESSION_NONE) {
+			session_start();
 		}
-
-		self::$instance->run();
 	}
 
 }
