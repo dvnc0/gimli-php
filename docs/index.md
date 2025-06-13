@@ -22,10 +22,11 @@ Gimli is a lightweight PHP framework designed to provide core functionality with
 **Key features include:**
 - Powerful dependency injection container
 - Flexible routing for web and CLI applications
-- Database abstraction layer with models
+- Database abstraction layer with models and transactions
 - Event system for decoupled components
 - Middleware support
 - Automatic parameter type casting
+- Data seeding
 
 ## Philosophy
 
