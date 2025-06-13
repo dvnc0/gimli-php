@@ -7,10 +7,10 @@ use Attribute;
 
 #[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS)]
 class Event {
-	/**
-	 * @param string $event_name
-	 */
-	public function __construct(
-		readonly public string $event_name,
-	) {}
+    public function __construct(
+        public string $event_name,
+        public ?string $description = null,
+        public array $tags = [],
+        public int $priority = 0
+    ) {}
 }
