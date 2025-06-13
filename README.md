@@ -13,6 +13,8 @@ Create a skeleton project with:
 
 Add the [devtools](https://github.com/dvnc0/gimli-devtools) with `composer require --dev danc0/gimliduck-devtools`
 
+[Docs](https://dvnc0.github.io/gimli-php/)
+
 Create a `.htaccess` file that looks something like this to point requests to your `index.php` file
 
 ```
