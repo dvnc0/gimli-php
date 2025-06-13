@@ -108,6 +108,10 @@ class Event_Manager {
 		$optional = $instance->getOptionalParameters();
 		$allParams = array_merge($required, $optional);
 		
+		if (empty($allParams)) {
+			return true;
+		}
+		
 		// Check for required parameters
 		foreach ($required as $param) {
 			if (!array_key_exists($param, $args)) {
