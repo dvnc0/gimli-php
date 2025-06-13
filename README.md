@@ -30,15 +30,17 @@ declare(strict_types=1);
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Gimli\Application;
+use Gimli\Application_Registry;
 use Gimli\Router\Route;
 
-Application::create(__DIR__, $_SERVER);
+$App = Application::create(__DIR__, $_SERVER);
 
 Route::get('/', function(){
 	echo "Hello World";
 });
 
-Application::start();
+Application_Registry::set($App);
+$App->run();
 ```
 That is really all you need to get started. You can add more like a template engine, a config file, etc, but you don't **have** to.
 
@@ -49,6 +51,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Gimli\Application;
+use Gimli\Application_Registry;
 use App\Core\Config;
 use App\Core\Cache;
 
@@ -58,11 +61,12 @@ $App = Application::create(APP_ROOT, $_SERVER);
 
 // set up your config and add it to the Application
 $config_file = parse_ini_file(APP_ROOT . '/App/Core/config.ini', true);
-$App->Config = $App->Injector->resolveFresh(Config::class, ['config' => $config_file]);
+$App->Config = $App->Injector->resolveFresh(Config::class, ['config' => $config_file], $App);
 
 // Register a cache class with the Injector
 $App->Injector->register(Cache::class, Cache::getCache($App->Config->admin_cache));
 
+Application_Registry::set($App);
 // Run Application
 $App->run();
 ```

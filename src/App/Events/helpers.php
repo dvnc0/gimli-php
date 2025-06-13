@@ -58,3 +58,14 @@ if (!function_exists('Gimli\Events\get_events_by_tag')) {
         return $Event_Manager->getEventsByTag($tag);
     }
 }
+
+if (!function_exists('Gimli\Events\event_manager')) {
+    /**
+     * Get the event manager
+     * 
+     * @return Event_Manager
+     */
+    function event_manager(): Event_Manager {
+        return Application_Registry::get()->Injector->resolve(Event_Manager::class);
+    }
+}
