@@ -2,6 +2,8 @@
 
 GimliDuck is an adaptable micro PHP framework that tries to stay out of your way while providing powerful features for modern PHP applications.
 
+[Check out the Repo](https://github.com/dvnc0/gimli-php)
+
 ## Documentation
 
 ### Core Concepts
