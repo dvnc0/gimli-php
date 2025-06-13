@@ -26,7 +26,6 @@ Gimli is a lightweight PHP framework designed to provide core functionality with
 - Event system for decoupled components
 - Middleware support
 - Automatic parameter type casting
-- Built-in testing utilities
 
 ## Philosophy
 
