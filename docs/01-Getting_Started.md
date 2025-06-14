@@ -51,13 +51,13 @@ use Gimli\Router\Route;
 // Create the application with the project root path and server variables
 $App = Application::create(__DIR__, $_SERVER);
 
-// Register the application in the global registry
-Application_Registry::set($App);
-
 // Define a simple route
 Route::get('/', function() {
     echo "Hello from Gimli!";
 });
+
+ // Register the application in the global registry
+Application_Registry::set($App);
 
 // Run the application
 $App->run();
@@ -101,12 +101,13 @@ define('APP_ROOT', __DIR__);
 // Create the application
 $App = Application::create(APP_ROOT, $_SERVER);
 
-// Register the application in the global registry
-Application_Registry::set($App);
-
 // Load configuration
 $App->setConfig(resolve_fresh(Config::class, ['config' => parse_ini_file(APP_ROOT . '/App/Core/config.ini', true)], $App))
     ->enableLatte();
+
+// Register the application in the global registry
+Application_Registry::set($App);
+
 
 // Run the application
 $App->run();
@@ -185,3 +186,5 @@ Now that you have a basic Gimli application running, you can:
 4. Add middleware for request filtering
 
 Check out the other documentation sections to learn more about these features.
+
+[Home](https://dvnc0.github.io/gimli-php/)

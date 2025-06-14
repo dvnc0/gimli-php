@@ -234,3 +234,5 @@ class B {
 6. **Keep services focused**
    - Each service should have a single responsibility
    - Avoid "god objects" with too many dependencies 
+
+[Home](https://dvnc0.github.io/gimli-php/)

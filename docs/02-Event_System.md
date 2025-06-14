@@ -241,3 +241,5 @@ $Event_Manager->subscribe('gimli.application.end', function($event, $args) {
 5. **Be careful with exceptions**:
    - Event handlers that throw exceptions will interrupt the execution of subsequent handlers
    - Consider catching exceptions within your handlers if appropriate 
+
+[Home](https://dvnc0.github.io/gimli-php/)

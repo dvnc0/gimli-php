@@ -343,4 +343,6 @@ $App->Injector->bind('NotFoundHandler', function() {
    - Avoid repeating the same prefixes or middleware declarations
 
 6. **Return Response objects from controllers**
-   - For consistent response handling and header management 
+   - For consistent response handling and header management
+   
+[Home](https://dvnc0.github.io/gimli-php/)
