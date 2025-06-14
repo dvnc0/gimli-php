@@ -84,15 +84,28 @@ class Injector implements Injector_Interface {
 			return $this->registered_classes[$class_name];
 		}
 
-		if (!empty($this->bindings[$class_name])) {
-			$callback = $this->bindings[$class_name];
-			$instance = call_user_func($callback);
-			$this->resolved_classes[$class_name] = $instance;
-			return $instance;
-		}
-
+		// Check for circular dependency BEFORE processing bindings
 		if (isset($this->resolving[$class_name])) {
 			throw new \RuntimeException("Circular dependency detected for class: {$class_name}");
+		}
+
+		if (!empty($this->bindings[$class_name])) {
+			// Mark as resolving before executing binding callback
+			$this->resolving[$class_name] = true;
+			
+			try {
+				$callback = $this->bindings[$class_name];
+				$instance = call_user_func($callback);
+				$this->resolved_classes[$class_name] = $instance;
+				
+				// Clear resolving state after successful resolution
+				unset($this->resolving[$class_name]);
+				return $instance;
+			} catch (\Exception $e) {
+				// Clear resolving state on error
+				unset($this->resolving[$class_name]);
+				throw $e;
+			}
 		}
 
 		return $this->createFreshInstance($class_name, $dependencies);
