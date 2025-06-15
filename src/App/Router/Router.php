@@ -46,13 +46,14 @@ class Router {
 	 * @var array<string, string> $patterns
 	 */
 	protected array $patterns = [
-		':all' => "([^/]+)",
-		':alphanumeric' => "([\w_-]+)",
-		':alpha' => "([A-Za-z_-]+)",
-		':integer' => "([0-9_-]+)",
-		':numeric' => "([0-9_.-]+)",
-		':id' => "([0-9-_]+)",
-		':slug' => "([A-Za-z0-9_-]+)",
+		':all' => "([a-zA-Z0-9._-]{1,100})",        // Alphanumeric + safe chars, max 100
+		':alphanumeric' => "([a-zA-Z0-9]{1,50})",   // Only alphanumeric, max 50
+		':alpha' => "([a-zA-Z]{1,50})",             // Only letters, max 50
+		':integer' => "([0-9]{1,10})",              // Only digits, max 10 digits
+		':numeric' => "([0-9]+(?:\.[0-9]+)?)",          // Proper decimal format
+		':id' => "([1-9][0-9]{0,9})",              // Positive integers, max 10 digits
+		':slug' => "([a-zA-Z0-9-]{1,100})",        // URL-safe slugs, max 100
+		':uuid' => "([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})", // UUID format
 	];
 
 	/**
@@ -145,8 +146,26 @@ class Router {
 		}
 		
 		if (empty($route_match)) {
+			http_response_code(404);
 			echo "404 page not found";
 			return;
+		}
+
+		if (!empty($route_match['args'])) {
+			try {
+				$route_match['args'] = $this->validateRouteParameters(
+					$route_match['args'], 
+					$route_match['route_info']
+				);
+			} catch (Exception $e) {
+				// Log security event
+				error_log("Route parameter validation failed: " . $e->getMessage());
+				
+				// Return 400 Bad Request instead of 404
+				http_response_code(400);
+				echo "Bad Request: Invalid parameters";
+				return;
+			}
 		}
 
 		$this->Request->route_data = $route_match;
@@ -213,9 +232,20 @@ class Router {
 			if (is_array($type)) {
 				$route_match_key = array_values($type)[0];
 				$cast_type = array_keys($type)[0];
+				
+				if (!isset($route_match_args[$route_match_key])) {
+					$method_args[$key] = null;
+					continue;
+				}
+				
 				$value = $route_match_args[$route_match_key];
-				settype($value, $cast_type);
-				$method_args[$key] = $value;
+				
+				// Safe type casting with validation
+				try {
+					$method_args[$key] = $this->safeCastType($value, $cast_type, $route_match_key);
+				} catch (Exception $e) {
+					throw new Exception("Failed to cast parameter '{$route_match_key}': " . $e->getMessage());
+				}
 			} else {
 				$method_args[$key] = $this->Injector->resolve($type);
 			}
@@ -275,6 +305,131 @@ class Router {
 		$response = call_user_func_array([$instance, '__invoke'], $method_args);
 
 		$this->Dispatch->dispatch($response, true);
+	}
+
+	/**
+	 * Validate and sanitize route parameters
+	 *
+	 * @param array $params
+	 * @param array $route_info
+	 * @return array
+	 * @throws Exception
+	 */
+	protected function validateRouteParameters(array $params, array $route_info): array {
+		$validated = [];
+		
+		foreach ($params as $key => $value) {
+			// Length check
+			if (strlen($value) > 1000) {
+				throw new Exception("Route parameter '{$key}' exceeds maximum length");
+			}
+			
+			// Basic sanitization
+			$value = trim($value);
+
+			if (empty($value)) {
+				throw new Exception("Route parameter '{$key}' is empty");
+			}
+			
+			// Type-specific validation
+			if (isset($route_info['param_types'][$key])) {
+				$value = $this->validateParameterType($key, $value, $route_info['param_types'][$key]);
+			}
+			
+			$validated[$key] = $value;
+		}
+		
+		return $validated;
+	}
+
+	/**
+	 * Validate parameter against expected type
+	 *
+	 * @param string $key
+	 * @param string $value
+	 * @param string $type
+	 * @return mixed
+	 * @throws Exception
+	 */
+	protected function validateParameterType(string $key, string $value, string $type): mixed {
+		switch ($type) {
+			case 'int':
+			case 'integer':
+				if (!ctype_digit($value)) {
+					throw new Exception("Parameter '{$key}' must be an integer");
+				}
+				$int_value = (int)$value;
+				if ($int_value > PHP_INT_MAX || $int_value < 0) {
+					throw new Exception("Parameter '{$key}' is out of valid range");
+				}
+				return $int_value;
+				
+			case 'float':
+			case 'numeric':
+				if (!is_numeric($value)) {
+					throw new Exception("Parameter '{$key}' must be numeric");
+				}
+				return (float)$value;
+				
+			case 'string':
+				// Additional string validation
+				if (preg_match('/[<>"\']/', $value)) {
+					throw new Exception("Parameter '{$key}' contains invalid characters");
+				}
+				return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+				
+			case 'slug':
+				if (!preg_match('/^[a-zA-Z0-9-]+$/', $value)) {
+					throw new Exception("Parameter '{$key}' is not a valid slug");
+				}
+				return $value;
+				
+			case 'uuid':
+				if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $value)) {
+					throw new Exception("Parameter '{$key}' is not a valid UUID");
+				}
+				return $value;
+				
+			default:
+				return $value;
+		}
+	}
+
+	/**
+	 * Safely cast a value to the specified type
+	 *
+	 * @param mixed $value
+	 * @param string $type
+	 * @param string $param_name
+	 * @return mixed
+	 * @throws Exception
+	 */
+	protected function safeCastType(mixed $value, string $type, string $param_name): mixed {
+		switch (strtolower($type)) {
+			case 'int':
+			case 'integer':
+				if (!is_numeric($value)) {
+					throw new Exception("Cannot cast '{$param_name}' to integer");
+				}
+				return (int)$value;
+				
+			case 'float':
+			case 'double':
+				if (!is_numeric($value)) {
+					throw new Exception("Cannot cast '{$param_name}' to float");
+				}
+				return (float)$value;
+				
+			case 'string':
+				return (string)$value;
+				
+			case 'bool':
+			case 'boolean':
+				return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+				
+			default:
+				throw new Exception("Unsupported cast type: {$type}");
+		}
 	}
 
 	/**

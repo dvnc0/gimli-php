@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Gimli\View;
 
+use Exception;
+
 use function Gimli\Environment\get_config_value;
 
 class Latte_Engine {
@@ -50,8 +52,19 @@ class Latte_Engine {
 
 		$latte->addFunction(
 			'getVue', function(string $path) {
-				$file = file_get_contents($this->app_root_dir . '/public/js/manifest.json');
+				$manifest_path = $this->app_root_dir . '/public/js/manifest.json';
+
+				if (!is_readable($manifest_path)) {
+					throw new Exception('Manifest file is not readable');
+				}
+
+				$file = file_get_contents($manifest_path);
 				$file = json_decode($file, TRUE);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					throw new Exception('Manifest file is not valid JSON');
+				}
+
 				if (empty($file[$path])) {
 					return;
 				}
@@ -63,8 +76,19 @@ class Latte_Engine {
 
 		$latte->addFunction(
 			'getCss', function(string $path) {
-				$file = file_get_contents($this->app_root_dir . '/public/js/manifest.json');
+				$manifest_path = $this->app_root_dir . '/public/js/manifest.json';
+
+				if (!is_readable($manifest_path)) {
+					return;
+				}
+
+				$file = file_get_contents($manifest_path);
 				$file = json_decode($file, TRUE);
+
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					throw new Exception('Manifest file is not valid JSON');
+				}
+
 				if (empty($file[$path])) {
 					return;
 				}
@@ -77,7 +101,20 @@ class Latte_Engine {
 		$latte->addFunction(
 			'csrf', function() {
 				$token = Csrf::generate();
-				echo "<input type='hidden' name='csrf_token' value='{$token}'>";
+				echo "<input type='hidden' name='csrf_token' value='{$token}' autocomplete='off'>";
+			}
+		);
+
+		$latte->addFunction(
+			'csrfToken', function() {
+				return Csrf::getToken();
+			}
+		);
+
+		$latte->addFunction(
+			'csrfMeta', function() {
+				$token = Csrf::getToken();
+				echo "<meta name='csrf-token' content='{$token}'>";
 			}
 		);
 

@@ -134,7 +134,12 @@ class Application {
 		$this->Config = $this->Injector->resolve(Config::class);
 
 		$this->Injector->register(Event_Manager::class, new Event_Manager);
-		$this->Injector->register(Session::class, new Session);
+		
+		// Configure session from config with fallback to defaults
+		$session_config = $this->Config->get('session') ?? [];
+		
+		// Use factory pattern to ensure config is applied before construction
+		$this->Injector->bind(Session::class, fn() => new Session($session_config));
 
 		return;
 	}

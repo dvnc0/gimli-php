@@ -9,11 +9,14 @@ GimliDuck is an adaptable micro PHP framework that tries to stay out of your way
 ### Core Concepts
 - [Getting Started](01-Getting_Started.md) - Installation and basic setup
 - [Dependency Injection](04-Dependency_Injection.md) - Understanding the DI container
+- [Security Guide](99-Security_Guide.md) - Security Overview
 
 ### Features
 - [Event System](02-Event_System.md) - Publisher-subscriber patterns
 - [Database System](03-Database_System.md) - Database operations, models, and seeding
 - [Routing System](05-Routing_System.md) - HTTP routing, CLI commands, and middleware
+- [CSRF Protection](06-CSRF_Protection.md) - CSRF information
+- [Config Guide](07-Config_Guide.md) - Config overview and options
 
 ## Introduction
 

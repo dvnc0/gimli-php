@@ -38,8 +38,28 @@ class Config {
 	 * 		autoload_routes: bool,
 	 * 		route_directory: string,
 	 * 		enable_latte: bool,
-	 * 		template_base_dir: string
-	 * 		events: array
+	 * 		template_base_dir: string,
+	 * 		events: array,
+	 * 		session: array{
+	 * 			regenerate_interval: int,
+	 * 			max_lifetime: int,
+	 * 			absolute_max_lifetime: int,
+	 * 			max_data_size: int,
+	 * 			allowed_keys_pattern: string,
+	 * 			enable_fingerprinting: bool,
+	 * 			enable_ip_validation: bool,
+	 * 			cookie_httponly: bool,
+	 * 			cookie_secure: string,
+	 * 			cookie_samesite: string,
+	 * 			use_strict_mode: bool,
+	 * 			use_only_cookies: bool,
+	 * 			cookie_lifetime: int,
+	 * 			gc_probability: int,
+	 * 			gc_divisor: int,
+	 * 			entropy_length: int,
+	 * 			hash_function: string,
+	 * 			hash_bits_per_character: int,
+	 * 		}
 	 * }
 	 */
 	protected array $config = [
@@ -62,6 +82,28 @@ class Config {
 		'template_base_dir' => 'App/views/',
 		'template_temp_dir' => 'tmp',
 		'events' => [],
+		
+		// Add session configuration with sensible defaults
+		'session' => [
+			'regenerate_interval' => 300,        // 5 minutes - regenerate session ID
+			'max_lifetime' => 7200,              // 2 hours - inactivity timeout
+			'absolute_max_lifetime' => 28800,    // 8 hours - absolute maximum
+			'max_data_size' => 1048576,          // 1MB
+			'allowed_keys_pattern' => '/^[a-zA-Z0-9._-]+$/', // Safe key pattern
+			'enable_fingerprinting' => true,
+			'enable_ip_validation' => false,     // Disabled by default (CDN/proxy issues)
+			'cookie_httponly' => true,
+			'cookie_secure' => 'auto',           // Auto-detect HTTPS
+			'cookie_samesite' => 'Strict',
+			'use_strict_mode' => true,
+			'use_only_cookies' => true,
+			'cookie_lifetime' => 0,              // Session cookies only
+			'gc_probability' => 1,
+			'gc_divisor' => 100,
+			'entropy_length' => 32,
+			'hash_function' => 'sha256',
+			'hash_bits_per_character' => 6,
+		],
 	];
 
 	/**

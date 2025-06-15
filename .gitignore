@@ -6,3 +6,4 @@ composer.lock
 .phpunit.cache
 src/tests/coverage
 .phpunit.result.cache
+ignore/

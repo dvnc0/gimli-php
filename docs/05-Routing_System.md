@@ -83,15 +83,38 @@ Route::get('/posts/:integer#post_id/comments/:id#comment_id', function(int $post
 
 Gimli supports various parameter patterns:
 
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| `:all` | Any character except / | `/product/:all` |
-| `:alpha` | Alphabetic characters | `/category/:alpha` |
-| `:alphanumeric` | Alphanumeric characters | `/username/:alphanumeric` |
-| `:integer` | Integer values | `/page/:integer` |
-| `:numeric` | Numeric values (including floats) | `/price/:numeric` |
-| `:id` | ID values (numbers, hyphens, underscores) | `/post/:id` |
-| `:slug` | URL-friendly slugs | `/article/:slug` |
+| Pattern | Description | Validation |
+|---------|-------------|------------|
+| `:all` | Any character except / | Alphanumeric + safe chars, max 100 chars |
+| `:alphanumeric` | Alphanumeric characters | Only a-zA-Z0-9, max 50 chars |
+| `:alpha` | Alphabetic characters | Only a-zA-Z, max 50 chars |
+| `:integer` | Integer values | Only digits, max 10 digits |
+| `:numeric` | Numeric values | Proper decimal format |
+| `:id` | ID values | Positive integers only, max 10 digits |
+| `:slug` | URL-friendly slugs | Alphanumeric + hyphens, max 100 chars |
+| `:uuid` | UUID values | Standard UUID format |
+
+### Parameter Validation & Security
+
+Route parameters are automatically validated for security:
+
+```php
+<?php
+// Route definition with typed parameters
+Route::get('/product/:id#product_id/:slug#name', [ProductController::class, 'show']);
+
+// Router performs validation:
+// 1. Length limits (prevents buffer overflows)
+// 2. Character set validation (prevents injection)
+// 3. Type validation (ensures expected data type)
+// 4. Automatic sanitization
+```
+
+The Router automatically:
+- Validates parameter length (prevents buffer overflows)
+- Validates character sets (prevents injection)
+- Checks parameter against expected type
+- Sanitizes parameter values before passing to handlers
 
 ### Type Casting
 
@@ -101,8 +124,9 @@ Route parameters are automatically typecast when declared in your controller met
 <?php
 // Controller class
 class ProductController {
-    public function show(int $id) {
+    public function show(int $id, string $name) {
         // $id is automatically cast to integer
+        // $name is automatically sanitized as string
     }
     
     public function price(float $price) {
@@ -111,9 +135,15 @@ class ProductController {
 }
 
 // Route definition
-Route::get('/products/:id', [ProductController::class, 'show']);
+Route::get('/products/:id#id/:slug#name', [ProductController::class, 'show']);
 Route::get('/price/:numeric#price', [ProductController::class, 'price']);
 ```
+
+The Router supports safe type casting for:
+- `int`/`integer`: Validated and cast to integer
+- `float`/`double`: Validated and cast to floating point
+- `string`: Sanitized properly for XSS protection
+- `bool`/`boolean`: Cast to boolean value
 
 ## Route Groups
 
@@ -144,6 +174,11 @@ You can add middleware to routes and route groups:
 // Add middleware to a specific route
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->addMiddleware(AuthMiddleware::class);
+
+// Add multiple middleware to a route
+Route::get('/admin/settings', [SettingsController::class, 'index'])
+    ->addMiddleware(AuthMiddleware::class)
+    ->addMiddleware(AdminMiddleware::class);
 
 // Add middleware to a group of routes
 Route::group('/admin', function() {
@@ -212,17 +247,64 @@ class ClearCacheCommand {
 }
 ```
 
-Example CLI usage:
-```bash
-# Basic command
-php index.php clear-cache
+### CLI Parser
 
-# With subcommand
+Gimli's `Cli_Parser` handles different argument formats:
+
+```bash
+# Basic command with subcommand
 php index.php clear-cache views
 
-# With options and flags
-php index.php clear-cache --type=views --verbose
+# With options (parsed as key-value)
+php index.php deploy --environment=production --verbose
+
+# With flags (boolean flags)
+php index.php migrate --reset --force
 ```
+
+The parser correctly handles:
+- Space-separated options: `--option value`
+- Equal-sign options: `--option=value`
+- Multi-word values: `--option="value with spaces"`
+- Multiple flags: `--verbose --force`
+- Mixed formats: `--env=prod --verbose --timeout 30`
+
+## CSRF Protection
+
+Gimli provides built-in CSRF protection that integrates with the routing system:
+
+```php
+<?php
+use Gimli\View\Csrf;
+
+// In your form view:
+<form method="post" action="/submit">
+    <input type="hidden" name="csrf_token" value="<?= Csrf::generate() ?>">
+    <!-- Form fields -->
+    <button type="submit">Submit</button>
+</form>
+
+// In your route handler or controller:
+public function handleSubmit(array $post_data) {
+    // Validate CSRF token
+    if (!Csrf::validateRequest($post_data)) {
+        // Invalid token, reject request
+        return new Response("Invalid request", 403);
+    }
+    
+    // Process form submission
+}
+```
+
+Security features of CSRF protection:
+- Cryptographically secure tokens using `random_bytes()`
+- Token expiration (15 minutes by default)
+- One-time use tokens (deleted after verification)
+- Token rotation to prevent reuse
+- Protection against token flooding
+- Timing-safe comparison to prevent timing attacks
+
+For more details, see [CSRF Protection](06-CSRF_Protection.md).
 
 ## Using Controllers
 
@@ -260,6 +342,38 @@ class UserController {
 // Route definition
 Route::get('/users/:id', [UserController::class, 'show']);
 ```
+
+## Session Integration
+
+The Router integrates with Gimli's secure Session handling:
+
+```php
+<?php
+// Middleware that requires session
+class AuthMiddleware implements Middleware_Interface {
+    public function __construct(
+        protected Session $Session
+    ) {
+        // Session is automatically injected
+    }
+    
+    public function process(): Middleware_Response {
+        if (!$this->Session->has('user_id')) {
+            return new Middleware_Response(false, '/login');
+        }
+        
+        return new Middleware_Response(true);
+    }
+}
+```
+
+The Session class provides:
+- Secure session initialization
+- HTTPS detection and secure cookie configuration
+- Session fingerprinting for security
+- Protection against session fixation
+- Automatic session regeneration
+- Session timeouts (inactivity and absolute)
 
 ## Organizing Routes
 
@@ -311,18 +425,36 @@ class ProductController {
 
 ## Error Handling
 
-The router handles basic error scenarios, but you should define custom error handling for more advanced use cases:
+The router handles basic error scenarios with default responses:
+
+```php
+// When a route is not found, the Router outputs:
+http_response_code(404);
+echo "404 page not found";
+
+// When route parameters fail validation, the Router outputs:
+http_response_code(400);
+echo "Bad Request: Invalid parameters";
+```
+
+To implement custom error handling, you can create a custom middleware that checks for specific conditions or create dedicated error routes:
 
 ```php
 <?php
-// Custom 404 handler
-$App->Injector->bind('NotFoundHandler', function() {
-    return function() {
-        $response = new Response();
-        return $response
-            ->setResponse("Custom 404 page not found", response_code:404);
-    };
-});
+// Create a route for handling 404 errors
+Route::get('/error/404', [ErrorController::class, 'notFound']);
+
+// Create a middleware that can redirect to error pages
+class ErrorHandlingMiddleware implements Middleware_Interface {
+    public function process(): Middleware_Response {
+        // Your custom error handling logic
+        if ($someErrorCondition) {
+            return new Middleware_Response(false, '/error/404');
+        }
+        
+        return new Middleware_Response(true);
+    }
+}
 ```
 
 ## Best Practices
@@ -337,12 +469,18 @@ $App->Injector->bind('NotFoundHandler', function() {
    - Follow RESTful principles with focused controller methods
 
 4. **Use middleware for cross-cutting concerns**
-   - Authentication, logging, rate limiting, etc.
+   - Authentication, logging, rate limiting, CSRF protection, etc.
 
 5. **Use route groups for common prefixes and middleware**
    - Avoid repeating the same prefixes or middleware declarations
 
 6. **Return Response objects from controllers**
    - For consistent response handling and header management
+
+7. **Validate and sanitize parameters**
+   - Use the built-in parameter type validation and casting
+
+8. **Keep route files clean**
+   - Extract complex logic to controllers and services
    
 [Home](https://dvnc0.github.io/gimli-php/)

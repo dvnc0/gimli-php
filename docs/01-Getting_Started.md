@@ -176,6 +176,18 @@ $App->Injector->bind(Database::class, function() use ($App) {
 $controller = $App->Injector->resolve(UserController::class);
 ```
 
+## Security Considerations
+
+GimliDuck includes several security features to protect your application:
+
+- **Route Parameter Validation**: All route parameters are automatically validated and sanitized
+- **CSRF Protection**: Built-in protection against Cross-Site Request Forgery attacks
+- **Secure Session Management**: Comprehensive session security with configurable settings
+- **Mass Assignment Protection**: Models include protection against mass assignment vulnerabilities
+- **SQL Injection Prevention**: All database methods use prepared statements
+
+For more details, see the [Security Guide](99-Security_Guide.md).
+
 ## Next steps
 
 Now that you have a basic Gimli application running, you can:
@@ -188,3 +200,4 @@ Now that you have a basic Gimli application running, you can:
 Check out the other documentation sections to learn more about these features.
 
 [Home](https://dvnc0.github.io/gimli-php/)
+

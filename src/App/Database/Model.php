@@ -29,7 +29,19 @@ class Model {
 		'table_name', 
 		'primary_key', 
 		'is_loaded',
+		'fillable_fields',
+		'guarded_fields',
 	];
+
+	/**
+	 * @var array $fillable_fields
+	 */
+	protected array $fillable_fields = [];
+
+	/**
+	 * @var array $guarded_fields
+	 */
+	protected array $guarded_fields = [];
 
 	/**
 	 * construct
@@ -144,7 +156,9 @@ class Model {
 	 */
 	public function loadFromDataSet(array $data, bool $is_loaded = true): void {
 		foreach ($data as $key => $value) {
-			$this->$key = $value;
+			if ($this->isFillable($key)) {
+				$this->$key = $value;
+			}
 		}
 		$this->is_loaded = $is_loaded;
 		$this->afterLoad();
@@ -158,9 +172,47 @@ class Model {
 	 */
 	public function createFromDataSet(array $data): void {
 		foreach ($data as $key => $value) {
-			$this->$key = $value;
+			if ($this->isFillable($key)) {
+				$this->$key = $value;
+			}
 		}
 		$this->is_loaded = false;
+	}
+
+	protected function isFillable(string $key): bool {
+		// Skip ignored framework fields
+		if (in_array($key, $this->ignored_fields)) {
+			return false;
+		}
+	
+		// Skip primary key
+		if ($key === $this->primary_key) {
+			return false;
+		}
+	
+		// Skip if property doesn't exist
+		if (!property_exists($this, $key)) {
+			return false;
+		}
+	
+		// Skip non-public properties (additional security layer)
+		$reflection = new \ReflectionProperty($this, $key);
+		if (!$reflection->isPublic()) {
+			return false;
+		}
+
+		// Whitelist approach: if fillable is defined, only allow those
+		if (!empty($this->fillable_fields)) {
+			return in_array($key, $this->fillable_fields);
+		}
+	
+		// Blacklist approach: if guarded is defined, block those
+		if (!empty($this->guarded_fields)) {
+			return !in_array($key, $this->guarded_fields);
+		}
+	
+		// Default: allow if passes all checks
+		return true;
 	}
 
 	/**
