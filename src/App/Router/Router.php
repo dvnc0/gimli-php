@@ -28,7 +28,7 @@ class Router {
 	protected Application $Application;
 
 	/**
-	 * @var array $routes
+	 * @var array<string, array<string, array<string, mixed>>> $routes
 	 */
 	protected array $routes = [];
 
@@ -43,7 +43,7 @@ class Router {
 	public Request $Request;
 
 	/**
-	 * @var array $patterns
+	 * @var array<string, string> $patterns
 	 */
 	protected array $patterns = [
 		':all' => "([^/]+)",
@@ -61,7 +61,7 @@ class Router {
 	protected Dispatch $Dispatch;
 
 	/**
-	 * @var array $allowed_methods
+	 * @var array<int, string> $allowed_methods
 	 */
 	protected array $allowed_methods = [ 
 		"GET",
@@ -86,7 +86,7 @@ class Router {
 	/**
 	 * add routes
 	 * 
-	 * @param array $routes routes to add
+	 * @param array<string, array<string, array<string, mixed>>> $routes routes to add
 	 * 
 	 * @return void
 	 * @throws Exception
@@ -187,8 +187,8 @@ class Router {
 	 * get arguments for method
 	 * 
 	 * @param object $class_to_call class to call
-	 * @param string $method method to call
-	 * @param array $route_match_args route match args
+	 * @param non-empty-string $method method to call
+	 * @param array<string, mixed> $route_match_args route match args
 	 * 
 	 * @return array
 	 */
@@ -226,7 +226,7 @@ class Router {
 	/**
 	 * call a middleware
 	 * 
-	 * @param string $Middleware middleware to call
+	 * @param class-string<Middleware_Interface> $Middleware_Class middleware to call
 	 * 
 	 * @return Middleware_Response
 	 * @throws Exception

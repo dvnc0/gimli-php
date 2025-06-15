@@ -11,7 +11,7 @@ class Cli_Parser {
 	/**
 	 * Parse the arguments
 	 * 
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function parse(): array {
 		$lexemes = [

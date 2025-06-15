@@ -52,6 +52,11 @@ class Application {
 
 	/**
 	 * Create a new Application instance (no longer singleton)
+	 * 
+	 * @param non-empty-string $app_root         The application root path
+	 * @param array            $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector Injector instance
+	 * @return Application
 	 */
 	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = null): Application {
 		if (empty($app_root)) {

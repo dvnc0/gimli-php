@@ -10,8 +10,8 @@ if (!function_exists('Gimli\View\render')) {
 	/**
 	 * View helper
 	 * 
-	 * @param string $view
-	 * @param array $data
+	 * @param non-empty-string $template
+	 * @param array<string, mixed> $data
 	 * 
 	 * @return string
 	 */

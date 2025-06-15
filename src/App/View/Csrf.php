@@ -9,6 +9,11 @@ use function Gimli\Injector\resolve;
 
 class Csrf
 {
+	/**
+	 * Generate a CSRF token
+	 *
+	 * @return string
+	 */
 	public static function generate(): string
 	{
 		$token = bin2hex(random_bytes(32));
@@ -20,6 +25,12 @@ class Csrf
 		return $token;
 	}
 
+	/**
+	 * Verify a CSRF token
+	 *
+	 * @param non-empty-string $token The token to verify
+	 * @return bool
+	 */
 	public static function verify(string $token): bool
 	{
 		$Session = resolve(Session::class);

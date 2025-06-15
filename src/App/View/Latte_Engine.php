@@ -6,14 +6,21 @@ namespace Gimli\View;
 use function Gimli\Environment\get_config_value;
 
 class Latte_Engine {
+	/**
+	 * @var non-empty-string $template_base_dir
+	 */
 	protected string $template_base_dir;
+
+	/**
+	 * @var non-empty-string $app_root_dir
+	 */
 	protected string $app_root_dir;
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param string $template_base_dir template base directory
-	 * @param string $app_root_dir      app_root_dir
+	 * @param non-empty-string $template_base_dir template base directory
+	 * @param non-empty-string $app_root_dir      app_root_dir
 	 * 
 	 * @return void
 	 */
@@ -25,8 +32,8 @@ class Latte_Engine {
 	/**
 	 * render a view with Latte
 	 * 
-	 * @param string $template_path template path
-	 * @param array  $template_data template data
+	 * @param non-empty-string $template_path template path
+	 * @param array<string, mixed>  $template_data template data
 	 * 
 	 * @return string
 	 */

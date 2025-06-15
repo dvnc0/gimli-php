@@ -61,7 +61,7 @@ class Route {
 	/**
 	 * Add a GET route
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -75,7 +75,7 @@ class Route {
 	/**
 	 * Add a POST route
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -89,7 +89,7 @@ class Route {
 	/**
 	 * Add a PUT route
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -103,7 +103,7 @@ class Route {
 	/**
 	 * Add a PATCH route
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -117,7 +117,7 @@ class Route {
 	/**
 	 * Add a DELETE route
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -131,7 +131,7 @@ class Route {
 	/**
 	 * Add a route for any HTTP method
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -149,7 +149,7 @@ class Route {
 	/**
 	 * Add a CLI route
 	 *
-	 * @param string                $route    route
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -163,9 +163,9 @@ class Route {
 	/**
 	 * Add routes to a group
 	 *
-	 * @param  string   $group      group prefix
+	 * @param  non-empty-string   $group      group prefix
 	 * @param  callable $callback   callback to add routes
-	 * @param  array    $middleware routes middleware
+	 * @param  array<int, class-string<Middleware_Interface>>    $middleware routes middleware
 	 * @return Route
 	 */
 	public static function group(string $group, callable $callback, array $middleware = []): Route {
@@ -177,9 +177,9 @@ class Route {
 	/** 
 	 * Add a route group
 	 *
-	 * @param string   $group      group prefix
+	 * @param non-empty-string   $group      group prefix
 	 * @param callable $callback   callback to add routes
-	 * @param array    $middleware routes middleware
+	 * @param array<int, class-string<Middleware_Interface>>    $middleware routes middleware
 	 *
 	 * @return Route
 	 */
@@ -199,7 +199,7 @@ class Route {
 	/**
 	 * Add a middleware to a route
 	 *
-	 * @param string $middleware Middleware class
+	 * @param class-string<Middleware_Interface> $middleware Middleware class
 	 *
 	 * @return Route
 	 */
@@ -211,8 +211,8 @@ class Route {
 	/**
 	 * Add a route
 	 *
-	 * @param string                $method   HTTP method
-	 * @param string                $route    route
+	 * @param non-empty-string $method   HTTP method
+	 * @param non-empty-string $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -262,7 +262,7 @@ class Route {
 	/**
 	 * Build the routes
 	 *
-	 * @return array
+	 * @return array<string, array<string, array<string, mixed>>>
 	 */
 	public static function build(): array {
 		$Route = static::getInstance();
