@@ -29,12 +29,12 @@ public function __construct(
     protected Latte_Engine $Latte
 ) {}
 
-public function showPage(): string {
+public function showPage(Response $Response): Response {
     // Render a template with data
-    return $this->Latte->render('pages/home.latte', [
+    return $Response->setResponse($this->Latte->render('pages/home.latte', [
         'title' => 'Welcome to Gimli',
         'user' => $currentUser,
-    ]);
+    ]));
 }
 ```
 
