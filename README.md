@@ -70,4 +70,4 @@ Application_Registry::set($App);
 // Run Application
 $App->run();
 ```
-[Tead the Docs](https://dvnc0.github.io/gimli-php/) for more information and examples.
+[Read the Docs](https://dvnc0.github.io/gimli-php/) for more information and examples.
