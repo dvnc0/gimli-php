@@ -38,10 +38,15 @@ class Session implements Session_Interface {
 		'hash_bits_per_character' => 6,
 	];
 
+	/**
+	 * @var Session|null $instance
+	 */
 	private static ?Session $instance = null;
 
 	/**
 	 * Constructor
+	 * 
+	 * @param array|null $config the config to use
 	 */
 	public function __construct(?array $config = null) {
 		if ($config !== null) {
@@ -421,8 +426,10 @@ class Session implements Session_Interface {
 	/**
 	 * Validate session key format
 	 * 
-	 * @param string $key
+	 * @param string $key the key to validate
+	 * 
 	 * @return void
+	 * 
 	 * @throws \InvalidArgumentException
 	 */
 	private function validateKey(string $key): void {
@@ -447,8 +454,10 @@ class Session implements Session_Interface {
 	/**
 	 * Validate data size to prevent session bloat
 	 * 
-	 * @param mixed $value
+	 * @param mixed $value the value to validate
+	 * 
 	 * @return void
+	 * 
 	 * @throws \InvalidArgumentException
 	 */
 	private function validateDataSize(mixed $value): void {
@@ -525,8 +534,8 @@ class Session implements Session_Interface {
 	/**
 	 * Get configuration value with fallback to default
 	 * 
-	 * @param string $key
-	 * @return mixed
+	 * @param string $key the key to get the config value for
+	 * @return mixed the config value
 	 */
 	private function getConfigValue(string $key): mixed {
 		return self::$security_config[$key] ?? null;
@@ -535,7 +544,7 @@ class Session implements Session_Interface {
 	/**
 	 * Configure security settings (static method for framework integration)
 	 * 
-	 * @param array $config
+	 * @param array $config the config to use
 	 * @return void
 	 */
 	public static function configure(array $config): void {
@@ -543,6 +552,12 @@ class Session implements Session_Interface {
 		self::$security_config = array_merge(self::$security_config, $config);
 	}
 
+	/**
+	 * Get the instance of the session
+	 * 
+	 * @param array|null $config the config to use
+	 * @return Session the instance of the session
+	 */
 	public static function getInstance(?array $config = null): Session {
 		if (self::$instance === null) {
 			self::$instance = new Session($config ?? []);

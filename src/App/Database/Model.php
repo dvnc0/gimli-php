@@ -18,7 +18,7 @@ class Model {
 	/**
 	 * @var bool $is_loaded
 	 */
-	protected bool $is_loaded = false;
+	protected bool $is_loaded = FALSE;
 
 	/**
 	 * @var array $ignored_fields
@@ -55,6 +55,8 @@ class Model {
 	/**
 	 * Save the model
 	 *
+	 * @param string $where  the where clause
+	 * @param array  $params the parameters
 	 * @return bool
 	 */
 	public function load(string $where, array $params = []): bool {
@@ -68,7 +70,7 @@ class Model {
 		$row = $this->Database->fetchRow($sql, $params);
 
 		if (empty($row)) {
-			return false;
+			return FALSE;
 		}
 
 		foreach ($row as $key => $value) {
@@ -77,9 +79,9 @@ class Model {
 			}
 		}
 
-		$this->is_loaded = true;
+		$this->is_loaded = TRUE;
 		$this->afterLoad();
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -97,7 +99,7 @@ class Model {
 		}
 
 		if ($this->is_loaded) {
-			$where = "{$this->primary_key} = :{$this->primary_key}";
+			$where  = "{$this->primary_key} = :{$this->primary_key}";
 			$params = [":{$this->primary_key}" => $this->{$this->primary_key}];
 			return $this->Database->update($this->table_name, $where, $data, $params);
 		}
@@ -106,9 +108,9 @@ class Model {
 
 		$this->{$this->primary_key} = (int) $this->Database->lastInsertId();
 
-		$this->is_loaded = true;
+		$this->is_loaded = TRUE;
 		$this->afterSave();
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -120,7 +122,7 @@ class Model {
 				unset($this->$key);
 			}
 		}
-		$this->is_loaded = false;
+		$this->is_loaded = FALSE;
 	}
 
 	/**
@@ -144,17 +146,17 @@ class Model {
 	 * @return bool
 	 */
 	public function isLoaded(): bool {
-		return $this->is_loaded === true;
+		return $this->is_loaded === TRUE;
 	}
 
 	/**
 	 * Load the model from a data set, used with Seeders
 	 *
-	 * @param array $data the data to load the Model with
-	 * @param bool $is_loaded is the model loaded
+	 * @param array $data      the data to load the Model with
+	 * @param bool  $is_loaded is the model loaded
 	 * @return void
 	 */
-	public function loadFromDataSet(array $data, bool $is_loaded = true): void {
+	public function loadFromDataSet(array $data, bool $is_loaded = TRUE): void {
 		foreach ($data as $key => $value) {
 			if ($this->isFillable($key)) {
 				$this->$key = $value;
@@ -176,29 +178,35 @@ class Model {
 				$this->$key = $value;
 			}
 		}
-		$this->is_loaded = false;
+		$this->is_loaded = FALSE;
 	}
 
+	/**
+	 * Check if the field is fillable
+	 *
+	 * @param string $key the field name
+	 * @return bool
+	 */
 	protected function isFillable(string $key): bool {
 		// Skip ignored framework fields
 		if (in_array($key, $this->ignored_fields)) {
-			return false;
+			return FALSE;
 		}
 	
 		// Skip primary key
 		if ($key === $this->primary_key) {
-			return false;
+			return FALSE;
 		}
 	
 		// Skip if property doesn't exist
 		if (!property_exists($this, $key)) {
-			return false;
+			return FALSE;
 		}
 	
 		// Skip non-public properties (additional security layer)
 		$reflection = new \ReflectionProperty($this, $key);
 		if (!$reflection->isPublic()) {
-			return false;
+			return FALSE;
 		}
 
 		// Whitelist approach: if fillable is defined, only allow those
@@ -212,11 +220,13 @@ class Model {
 		}
 	
 		// Default: allow if passes all checks
-		return true;
+		return TRUE;
 	}
 
 	/**
 	 * Before save hook
+	 * 
+	 * @return void
 	 */
 	protected function beforeSave(): void {
 		return;
@@ -224,6 +234,8 @@ class Model {
 
 	/**
 	 * After save hook
+	 * 
+	 * @return void
 	 */
 	protected function afterSave(): void {
 		return;
@@ -231,6 +243,8 @@ class Model {
 
 	/**
 	 * After load hook
+	 * 
+	 * @return void
 	 */
 	protected function afterLoad(): void {
 		return;

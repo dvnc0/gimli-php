@@ -8,7 +8,7 @@ use function Gimli\Injector\resolve_fresh;
 class Faker {
 
 	/**
-	 * @var array $lookup_table
+	 * @var array $lookup_table the lookup table for the faker methods
 	 */
 	protected array $lookup_table = [
 		'int' => 'getRandomInt',
@@ -46,7 +46,6 @@ class Faker {
 		'state' => 'state',
 		'zip' => 'zip',
 		'state_full' => 'stateLong',
-		'phone_number' => 'phoneNumber',
 		'tiny_int' => 'tinyInt',
 		'always' => 'always',
 	];
@@ -54,7 +53,7 @@ class Faker {
 	/**
 	 * construct
 	 * 
-	 * @param int $seed
+	 * @param int $seed the seed for the faker
 	 */
 	public function __construct(
 		protected int $seed
@@ -63,8 +62,8 @@ class Faker {
 	/**
 	 * Build a data set
 	 *
-	 * @param array $schema
-	 * @param array $provided_data
+	 * @param array $schema        the schema for the data set
+	 * @param array $provided_data the provided data
 	 * @return array
 	 */
 	public function buildDataSet(array $schema, array $provided_data = []): array {
@@ -82,7 +81,7 @@ class Faker {
 	/**
 	 * Generate a field value
 	 *
-	 * @param array $field
+	 * @param array $field the field to generate
 	 * @return mixed
 	 */
 	public function generateField(array $field): mixed {
@@ -95,6 +94,6 @@ class Faker {
 			return $Faker_Factory->$method(...$field['args']);
 		}
 
-		return null;
+		return NULL;
 	}
 }

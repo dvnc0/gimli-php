@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Gimli\Database\Faker;
 
 class Faker_Factory {
+	/**
+	 * @param int $seed
+	 */
 	public function __construct(
 		protected int $seed
 	) {
@@ -13,12 +16,12 @@ class Faker_Factory {
 	/**
 	 * Get a data file
 	 *
-	 * @param string $filename
+	 * @param string $filename the filename of the data file
 	 * @return array
 	 */
 	protected function getDataFile(string $filename): array {
 		$file = file_get_contents(__DIR__ . '/data/' . $filename);
-		return json_decode($file, true);
+		return json_decode($file, TRUE);
 	}
 
 	/**
@@ -44,8 +47,8 @@ class Faker_Factory {
 	/**
 	 * Get a random integer
 	 *
-	 * @param int $min
-	 * @param int $max
+	 * @param int $min the minimum value
+	 * @param int $max the maximum value
 	 * @return int
 	 */
 	public function getRandomInt(int $min = 1, int $max = 100): int {
@@ -55,8 +58,8 @@ class Faker_Factory {
 	/**
 	 * Get a random float
 	 *
-	 * @param float $min
-	 * @param float $max
+	 * @param float $min the minimum value
+	 * @param float $max the maximum value
 	 * @return float
 	 */
 	public function getRandomFloat(float $min, float $max): float {
@@ -66,7 +69,7 @@ class Faker_Factory {
 	/**
 	 * Get one of the options
 	 *
-	 * @param array $options
+	 * @param array $options the options to choose from
 	 * @return mixed
 	 */
 	public function options(array $options) {
@@ -76,14 +79,14 @@ class Faker_Factory {
 	/**
 	 * Get a random date
 	 *
-	 * @param string $format
-	 * @param string $min
-	 * @param string $max
+	 * @param string $format the format of the date
+	 * @param string $min    the minimum date
+	 * @param string $max    the maximum date
 	 * @return string
 	 */
 	public function date(string $format = 'Y-m-d H:i:s', string $min = '1970-01-01 00:00:00', string $max = '2024-01-01 00:00:00'): string {
-		$min = strtotime($min);
-		$max = strtotime($max);
+		$min  = strtotime($min);
+		$max  = strtotime($max);
 		$rand = mt_rand($min, $max);
 		return date($format, $rand);
 	}
@@ -103,18 +106,18 @@ class Faker_Factory {
 	 * @return string
 	 */
 	public function email(): string {
-		$domains = $this->getDataFile('domain_tlds.json');
+		$domains     = $this->getDataFile('domain_tlds.json');
 		$first_names = $this->getDataFile('first_names.json');
-		$last_names = $this->getDataFile('last_names.json');
+		$last_names  = $this->getDataFile('last_names.json');
 		$domain_name = $this->getDataFile('words.json');
-		$domain = $this->options($domain_name);
-		$tld = $this->options($domains);
-		$first_name = $this->options($first_names);
-		$last_name = $this->options($last_names);
+		$domain      = $this->options($domain_name);
+		$tld         = $this->options($domains);
+		$first_name  = $this->options($first_names);
+		$last_name   = $this->options($last_names);
 
 		if (mt_rand(0, 100) <= 20) {
 			$special_chars = ['\'', '-', '_', '!'];
-			$first_name = substr_replace($first_name, $this->options($special_chars), mt_rand(0, strlen($first_name)), 0);
+			$first_name    = substr_replace($first_name, $this->options($special_chars), mt_rand(0, strlen($first_name)), 0);
 		}
 
 		return strtolower($first_name) . '.' . strtolower($last_name) . '@' . $domain . $tld;
@@ -157,21 +160,21 @@ class Faker_Factory {
 	 */
 	public function middleInitial(): string {
 		$middle_names = $this->getDataFile('middle_names.json');
-		$middle_name = $this->options($middle_names);
+		$middle_name  = $this->options($middle_names);
 		return strtoupper($middle_name[0]);
 	}
 
 	/**
 	 * get random string
 	 *
-	 * @param int $length
+	 * @param int    $length
 	 * @param string $prefix
 	 * @return string
 	 */
 	public function getRandomString(int $length, string $prefix = ''): string {
-		$characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+		$characters       = '0123456789abcdefghijklmnopqrstuvwxyz';
 		$charactersLength = strlen($characters);
-		$randomString = '';
+		$randomString     = '';
 		for ($i = 0; $i < $length; $i++) {
 			$randomString .= $characters[mt_rand(0, $charactersLength - 1)];
 		}
@@ -212,8 +215,8 @@ class Faker_Factory {
 	 * @return string
 	 */
 	public function words(int $count = 3): string {
-		$words = $this->getDataFile('words.json');
-		$word_count = count($words);
+		$words          = $this->getDataFile('words.json');
+		$word_count     = count($words);
 		$selected_words = [];
 		for ($i = 0; $i < $count; $i++) {
 			$selected_words[] = $words[mt_rand(0, $word_count - 1)];
@@ -224,8 +227,8 @@ class Faker_Factory {
 	/**
 	 * password
 	 *
-	 * @param  string $password
-	 * @param  string $salt
+	 * @param string $password the password
+	 * @param string $salt     the salt
 	 * @return string
 	 */
 	public function password(string $password = 'password', string $salt = ''): string {
@@ -239,10 +242,10 @@ class Faker_Factory {
 	 */
 	public function username(): string {
 		$emotions = $this->getDataFile('emotions.json');
-		$animals = $this->getDataFile('animals.json');
+		$animals  = $this->getDataFile('animals.json');
 		
 		$emotion = $this->options($emotions);
-		$animal = $this->options($animals);
+		$animal  = $this->options($animals);
 
 		return $emotion . '_' . $animal . $this->getRandomInt(1, 100);
 	}
@@ -250,14 +253,14 @@ class Faker_Factory {
 	/**
 	 * get a paragraph
 	 *
-	 * @param int $count
+	 * @param int $count the number of paragraphs
 	 * @return string
 	 */
 	public function paragraphs(int $count = 3): string {
-		$paragraphs = $this->getDataFile('words.json');
+		$paragraphs          = $this->getDataFile('words.json');
 		$selected_paragraphs = [];
 		for ($i = 0; $i < $count; $i++) {
-			$word_count = \mt_rand(50, 200);
+			$word_count     = \mt_rand(50, 200);
 			$sentence_count = \mt_rand(5, 10);
 
 			$selected_words = [];
@@ -281,10 +284,10 @@ class Faker_Factory {
 	 * @return string
 	 */
 	public function url(): string {
-		$domains = $this->getDataFile('domain_tlds.json');
+		$domains     = $this->getDataFile('domain_tlds.json');
 		$domain_name = $this->getDataFile('words.json');
-		$domain = $this->options($domain_name);
-		$tld = $this->options($domains);
+		$domain      = $this->options($domain_name);
+		$tld         = $this->options($domains);
 
 		return 'https://' . $domain . $tld;
 	}
@@ -294,10 +297,10 @@ class Faker_Factory {
 	 *
 	 * @return string
 	 */
-	public function phoneNumber(): string{
-		$area_codes = $this->getDataFile('area_codes.json');
-		$area_code = $this->options($area_codes);
-		$exchange_code = $this->getRandomInt(200, 999);
+	public function phoneNumber(): string {
+		$area_codes        = $this->getDataFile('area_codes.json');
+		$area_code         = $this->options($area_codes);
+		$exchange_code     = $this->getRandomInt(200, 999);
 		$subscriber_number = $this->getRandomInt(1000, 9999);
 
 		return '1' . $area_code . '-' . $exchange_code . '-' . $subscriber_number;
@@ -310,14 +313,14 @@ class Faker_Factory {
 	 */
 	public function fullAddress(): string {
 		$street_names = $this->getDataFile('address_line_1.json');
-		$city_names = $this->getDataFile('address_city.json');
-		$state_names = $this->getDataFile('address_state.json');
-		$zip_codes = $this->getDataFile('address_zip.json');
+		$city_names   = $this->getDataFile('address_city.json');
+		$state_names  = $this->getDataFile('address_state.json');
+		$zip_codes    = $this->getDataFile('address_zip.json');
 
-		$street = $this->options($street_names);
-		$city_name = $this->options($city_names);
+		$street     = $this->options($street_names);
+		$city_name  = $this->options($city_names);
 		$state_name = $this->options($state_names);
-		$zip_code = $this->options($zip_codes);
+		$zip_code   = $this->options($zip_codes);
 
 		return $street . ', ' . $city_name . ', ' . $state_name . ' ' . $zip_code;
 	}
@@ -329,7 +332,7 @@ class Faker_Factory {
 	 */
 	public function addressLine1(): string {
 		$street_names = $this->getDataFile('address_line_1.json');
-		$street = $this->options($street_names);
+		$street       = $this->options($street_names);
 		return $street;
 	}
 
@@ -340,7 +343,7 @@ class Faker_Factory {
 	 */
 	public function addressLine2(): string {
 		$street_names = $this->getDataFile('address_line_2.json');
-		$street = $this->options($street_names);
+		$street       = $this->options($street_names);
 		return $street;
 	}
 
@@ -351,7 +354,7 @@ class Faker_Factory {
 	 */
 	public function city(): string {
 		$city_names = $this->getDataFile('address_city.json');
-		$city_name = $this->options($city_names);
+		$city_name  = $this->options($city_names);
 		return $city_name;
 	}
 
@@ -362,7 +365,7 @@ class Faker_Factory {
 	 */
 	public function state(): string {
 		$state_names = $this->getDataFile('address_state.json');
-		$state_name = $this->options($state_names);
+		$state_name  = $this->options($state_names);
 		return $state_name;
 	}
 
@@ -373,8 +376,8 @@ class Faker_Factory {
 	 */
 	public function stateLong(): string {
 		$state_names = $this->getDataFile('state.json');
-		$state_name = $this->options($state_names);
-		$state_name = str_replace('_', ' ', $state_name);
+		$state_name  = $this->options($state_names);
+		$state_name  = str_replace('_', ' ', $state_name);
 		return $state_name;
 	}
 
@@ -385,7 +388,7 @@ class Faker_Factory {
 	 */
 	public function zip(): string {
 		$zip_codes = $this->getDataFile('address_zip.json');
-		$zip_code = $this->options($zip_codes);
+		$zip_code  = $this->options($zip_codes);
 		return $zip_code;
 	}
 
@@ -401,7 +404,7 @@ class Faker_Factory {
 	/**
 	 * Force a value to always be something specific
 	 *
-	 * @param mixed $value
+	 * @param mixed $value the value to always return
 	 * @return mixed
 	 */
 	public function always($value) {

@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Gimli\Router;
 
 class Cli_Parser {
+	/**
+	 * @param array $args the arguments to parse
+	 */
 	public function __construct(
 		protected array $args,
 	) {}
@@ -27,16 +30,16 @@ class Cli_Parser {
 		];
 
 		for ($index = 0; $index < count($this->args); $index++) {
-			$arg = $this->args[$index];
+			$arg   = $this->args[$index];
 			$parts = str_split($arg);
-			$i = 0;
-			$char = $parts[$i];
+			$i     = 0;
+			$char  = $parts[$i];
 
 			if ($char === $lexemes['dash'] && $this->peak($i, $parts) === $lexemes['dash']) {
 				$option = explode($lexemes['equal'], $arg);
 				if ($this->isOptionWithNoEqual($option[1] ?? '', $index, $lexemes['word'])) {
 					[$option[1], $new_index] = $this->findOptionValue($index);
-					$index = $new_index - 1;
+					$index                   = $new_index - 1;
 				}
 
 				if (!empty($option[1])) {
@@ -48,7 +51,7 @@ class Cli_Parser {
 			}
 
 			if ($char === $lexemes['dash']) {
-				$flag = $this->peak($i, $parts);
+				$flag                  = $this->peak($i, $parts);
 				$arg_output['flags'][] = str_replace('-', '', $flag);
 				continue;
 			}
@@ -66,9 +69,9 @@ class Cli_Parser {
 	 * Check if the option has no equal
 	 * --foo-bar some value vs --foo-bar=some value
 	 * 
-	 * @param string $option
-	 * @param int $index
-	 * @param string $lexeme
+	 * @param string $option the option to check
+	 * @param int    $index  the index of the option
+	 * @param string $lexeme the lexeme to check
 	 * 
 	 * @return bool
 	 */
@@ -77,15 +80,15 @@ class Cli_Parser {
 			empty($option) 
 			&& !empty($this->args[$index + 1]) 
 			&& preg_match($lexeme, $this->args[$index + 1]) > 0
-		) === true;
+		) === TRUE;
 	}
 
 	/**
 	 * Find the option value
 	 * 
-	 * @param int $index
+	 * @param int $index the index of the option
 	 * 
-	 * @return array
+	 * @return array the option value
 	 */
 	protected function findOptionValue(int $index): array {
 		$lexemes = [
@@ -93,7 +96,7 @@ class Cli_Parser {
 			'word' => '/[a-zA-Z0-9_-]+/',
 		];
 
-		$i = $index + 1;
+		$i          = $index + 1;
 		$out_string = '';
 		for ($i; $i < count($this->args); $i++) {
 			if (preg_match($lexemes['word'], $this->args[$i]) > 0) {
@@ -113,10 +116,10 @@ class Cli_Parser {
 	/**
 	 * Peak
 	 * 
-	 * @param int $index
-	 * @param array $value
+	 * @param int   $index the index of the value
+	 * @param array $value the value to peak
 	 * 
-	 * @return string
+	 * @return string the peak value
 	 */
 	protected function peak(int $index, array $value): string {
 		return $value[$index + 1];

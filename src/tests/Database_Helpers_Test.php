@@ -236,7 +236,7 @@ class Database_Helpers_Test extends TestCase {
 		$database = $this->createMock(Database::class);
 		$database->expects($this->once())
 			->method('transaction')
-			->with($this->isType('callable'))
+			->with($this->isCallable('callable'))
 			->willReturn('callback_result');
 		
 		$injector = $this->createMock(Injector::class);
@@ -327,19 +327,11 @@ class Database_Helpers_Test extends TestCase {
 	public function testSeedModelHelper() {
 		// Test that the seed_model helper function exists and can be called
 		$this->assertTrue(function_exists('Gimli\Database\seed_model'));
-		
-		// We can't easily test the full functionality without setting up the seeding system
-		// But we can test that it doesn't throw an error when called with valid parameters
-		$this->expectNotToPerformAssertions();
 	}
 
 	public function testSeedDataHelper() {
 		// Test that the seed_data helper function exists and can be called
 		$this->assertTrue(function_exists('Gimli\Database\seed_data'));
-		
-		// We can't easily test the full functionality without setting up the seeding system
-		// But we can test that it doesn't throw an error when called with valid parameters
-		$this->expectNotToPerformAssertions();
 	}
 
 	public function testHelperFunctionsExist() {

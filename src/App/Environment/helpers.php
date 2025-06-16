@@ -19,9 +19,9 @@ if (!function_exists('Gimli\Environment\get_config')) {
 if (!function_exists('Gimli\Environment\get_config_value')) {
 	/**
 	 * get a value from config
-	 * @param string $key
 	 *
-	 * @return mixed
+	 * @param string $key the key to get
+	 * @return mixed the value of the key
 	 */
 	function get_config_value(string $key): mixed {
 		return Application_Registry::get()->Config->get($key);
@@ -31,9 +31,9 @@ if (!function_exists('Gimli\Environment\get_config_value')) {
 if (!function_exists('Gimli\Environment\config_has')) {
 	/**
 	 * check if a key exists in the config
-	 * @param string $key
 	 *
-	 * @return string
+	 * @param string $key the key to check
+	 * @return bool the result of the check
 	 */
 	function config_has(string $key): bool {
 		return Application_Registry::get()->Config->has($key);

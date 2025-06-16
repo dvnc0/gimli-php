@@ -57,7 +57,8 @@ class Response
 	 * @param bool   $success       success or fail
 	 * @param array  $data          data
 	 * @param int    $response_code response code
-	 * @return Response
+	 * 
+	 * @return Response the response instance
 	 */
 	public function setResponse(string $response_body = '', bool $success = TRUE, array $data = [], int $response_code = 200) {
 		$this->success       = $success;
@@ -70,9 +71,9 @@ class Response
 	/**
 	 * Sets the response body as JSON
 	 *
-	 * @param string $message response body
-	 * @param bool   $success       success or fail
 	 * @param array  $body          body
+	 * @param string $message       response body
+	 * @param bool   $success       success or fail
 	 * @param int    $response_code response code
 	 * @return Response
 	 */

@@ -5,19 +5,23 @@ use PHPUnit\Framework\TestCase;
 use Gimli\Database\Pdo_Manager;
 use Gimli\Application;
 use Gimli\Environment\Config;
-use PDO;
 
 class Pdo_Manager_Test extends TestCase {
 
 	private function getApplicationMock(): Application {
-		$configMock = $this->createMock(Config::class);
-		$configMock->database = [
+		$configMock = new class extends Config {
+			public function set(string $name, $value) {
+				$this->config[$name] = $value;
+			}
+		};
+
+		$configMock->set('database', [
 			'driver' => 'mysql',
 			'host' => 'localhost',
 			'database' => 'test_db',
 			'username' => 'test_user',
 			'password' => 'test_pass'
-		];
+		]);
 		
 		$applicationMock = $this->createMock(Application::class);
 		$applicationMock->Config = $configMock;

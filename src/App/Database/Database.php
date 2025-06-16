@@ -29,8 +29,8 @@ class Database {
 	/**
 	 * Executes a SQL query
 	 *
-	 * @param string $sql
-	 * @param array $params
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
 	 * @return bool
 	 */
 	public function execute(string $sql, array $params = []): bool {
@@ -41,7 +41,7 @@ class Database {
 	/**
 	 * Fetches the last insert ID
 	 *
-	 * @return string
+	 * @return string the last insert ID
 	 */
 	public function lastInsertId(): string {
 		return $this->db->lastInsertId();
@@ -50,16 +50,16 @@ class Database {
 	/**
 	 * Update a row
 	 *
-	 * @param  string  $table
-	 * @param  string  $where
-	 * @param  array   $data
-	 * @param  array   $params
+	 * @param  string $table  the table to update
+	 * @param  string $where  the where clause
+	 * @param  array  $data   the data to update
+	 * @param  array  $params the parameters for the SQL query
 	 * @return boolean
 	 */
 	public function update(string $table, string $where, array $data, array $params = []): bool {
 		$set = [];
 		foreach ($data as $key => $value) {
-			$set[] = "{$key} = :{$key}";
+			$set[]             = "{$key} = :{$key}";
 			$params[":{$key}"] = $value;
 		}
 		$set = implode(', ', $set);
@@ -70,24 +70,24 @@ class Database {
 	/**
 	 * Insert a row
 	 *
-	 * @param  string  $table
-	 * @param  array   $data
+	 * @param  string $table the table to insert into
+	 * @param  array  $data  the data to insert
 	 * @return boolean
 	 */
 	public function insert(string $table, array $data): bool {
-		$keys = array_keys($data);
+		$keys    = array_keys($data);
 		$columns = implode(', ', $keys);
-		$values = ':' . implode(', :', $keys);
-		$sql = "INSERT INTO {$table} ({$columns}) VALUES ({$values})";
+		$values  = ':' . implode(', :', $keys);
+		$sql     = "INSERT INTO {$table} ({$columns}) VALUES ({$values})";
 		return $this->execute($sql, $data);
 	}
 
 	/**
 	 * Fetches all rows from a SQL query
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return array
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return array the results of the SQL query
 	 */
 	public function fetchAll(string $sql, array $params = []): array {
 		$stmt = $this->db->prepare($sql);
@@ -98,9 +98,9 @@ class Database {
 	/**
 	 * Fetches a single row from a SQL query
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return array
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return array the results of the SQL query
 	 */
 	public function fetchRow(string $sql, array $params = []): array {
 		$stmt = $this->db->prepare($sql);
@@ -111,9 +111,9 @@ class Database {
 	/**
 	 * Fetches a single column from a SQL query
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return mixed
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return mixed the results of the SQL query
 	 */
 	public function fetchColumn(string $sql, array $params = []): mixed {
 		$stmt = $this->db->prepare($sql);
@@ -124,9 +124,9 @@ class Database {
 	/**
 	 * Fetches rows from a SQL query using a generator
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return Generator
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return Generator the results of the SQL query
 	 * @throws PDOException
 	 */
 	public function yieldRows(string $sql, array $params = []): Generator {
@@ -146,9 +146,9 @@ class Database {
 	/**
 	 * Fetches rows from a SQL query in chunks using a generator
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @param int $chunk_size
+	 * @param string $sql        the SQL query to execute
+	 * @param array  $params     the parameters for the SQL query
+	 * @param int    $chunk_size the size of the chunk
 	 * @return Generator<array<array>>
 	 * @throws PDOException
 	 */
@@ -182,14 +182,14 @@ class Database {
 	/**
 	 * Fetches rows in batches using LIMIT/OFFSET for efficient database-level pagination
 	 *
-	 * @param string $sql Base SQL query (without LIMIT/OFFSET)
-	 * @param array $params Query parameters
-	 * @param int $batch_size Number of rows per batch
-	 * @param string|null $order_by ORDER BY clause (required for consistent results)
+	 * @param string      $sql        the SQL query to execute
+	 * @param array       $params     Query parameters
+	 * @param int         $batch_size Number of rows per batch
+	 * @param string|null $order_by   ORDER BY clause (required for consistent results)
 	 * @return Generator<array<array>>
 	 * @throws PDOException
 	 */
-	public function yieldBatch(string $sql, array $params = [], int $batch_size = 1000, ?string $order_by = null): Generator {
+	public function yieldBatch(string $sql, array $params = [], int $batch_size = 1000, ?string $order_by = NULL): Generator {
 		if ($batch_size <= 0) {
 			throw new InvalidArgumentException('Batch size must be greater than 0');
 		}
@@ -208,7 +208,7 @@ class Database {
 		
 		do {
 			$batch_sql = $sql . " LIMIT {$batch_size} OFFSET {$offset}";
-			$batch = $this->fetchAll($batch_sql, $params);
+			$batch     = $this->fetchAll($batch_sql, $params);
 			
 			if (!empty($batch)) {
 				yield $batch;
@@ -261,7 +261,7 @@ class Database {
 	 * Executes a callback within a transaction
 	 * Automatically commits on success or rolls back on exception
 	 *
-	 * @param callable $callback
+	 * @param callable $callback the callback to execute
 	 * @return mixed Returns the result of the callback
 	 * @throws Throwable
 	 */

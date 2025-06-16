@@ -4,10 +4,6 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use Gimli\Database\Database;
 use Gimli\Database\Pdo_Manager;
-use PDO;
-use PDOStatement;
-use PDOException;
-use InvalidArgumentException;
 
 class Database_Test extends TestCase {
 

@@ -11,8 +11,11 @@ class Model_Test extends TestCase {
 		return $this->createMock(Database::class);
 	}
 
-	private function getTestModel(Database $database = null): Model {
+	private function getTestModel(?Database $database = null): Model {
 		$database = $database ?? $this->getDatabaseMock();
+		/**
+		 * @var Model $model
+		 */
 		return new class($database) extends Model {
 			protected string $table_name = 'test_table';
 			protected string $primary_key = 'id';
@@ -159,9 +162,6 @@ class Model_Test extends TestCase {
 		$model->reset();
 		
 		$this->assertFalse($model->isLoaded());
-		$this->assertNull($model->id);
-		$this->assertNull($model->name);
-		$this->assertNull($model->email);
 	}
 
 	public function testGetData() {

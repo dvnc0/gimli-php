@@ -23,9 +23,9 @@ if (!function_exists('Gimli\Database\fetch_column')) {
 	/**
 	 * Fetches a single column
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return mixed
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return mixed the results of the SQL query
 	 */
 	function fetch_column(string $sql, array $params = []): mixed {
 		$Database = Application_Registry::get()->Injector->resolve(Database::class);
@@ -37,9 +37,9 @@ if (!function_exists('Gimli\Database\fetch_row')) {
 	/**
 	 * Fetches a single row
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return array
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return array the results of the SQL query
 	 */
 	function fetch_row(string $sql, array $params = []): array {
 		$Database = Application_Registry::get()->Injector->resolve(Database::class);
@@ -51,9 +51,9 @@ if (!function_exists('Gimli\Database\fetch_all')) {
 	/**
 	 * Fetch all rows
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return mixed
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return mixed the results of the SQL query
 	 */
 	function fetch_all(string $sql, array $params = []): mixed {
 		$Database = Application_Registry::get()->Injector->resolve(Database::class);
@@ -65,13 +65,13 @@ if (!function_exists('Gimli\Database\row_exists')) {
 	/**
 	 * Checks if a row exists
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return bool
+	 * @param string $sql    the SQL query to execute
+	 * @param array  $params the parameters for the SQL query
+	 * @return bool the results of the SQL query
 	 */
 	function row_exists(string $sql, array $params = []): bool {
 		$Database = Application_Registry::get()->Injector->resolve(Database::class);
-		$row = $Database->fetchRow($sql, $params);
+		$row      = $Database->fetchRow($sql, $params);
 
 		return !empty($row);
 	}
@@ -82,12 +82,12 @@ if (!function_exists('Gimli\Database\seed_model')) {
 	/**
 	 * Seed a model
 	 *
-	 * @param string $model
-	 * @param int $count
-	 * @param int|null $seed
-	 * @return int
+	 * @param string   $model the model to seed
+	 * @param int      $count the number of records to seed
+	 * @param int|null $seed  the seed for the seeder
+	 * @return int the number of records seeded
 	 */
-	function seed_model(string $model, int $count = 1, int|null $seed = null): int {
+	function seed_model(string $model, int $count = 1, int|null $seed = NULL): int {
 		$seed = $seed ?? Seeder::getRandomSeed();
 		return Seeder::make($model)->count($count)->seed($seed)->create();
 	}
@@ -98,11 +98,11 @@ if (!function_exists('Gimli\Database\seed_data')) {
 	/**
 	 * Seed a model, get data instead of insert
 	 *
-	 * @param string $model
-	 * @param int|null $seed
-	 * @return int
-	 */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-	function seed_data(string $model, int|null $seed = null): int {
+	 * @param string   $model the model to seed
+	 * @param int|null $seed  the seed for the seeder
+	 * @return array the seeded data
+	 */
+	function seed_data(string $model, int|null $seed = NULL): array {
 		$seed = $seed ?? Seeder::getRandomSeed();
 		return Seeder::make($model)->count(1)->seed($seed)->getSeededData();
 	}
@@ -164,7 +164,7 @@ if (!function_exists('Gimli\Database\with_transaction')) {
 	 * Execute a callback within a transaction
 	 * Automatically commits on success or rolls back on exception
 	 *
-	 * @param callable $callback
+	 * @param callable $callback the callback to execute
 	 * @return mixed Returns the result of the callback
 	 * @throws \Throwable
 	 */
@@ -178,9 +178,9 @@ if (!function_exists('Gimli\Database\yield_row_chunks')) {
 	/**
 	 * Fetch rows from a SQL query in chunks using a generator
 	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @param int $chunk_size
+	 * @param string $sql        the SQL query to execute
+	 * @param array  $params     the parameters for the SQL query
+	 * @param int    $chunk_size the size of the chunk
 	 * @return Generator<array<array>>
 	 * @throws PDOException
 	 */
@@ -194,14 +194,14 @@ if (!function_exists('Gimli\Database\yield_batch')) {
 	/**
 	 * Fetch rows in batches using LIMIT/OFFSET for efficient database-level pagination
 	 *
-	 * @param string $sql Base SQL query (without LIMIT/OFFSET)
-	 * @param array $params Query parameters
-	 * @param int $batch_size Number of rows per batch
-	 * @param string|null $order_by ORDER BY clause (required for consistent results)
+	 * @param string      $sql        Base SQL query (without LIMIT/OFFSET)
+	 * @param array       $params     Query parameters
+	 * @param int         $batch_size Number of rows per batch
+	 * @param string|null $order_by   ORDER BY clause (required for consistent results)
 	 * @return Generator<array<array>>
 	 * @throws PDOException
 	 */
-	function yield_batch(string $sql, array $params = [], int $batch_size = 1000, ?string $order_by = null): Generator {
+	function yield_batch(string $sql, array $params = [], int $batch_size = 1000, ?string $order_by = NULL): Generator {
 		$Database = Application_Registry::get()->Injector->resolve(Database::class);
 		return $Database->yieldBatch($sql, $params, $batch_size, $order_by);
 	}

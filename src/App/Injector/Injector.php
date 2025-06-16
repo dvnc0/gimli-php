@@ -70,9 +70,9 @@ class Injector implements Injector_Interface {
 	/**
 	 * Resolves a class instance
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  array   $dependencies dependencies
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  array           $dependencies dependencies
 	 * @return T
 	 */
 	public function resolve(string $class_name, array $dependencies = []): object {
@@ -91,11 +91,11 @@ class Injector implements Injector_Interface {
 
 		if (!empty($this->bindings[$class_name])) {
 			// Mark as resolving before executing binding callback
-			$this->resolving[$class_name] = true;
+			$this->resolving[$class_name] = TRUE;
 			
 			try {
-				$callback = $this->bindings[$class_name];
-				$instance = call_user_func($callback);
+				$callback                            = $this->bindings[$class_name];
+				$instance                            = call_user_func($callback);
 				$this->resolved_classes[$class_name] = $instance;
 				
 				// Clear resolving state after successful resolution
@@ -114,9 +114,9 @@ class Injector implements Injector_Interface {
 	/**
 	 * Resolves a fresh class instance
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  array   $dependencies dependencies
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  array           $dependencies dependencies
 	 * @return T
 	 */
 	public function resolveFresh(string $class_name, array $dependencies = []): object {
@@ -141,13 +141,13 @@ class Injector implements Injector_Interface {
 	/**
 	 * Creates a fresh class instance
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  array   $dependencies dependencies
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  array           $dependencies dependencies
 	 * @return T
 	 */
 	protected function createFreshInstance(string $class_name, array $dependencies): object {
-		$this->resolving[$class_name] = true;
+		$this->resolving[$class_name] = TRUE;
 
 		$dependencies[Application::class] = $this->Application;
 		$dependencies[Injector::class]    = $this;
@@ -167,8 +167,8 @@ class Injector implements Injector_Interface {
 		$constructor_args   = [];
 
 		foreach ($constructor_params as $param) {
-			$param_type = $param->getType();
-			$param_name = $param->getName();
+			$param_type  = $param->getType();
+			$param_name  = $param->getName();
 			$param_class = '';
 
 			if ($param_type instanceof \ReflectionNamedType && !$param_type->isBuiltin()) {
@@ -217,11 +217,11 @@ class Injector implements Injector_Interface {
 	/**
 	 * Resolves a class and calls a specific method
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  string  $method_name
-	 * @param  array   $method_args
-	 * @param  array   $dependencies dependencies for class resolution
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  string          $method_name
+	 * @param  array           $method_args
+	 * @param  array           $dependencies dependencies for class resolution
 	 * @return mixed
 	 */
 	public function call(string $class_name, string $method_name, array $method_args = [], array $dependencies = []): mixed {
@@ -233,7 +233,7 @@ class Injector implements Injector_Interface {
 
 		$reflection_method = new \ReflectionMethod($instance, $method_name);
 		$method_parameters = $reflection_method->getParameters();
-		$resolved_args = [];
+		$resolved_args     = [];
 
 		// Auto-resolve method parameters with dependency injection
 		foreach ($method_parameters as $index => $param) {
@@ -253,7 +253,7 @@ class Injector implements Injector_Interface {
 
 			// Try to resolve by typeo
 			if ($param_type && !$param_type->isBuiltin()) {
-				$param_class = $param_type->getName();
+				$param_class     = $param_type->getName();
 				$resolved_args[] = $this->resolve($param_class);
 				continue;
 			}
@@ -266,7 +266,7 @@ class Injector implements Injector_Interface {
 
 			// Allow null if parameter allows it
 			if ($param->allowsNull()) {
-				$resolved_args[] = null;
+				$resolved_args[] = NULL;
 				continue;
 			}
 
@@ -279,10 +279,10 @@ class Injector implements Injector_Interface {
 	/**
 	 * Extends a resolved class with additional functionality
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  callable $callback
-	 * @param  array    $dependencies dependencies for class resolution
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  callable        $callback
+	 * @param  array           $dependencies dependencies for class resolution
 	 * @return T
 	 */
 	public function extends(string $class_name, callable $callback, array $dependencies = []): object {

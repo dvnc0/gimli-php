@@ -11,11 +11,11 @@ class Dispatch {
 	 * dispatch changes
 	 *
 	 * @param Response $Response Response from Controllers
-	 * @param bool $is_cli If the request is from CLI
+	 * @param bool     $is_cli   If the request is from CLI
 	 * @return void
 	 */
-	public function dispatch(Response $Response, bool $is_cli = false): void {
-		if ($is_cli === true) {
+	public function dispatch(Response $Response, bool $is_cli = FALSE): void {
+		if ($is_cli === TRUE) {
 			echo $Response->response_body ?? '';
 			return;
 		}

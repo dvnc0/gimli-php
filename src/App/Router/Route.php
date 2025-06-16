@@ -7,7 +7,7 @@ class Route {
 	/**
 	 * @var Route|null $instance
 	 */
-	private static ?Route $instance = null;
+	private static ?Route $instance = NULL;
 
 	/**
 	 * @var string $current_group
@@ -52,7 +52,7 @@ class Route {
 	 * @return Route
 	 */
 	public static function getInstance(): Route {
-		if (self::$instance === null) {
+		if (self::$instance === NULL) {
 			self::$instance = new Route();
 		}
 		return self::$instance;
@@ -61,7 +61,7 @@ class Route {
 	/**
 	 * Add a GET route
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -75,7 +75,7 @@ class Route {
 	/**
 	 * Add a POST route
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -89,7 +89,7 @@ class Route {
 	/**
 	 * Add a PUT route
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -103,7 +103,7 @@ class Route {
 	/**
 	 * Add a PATCH route
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -117,7 +117,7 @@ class Route {
 	/**
 	 * Add a DELETE route
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -131,7 +131,7 @@ class Route {
 	/**
 	 * Add a route for any HTTP method
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -149,7 +149,7 @@ class Route {
 	/**
 	 * Add a CLI route
 	 *
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -163,9 +163,9 @@ class Route {
 	/**
 	 * Add routes to a group
 	 *
-	 * @param  non-empty-string   $group      group prefix
-	 * @param  callable $callback   callback to add routes
-	 * @param  array<int, class-string<Middleware_Interface>>    $middleware routes middleware
+	 * @param  non-empty-string                               $group      group prefix
+	 * @param  callable                                       $callback   callback to add routes
+	 * @param  array<int, class-string<Middleware_Interface>> $middleware routes middleware
 	 * @return Route
 	 */
 	public static function group(string $group, callable $callback, array $middleware = []): Route {
@@ -177,9 +177,9 @@ class Route {
 	/** 
 	 * Add a route group
 	 *
-	 * @param non-empty-string   $group      group prefix
-	 * @param callable $callback   callback to add routes
-	 * @param array<int, class-string<Middleware_Interface>>    $middleware routes middleware
+	 * @param non-empty-string                               $group      group prefix
+	 * @param callable                                       $callback   callback to add routes
+	 * @param array<int, class-string<Middleware_Interface>> $middleware routes middleware
 	 *
 	 * @return Route
 	 */
@@ -211,8 +211,8 @@ class Route {
 	/**
 	 * Add a route
 	 *
-	 * @param non-empty-string $method   HTTP method
-	 * @param non-empty-string $route    route
+	 * @param non-empty-string      $method   HTTP method
+	 * @param non-empty-string      $route    route
 	 * @param string|callable|array $callback callback
 	 *
 	 * @return Route
@@ -222,7 +222,7 @@ class Route {
 		$arg_names = [];
 		preg_match_all('/' . $this->arg_name_pattern . '/', $route, $matches);
 		$arg_names = preg_replace('/\#/', '', $matches[1]);
-		$route = preg_replace('/' . $this->arg_name_pattern . '/', '', $route);
+		$route     = preg_replace('/' . $this->arg_name_pattern . '/', '', $route);
 
 		$route_with_group    = $this->current_group . $route;
 		$this->current_route = $route_with_group;

@@ -9,7 +9,7 @@ interface Middleware_Interface {
 	/**
 	 * Processes the middleware
 	 * 
-	 * @return Middleware_Response
+	 * @return Middleware_Response the middleware response
 	 */
 	public function process(): Middleware_Response;
 }

@@ -15,6 +15,10 @@ namespace Gimli\Environment;
  * @property string $route_directory
  * @property bool $enable_latte
  * @property string $template_base_dir
+ * @property string $template_temp_dir
+ * @property array $events
+ * @property array $session
+ * 
  */
 class Config {
 
@@ -90,13 +94,13 @@ class Config {
 			'absolute_max_lifetime' => 28800,    // 8 hours - absolute maximum
 			'max_data_size' => 1048576,          // 1MB
 			'allowed_keys_pattern' => '/^[a-zA-Z0-9._-]+$/', // Safe key pattern
-			'enable_fingerprinting' => true,
-			'enable_ip_validation' => false,     // Disabled by default (CDN/proxy issues)
-			'cookie_httponly' => true,
+			'enable_fingerprinting' => TRUE,
+			'enable_ip_validation' => FALSE,     // Disabled by default (CDN/proxy issues)
+			'cookie_httponly' => TRUE,
 			'cookie_secure' => 'auto',           // Auto-detect HTTPS
 			'cookie_samesite' => 'Strict',
-			'use_strict_mode' => true,
-			'use_only_cookies' => true,
+			'use_strict_mode' => TRUE,
+			'use_only_cookies' => TRUE,
 			'cookie_lifetime' => 0,              // Session cookies only
 			'gc_probability' => 1,
 			'gc_divisor' => 100,
@@ -109,7 +113,7 @@ class Config {
 	/**
 	 * Config constructor.
 	 *
-	 * @param array $config
+	 * @param array $config the config to load
 	 */
 	public function __construct(array $config = []) {
 		$this->load($config);
@@ -118,12 +122,12 @@ class Config {
 	/**
 	 * Get a config value
 	 *
-	 * @param string $name
-	 * @return mixed
+	 * @param string $name the name of the config to get
+	 * @return mixed the config value
 	 */
 	public function __get(string $name) {
 		if (strpos($name, '.') !== FALSE) {
-			$keys = explode('.', $name);
+			$keys   = explode('.', $name);
 			$object = $this->config;
 			foreach ($keys as $key) {
 				if (is_array($object)) {
@@ -143,12 +147,12 @@ class Config {
 	/**
 	 * get a config value
 	 *
-	 * @param string $name
-	 * @return mixed
+	 * @param string $name the name of the config to get
+	 * @return mixed the config value
 	 */
 	public function get(string $name) {
 		if (strpos($name, '.') !== FALSE) {
-			$keys = explode('.', $name);
+			$keys   = explode('.', $name);
 			$object = $this->config;
 			foreach ($keys as $key) {
 				if (is_array($object)) {
@@ -168,13 +172,13 @@ class Config {
 	/**
 	 * Set a config value
 	 *
-	 * @param string $name
-	 * @param mixed $value
+	 * @param string $name  the name of the config to set
+	 * @param mixed  $value the value to set
 	 * @return void
 	 */
 	public function set(string $name, $value) {
 		if (strpos($name, '.') !== FALSE) {
-			$keys = explode('.', $name);
+			$keys   = explode('.', $name);
 			$object = &$this->config;
 			foreach ($keys as $key) {
 				if (is_array($object)) {
@@ -195,7 +199,7 @@ class Config {
 	/**
 	 * Load the config
 	 *
-	 * @param array $config
+	 * @param array $config the config to load
 	 * @return void
 	 */
 	public function load(array $config): void {
@@ -209,9 +213,9 @@ class Config {
 	/**
 	 * Load the config file
 	 *
-	 * @param array $config
-	 * @param array $new_config
-	 * @return array
+	 * @param array $config     the config to load
+	 * @param array $new_config the new config to load
+	 * @return array the loaded config
 	 */
 	protected function loadConfigFile(array $config, array $new_config): array {
 		foreach ($new_config as $key => $value) {
@@ -229,7 +233,7 @@ class Config {
 	/**
 	 * Get the config
 	 *
-	 * @return array
+	 * @return array the config
 	 */
 	public function getConfig(): array {
 		return $this->config;
@@ -238,7 +242,7 @@ class Config {
 	/**
 	 * Get the config as a JSON string
 	 *
-	 * @return string
+	 * @return string the config as a JSON string
 	 */
 	public function getJson(): string {
 		return json_encode($this->config);
@@ -247,12 +251,12 @@ class Config {
 	/**
 	 * Check if a key exists in the config
 	 *
-	 * @param string $key
-	 * @return bool
+	 * @param string $key the key to check
+	 * @return bool the result of the check
 	 */
 	public function has(string $key): bool {
 		if (strpos($key, '.') !== FALSE) {
-			$keys = explode('.', $key);
+			$keys   = explode('.', $key);
 			$object = $this->config;
 			foreach ($keys as $key) {
 				if (is_array($object)) {

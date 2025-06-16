@@ -10,12 +10,12 @@ if (!function_exists('Gimli\Injector\resolve')) {
 	/**
 	 * Resolve the dependency.
 	 * 
-	 * @template T
-	 * @param  class-string<T>  $injector_key
-	 * @param  array   $args
+	 * @template T of object
+	 * @param  class-string<T> $injector_key
+	 * @param  array           $args
 	 * @return T
 	 */
-	function resolve(string $injector_key, array $args = [], ?Application $app = null) {
+	function resolve(string $injector_key, array $args = [], ?Application $app = NULL) {
 		$Application = $app ?? Application_Registry::get();
 		return $Application->Injector->resolve($injector_key, $args);
 	}
@@ -25,12 +25,12 @@ if (!function_exists('Gimli\Injector\resolve_fresh')) {
 	/**
 	 * Resolve the dependency with a fresh instance.
 	 *
-	 * @template T
-	 * @param  class-string<T>  $injector_key
-	 * @param  array   $args
+	 * @template T of object
+	 * @param  class-string<T> $injector_key
+	 * @param  array           $args
 	 * @return T
 	 */
-	function resolve_fresh(string $injector_key, array $args = [], ?Application $app = null) {
+	function resolve_fresh(string $injector_key, array $args = [], ?Application $app = NULL) {
 		$Application = $app ?? Application_Registry::get();
 		return $Application->Injector->resolveFresh($injector_key, $args);
 	}
@@ -40,11 +40,11 @@ if (!function_exists('Gimli\Injector\call_method')) {
 	/**
 	 * Resolve a class and call a specific method on it.
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  string  $method_name
-	 * @param  array   $method_args
-	 * @param  array   $dependencies dependencies for class resolution
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  string          $method_name
+	 * @param  array           $method_args
+	 * @param  array           $dependencies dependencies for class resolution
 	 * @return mixed
 	 */
 	function call_method(string $class_name, string $method_name, array $method_args = [], array $dependencies = []) {
@@ -56,10 +56,10 @@ if (!function_exists('Gimli\Injector\extend_class')) {
 	/**
 	 * Extend a resolved class with additional functionality.
 	 *
-	 * @template T
-	 * @param  class-string<T>  $class_name
-	 * @param  callable $callback
-	 * @param  array    $dependencies dependencies for class resolution
+	 * @template T of object
+	 * @param  class-string<T> $class_name
+	 * @param  callable        $callback
+	 * @param  array           $dependencies dependencies for class resolution
 	 * @return T
 	 */
 	function extend_class(string $class_name, callable $callback, array $dependencies = []): object {
@@ -71,11 +71,13 @@ if (!function_exists('Gimli\Injector\bind')) {
 	/**
 	 * Bind a class to the injector.
 	 *
-	 * @param class-string<T> $class_name
-	 * @param callable $callback
+	 * @template T of object
+	 * @param class-string<T> $class_name the class name to bind
+	 * @param callable        $callback   the callback to bind
+	 * 
 	 * @return void
 	 */
-	function bind(string $class_name, callable $callback, ?Application $app = null): void {
+	function bind(string $class_name, callable $callback, ?Application $app = NULL): void {
 		$Application = $app ?? Application_Registry::get();
 		$Application->Injector->bind($class_name, $callback);
 	}
@@ -85,7 +87,7 @@ if (!function_exists('Gimli\Injector\injector')) {
 	/**
 	 * Get the injector instance.
 	 *
-	 * @return Injector_Interface
+	 * @return Injector_Interface the injector instance
 	 */
 	function injector(): Injector_Interface {
 		return Application_Registry::get()->Injector;

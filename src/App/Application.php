@@ -53,12 +53,12 @@ class Application {
 	/**
 	 * Create a new Application instance (no longer singleton)
 	 * 
-	 * @param non-empty-string $app_root         The application root path
-	 * @param array            $server_variables $_SERVER values
-	 * @param Injector_Interface|null $Injector Injector instance
+	 * @param non-empty-string        $app_root         The application root path
+	 * @param array                   $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector         Injector instance
 	 * @return Application
 	 */
-	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = null): Application {
+	public static function create(string $app_root, array $server_variables, ?Injector_Interface $Injector = NULL): Application {
 		if (empty($app_root)) {
 			throw new Gimli_Application_Exception('Application root path not set');
 		}
@@ -78,11 +78,11 @@ class Application {
 	/**
 	 * Constructor
 	 *
-	 * @param non-empty-string $app_root         The application root path
-	 * @param array            $server_variables $_SERVER values
-	 * @param Injector_Interface|null $Injector Injector instance
+	 * @param non-empty-string        $app_root         The application root path
+	 * @param array                   $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector         Injector instance
 	 */
-	public function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = null) {
+	public function __construct(string $app_root, array $server_variables, ?Injector_Interface $Injector = NULL) {
 		$this->app_root = $app_root;
 		$this->registerCoreServices($server_variables, $Injector);
 	}
@@ -105,7 +105,7 @@ class Application {
 	 * @throws Gimli_Application_Exception
 	 */
 	public function enableLatte(): Application {
-		if (isset($this->Config) === false) {
+		if (isset($this->Config) === FALSE) {
 			throw new Gimli_Application_Exception('Enable Latte requires Config to be set');
 		}
 
@@ -116,11 +116,11 @@ class Application {
 	/**
 	 * Register core services with the DI container
 	 *
-	 * @param array $server_variables $_SERVER values
-	 * @param Injector_Interface|null $Injector Injector instance
+	 * @param array                   $server_variables $_SERVER values
+	 * @param Injector_Interface|null $Injector         Injector instance
 	 * @return void
 	 */
-	protected function registerCoreServices(array $server_variables, ?Injector_Interface $Injector = null): void {
+	protected function registerCoreServices(array $server_variables, ?Injector_Interface $Injector = NULL): void {
 		if (!is_null($Injector)) {
 			$this->setCustomInjector($Injector);
 		} else {
@@ -202,7 +202,7 @@ class Application {
 				throw new Route_Loader_Exception('Route file not readable: ' . $route);
 			}
 
-			require_once $route;
+			include_once $route;
 		}
 	}
 
@@ -233,20 +233,20 @@ class Application {
 	public function run(): void {
 		$this->initializeSession();
 		// might need to rethink this
-		publish_event('gimli.application.start', ['time' => microtime(true)]);
-		if (isset($this->Config) === false) {
+		publish_event('gimli.application.start', ['time' => microtime(TRUE)]);
+		if (isset($this->Config) === FALSE) {
 			throw new Gimli_Application_Exception('Please set the Config object using setConfig');
 		}
 		$this->registerWebRoutes();
 		if (!empty($this->Config->get('events'))) {
 			$this->registerEvents($this->Config->events);
 		}
-		$routes = Route::build();
-		$Router = $this->Injector->resolve(Router::class);
+		$routes          = Route::build();
+		$Router          = $this->Injector->resolve(Router::class);
 		$Router->Request = $this->Injector->resolve(Request::class);
 		$Router->addRoutes($routes);
 		$Router->run();
-		publish_event('gimli.application.end', ['time' => microtime(true)]);
+		publish_event('gimli.application.end', ['time' => microtime(TRUE)]);
 		return;
 	}
 

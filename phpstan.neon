@@ -4,5 +4,5 @@ parameters:
 		- src/App
 		# - src/tests
 	excludePaths:
-		- src/App/tmp
+		# - src/App/tmp
 		- src/vendor

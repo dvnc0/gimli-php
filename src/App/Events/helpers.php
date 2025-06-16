@@ -10,8 +10,8 @@ if (!function_exists('Gimli\Events\publish_event')) {
 	/**
 	 * Publish an event
 	 *
-	 * @param string $event_name
-	 * @param array  $args
+	 * @param string $event_name the name of the event
+	 * @param array  $args       the arguments for the event
 	 * @return void
 	 */
 	function publish_event(string $event_name, array $args = []): void {
@@ -24,8 +24,8 @@ if (!function_exists('Gimli\Events\subscribe_event')) {
 	/**
 	 * Subscribe to an event
 	 *
-	 * @param string   $event_name
-	 * @param callable|string $callback
+	 * @param string          $event_name the name of the event
+	 * @param callable|string $callback   the callback to subscribe to the event
 	 * @return void
 	 */
 	function subscribe_event(string $event_name, callable|string $callback): void {
@@ -35,37 +35,37 @@ if (!function_exists('Gimli\Events\subscribe_event')) {
 }
 
 if (!function_exists('Gimli\Events\chain_events')) {
-    /**
-     * Create a new event chain
-     * 
-     * @return Event_Chain
-     */
-    function chain_events(): Event_Chain {
-        $Event_Manager = Application_Registry::get()->Injector->resolve(Event_Manager::class);
-        return $Event_Manager->chain();
-    }
+	/**
+	 * Create a new event chain
+	 * 
+	 * @return Event_Chain the event chain
+	 */
+	function chain_events(): Event_Chain {
+		$Event_Manager = Application_Registry::get()->Injector->resolve(Event_Manager::class);
+		return $Event_Manager->chain();
+	}
 }
 
 if (!function_exists('Gimli\Events\get_events_by_tag')) {
-    /**
-     * Get events by tag
-     * 
-     * @param string $tag
-     * @return array<string, array{description: ?string, tags: array, class: string}>
-     */
-    function get_events_by_tag(string $tag): array {
-        $Event_Manager = Application_Registry::get()->Injector->resolve(Event_Manager::class);
-        return $Event_Manager->getEventsByTag($tag);
-    }
+	/**
+	 * Get events by tag
+	 * 
+	 * @param string $tag the tag to get events by
+	 * @return array<string, array{description: ?string, tags: array, class: string}>
+	 */
+	function get_events_by_tag(string $tag): array {
+		$Event_Manager = Application_Registry::get()->Injector->resolve(Event_Manager::class);
+		return $Event_Manager->getEventsByTag($tag);
+	}
 }
 
 if (!function_exists('Gimli\Events\event_manager')) {
-    /**
-     * Get the event manager
-     * 
-     * @return Event_Manager
-     */
-    function event_manager(): Event_Manager {
-        return Application_Registry::get()->Injector->resolve(Event_Manager::class);
-    }
+	/**
+	 * Get the event manager
+	 * 
+	 * @return Event_Manager the event manager
+	 */
+	function event_manager(): Event_Manager {
+		return Application_Registry::get()->Injector->resolve(Event_Manager::class);
+	}
 }

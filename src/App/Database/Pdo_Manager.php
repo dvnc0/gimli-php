@@ -20,12 +20,12 @@ class Pdo_Manager {
 	 * @return PDO
 	 */
 	public function getConnection(): PDO {
-		$config = $this->Application->Config->database;
-		$dsn = "{$config['driver']}:host={$config['host']};dbname={$config['database']}";
+		$config  = $this->Application->Config->database;
+		$dsn     = "{$config['driver']}:host={$config['host']};dbname={$config['database']}";
 		$options = [
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-			PDO::ATTR_EMULATE_PREPARES => false,
+			PDO::ATTR_EMULATE_PREPARES => FALSE,
 		];
 		return new PDO($dsn, $config['username'], $config['password'], $options);
 	}

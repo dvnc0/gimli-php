@@ -27,9 +27,9 @@ interface Injector_Interface {
 	/**
 	 * resolves a class instance
 	 * 
-	 * @template T
+	 * @template T of object
 	 * @param class-string<T> $class_name   class name
-	 * @param array  $dependencies dependencies
+	 * @param array           $dependencies dependencies
 	 * 
 	 * @return T
 	 */
@@ -38,9 +38,9 @@ interface Injector_Interface {
 	/**
 	 * resolves a fresh class instance
 	 * 
-	 * @template T
+	 * @template T of object
 	 * @param class-string<T> $class_name   class name
-	 * @param array  $dependencies dependencies
+	 * @param array           $dependencies dependencies
 	 * 
 	 * @return T
 	 */
@@ -49,7 +49,7 @@ interface Injector_Interface {
 	/**
 	 * check if a class exists
 	 * 
-	 * @param string $class_name class name
+	 * @param string $key class name
 	 * 
 	 * @return bool
 	 */
@@ -70,10 +70,10 @@ interface Injector_Interface {
 	/**
 	 * extends a resolved class with additional functionality
 	 * 
-	 * @template T
-	 * @param class-string<T> $class_name class name to extend
-	 * @param callable $callback   callback to extend the instance
-	 * @param array    $dependencies dependencies for class resolution
+	 * @template T of object
+	 * @param class-string<T> $class_name   class name to extend
+	 * @param callable        $callback     callback to extend the instance
+	 * @param array           $dependencies dependencies for class resolution
 	 * 
 	 * @return T
 	 */

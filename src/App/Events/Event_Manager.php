@@ -100,7 +100,7 @@ class Event_Manager {
 	 * Validate event arguments against required and optional parameters
 	 * 
 	 * @param Event_Interface $instance
-	 * @param array $args
+	 * @param array $args the arguments to validate
 	 * @return bool
 	 */
 	protected function validateEventParameters(Event_Interface $instance, array $args): bool {
@@ -133,7 +133,7 @@ class Event_Manager {
 	 * Publish an event
 	 * 
 	 * @param string $event
-	 * @param array $args
+	 * @param array $args the arguments to publish
 	 * @return void
 	 * @throws Throwable
 	 */
@@ -190,7 +190,7 @@ class Event_Manager {
 	/**
 	 * Get events by multiple tags
 	 * 
-	 * @param array $tags
+	 * @param array $tags the tags to get events by
 	 * @return array<string, array{description: ?string, tags: array, class: string}>
 	 */
 	public function getEventsByTags(array $tags): array {
@@ -214,7 +214,7 @@ class Event_Manager {
 	 * Get the subscribers for an event
 	 * 
 	 * @param string $event
-	 * @return array
+	 * @return array the subscribers for the event
 	 */
 	public function getSubscribers(string $event): array {
 		return $this->subscribers[$event] ?? [];
@@ -224,7 +224,7 @@ class Event_Manager {
 	 * Get metadata for an event
 	 * 
 	 * @param string $event
-	 * @return array|null
+	 * @return array|null the metadata for the event
 	 */
 	public function getEventMetadata(string $event): ?array {
 		return $this->eventMetadata[$event] ?? null;
@@ -233,7 +233,7 @@ class Event_Manager {
 	/**
 	 * Create a new event chain
 	 * 
-	 * @return Event_Chain
+	 * @return Event_Chain the event chain
 	 */
 	public function chain(): Event_Chain {
 		return new Event_Chain($this);

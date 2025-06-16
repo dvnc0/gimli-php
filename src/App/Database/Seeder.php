@@ -32,6 +32,9 @@ class Seeder {
 	 */
 	protected array $with_data = [];
 
+	/**
+	 * @param string $class_name the class name to seed
+	 */
 	public function __construct(
 		protected string $class_name
 	) {}
@@ -39,9 +42,7 @@ class Seeder {
 	/**
 	 * Build the seeder
 	 *
-	 * @param string $table_name
-	 * @param array $fields
-	 * @param int $count
+	 * @param string $class_name the class name to seed
 	 * @return Seeder
 	 */
 	public static function make(string $class_name): Seeder {
@@ -60,13 +61,13 @@ class Seeder {
 	/**
 	 * Return an array of faked data
 	 *
-	 * @param int|null $seed
+	 * @param int|null $seed the seed to use
 	 * @return array
 	 */
-	public function getSeededData(int|null $seed = null): array {
+	public function getSeededData(int|null $seed = NULL): array {
 		$seed_to_use = $seed ?? $this->seed;
 
-		$Faker = resolve_fresh(Faker::class, ['seed' => $seed_to_use]);
+		$Faker  = resolve_fresh(Faker::class, ['seed' => $seed_to_use]);
 		$schema = $this->getSeedSchema();
 
 		$data = $Faker->buildDataSet($schema, $this->with_data);
@@ -78,13 +79,13 @@ class Seeder {
 	 * Create the record and save to the database
 	 * Creates any callback records as well
 	 *
-	 * @return int
+	 * @return int the number of records seeded
 	 */
 	public function create(): int {
-		$count = $this->count ?? 1;
+		$count         = $this->count ?? 1;
 		$iterated_seed = $this->seed;
 		for ($i = 0; $i < $count; $i++) {
-			$result_set = $this->getSeededData($iterated_seed);
+			$result_set     = $this->getSeededData($iterated_seed);
 			$iterated_seed += 1;
 
 			$model = resolve($this->class_name);
@@ -108,8 +109,8 @@ class Seeder {
 	/**
 	 * Set the data to seed with
 	 *
-	 * @param array $data
-	 * @return Seeder_Factory
+	 * @param array $data the data to seed with
+	 * @return self
 	 */
 	public function using(array $data): self {
 		$this->with_data = $data;
@@ -120,8 +121,8 @@ class Seeder {
 	/**
 	 * Set the amount of times to repeat, not used with getSeededData
 	 *
-	 * @param int $count
-	 * @return Seeder_Factory
+	 * @param int $count the number of times to seed
+	 * @return self
 	 */
 	public function count(int $count): self {
 		$this->count = $count;
@@ -132,8 +133,8 @@ class Seeder {
 	/**
 	 * Set a callback to run after seeding
 	 *
-	 * @param callable $callback
-	 * @return Seeder_Factory
+	 * @param callable $callback the callback to run after seeding
+	 * @return self
 	 */
 	public function callback(callable $callback): self {
 		$this->callback = $callback;
@@ -144,8 +145,8 @@ class Seeder {
 	/**
 	 * Set the seed
 	 *
-	 * @param int $seed
-	 * @return Seeder_Factory
+	 * @param int $seed the seed to use
+	 * @return self
 	 */
 	public function seed(int $seed): self {
 		$this->seed = $seed;
@@ -156,11 +157,11 @@ class Seeder {
 	/**
 	 * Get the seed schema
 	 *
-	 * @return array
+	 * @return array the seed schema
 	 */
 	protected function getSeedSchema(): array {
-		$reflection = new ReflectionClass($this->class_name);
-		$properties = $reflection->getProperties();
+		$reflection  = new ReflectionClass($this->class_name);
+		$properties  = $reflection->getProperties();
 		$seeded_data = [];
 
 		foreach ($properties as $property) {
