@@ -427,6 +427,23 @@ class Router {
 			case 'boolean':
 				return filter_var($value, FILTER_VALIDATE_BOOLEAN);
 				
+			case 'array':
+				// If it's already an array, return as-is
+				if (is_array($value)) {
+					return $value;
+				}
+				// If it's a string, try to decode JSON or return as single-element array
+				if (is_string($value)) {
+					$decoded = json_decode($value, true);
+					if (json_last_error() === JSON_ERROR_NONE) {
+						return $decoded;
+					}
+					// Return as single-element array
+					return [$value];
+				}
+				// For other types, wrap in array
+				return [$value];
+				
 			default:
 				throw new Exception("Unsupported cast type: {$type}");
 		}
