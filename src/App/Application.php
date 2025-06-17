@@ -135,11 +135,12 @@ class Application {
 
 		$this->Injector->register(Event_Manager::class, new Event_Manager);
 		
-		// Configure session from config with fallback to defaults
-		$session_config = $this->Config->get('session') ?? [];
-		
-		// Use factory pattern to ensure config is applied before construction
-		$this->Injector->bind(Session::class, fn() => new Session($session_config));
+		$this->Injector->bind(Session::class, function() {
+			$App = Application_Registry::get();
+			$Config = $App->Config;
+			$session_config = $Config->get('session') ?? [];
+			return new Session($session_config);
+		});
 
 		return;
 	}
@@ -231,7 +232,9 @@ class Application {
 	 * @return void
 	 */
 	public function run(): void {
-		$this->initializeSession();
+		// Initialize session with proper configuration via Session class
+		$this->Injector->resolve(Session::class);
+		
 		// might need to rethink this
 		publish_event('gimli.application.start', ['time' => microtime(TRUE)]);
 		if (isset($this->Config) === FALSE) {
@@ -248,17 +251,6 @@ class Application {
 		$Router->run();
 		publish_event('gimli.application.end', ['time' => microtime(TRUE)]);
 		return;
-	}
-
-	/**
-	 * Initialize the session
-	 *
-	 * @return void
-	 */
-	protected function initializeSession(): void {
-		if (session_status() === PHP_SESSION_NONE) {
-			session_start();
-		}
 	}
 
 }
