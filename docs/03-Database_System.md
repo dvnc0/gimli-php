@@ -350,6 +350,210 @@ The Faker system provides various data types for seeding:
 | `tiny_int` | Random 0 or 1 | None |
 | `always` | Always returns the same value | `['value']` |
 
+## Database Events
+
+The Database class publishes events throughout its lifecycle, allowing you to monitor performance, implement logging, caching, or other cross-cutting concerns.
+
+### Core Operation Events
+
+```php
+use function Gimli\Events\subscribe_event;
+
+// Monitor all database queries
+subscribe_event('gimli.database.start', function(string $event, array $data) {
+    // $data contains: sql, time
+    error_log("Query started: " . $data['sql']);
+});
+
+subscribe_event('gimli.database.end', function(string $event, array $data) {
+    // $data contains: sql, time
+    $duration = $data['time'] - $GLOBALS['query_start_time'];
+    error_log("Query completed in {$duration}s: " . $data['sql']);
+});
+```
+
+### Insert/Update Events
+
+```php
+// Monitor insert operations
+subscribe_event('gimli.database.insert.start', function(string $event, array $data) {
+    // $data contains: table, data, time
+    error_log("Inserting into {$data['table']}");
+});
+
+subscribe_event('gimli.database.insert.end', function(string $event, array $data) {
+    // $data contains: table, success, time
+    if ($data['success']) {
+        error_log("Successfully inserted into {$data['table']}");
+    }
+});
+
+// Monitor update operations
+subscribe_event('gimli.database.update.start', function(string $event, array $data) {
+    // $data contains: table, data, time
+});
+
+subscribe_event('gimli.database.update.end', function(string $event, array $data) {
+    // $data contains: table, success, time
+});
+```
+
+### Fetch Operation Events
+
+```php
+// Monitor fetch operations
+subscribe_event('gimli.database.fetch.start', function(string $event, array $data) {
+    // $data contains: operation (fetchAll/fetchRow/fetchColumn), sql, time
+    error_log("Starting {$data['operation']} operation");
+});
+
+subscribe_event('gimli.database.fetch.end', function(string $event, array $data) {
+    // For fetchAll: operation, count, time
+    // For fetchRow: operation, found, time  
+    // For fetchColumn: operation, result, time
+    
+    if ($data['operation'] === 'fetchAll') {
+        error_log("Fetched {$data['count']} rows");
+    } elseif ($data['operation'] === 'fetchRow') {
+        error_log("Row " . ($data['found'] ? 'found' : 'not found'));
+    }
+});
+```
+
+### Generator/Streaming Events
+
+```php
+// Monitor generator operations
+subscribe_event('gimli.database.yield.start', function(string $event, array $data) {
+    // $data contains: operation (yieldRows/yieldRowChunks), sql, time
+    // For yieldRowChunks also includes: chunk_size
+});
+
+subscribe_event('gimli.database.yield.end', function(string $event, array $data) {
+    // For yieldRows: operation, count, time
+    // For yieldRowChunks: operation, chunks, total_rows, time
+    
+    if ($data['operation'] === 'yieldRowChunks') {
+        error_log("Processed {$data['chunks']} chunks with {$data['total_rows']} total rows");
+    }
+});
+
+// Monitor batch operations
+subscribe_event('gimli.database.batch.start', function(string $event, array $data) {
+    // $data contains: operation (yieldBatch), batch_size, sql, time
+});
+
+subscribe_event('gimli.database.batch.end', function(string $event, array $data) {
+    // $data contains: operation, batches, total_rows, time
+    error_log("Processed {$data['batches']} batches with {$data['total_rows']} total rows");
+});
+```
+
+### Transaction Events
+
+```php
+// Monitor individual transaction operations
+subscribe_event('gimli.database.transaction.begin', function(string $event, array $data) {
+    // $data contains: time
+    error_log("Beginning transaction");
+});
+
+subscribe_event('gimli.database.transaction.started', function(string $event, array $data) {
+    // $data contains: success, time
+});
+
+subscribe_event('gimli.database.transaction.commit', function(string $event, array $data) {
+    // $data contains: time
+});
+
+subscribe_event('gimli.database.transaction.committed', function(string $event, array $data) {
+    // $data contains: success, time
+});
+
+subscribe_event('gimli.database.transaction.rollback', function(string $event, array $data) {
+    // $data contains: time
+});
+
+subscribe_event('gimli.database.transaction.rolledback', function(string $event, array $data) {
+    // $data contains: success, time
+});
+
+// Monitor transaction wrapper
+subscribe_event('gimli.database.transaction.wrapper.start', function(string $event, array $data) {
+    // $data contains: nested (bool), time
+    if ($data['nested']) {
+        error_log("Starting nested transaction");
+    }
+});
+
+subscribe_event('gimli.database.transaction.wrapper.success', function(string $event, array $data) {
+    // $data contains: nested (bool), time
+});
+
+subscribe_event('gimli.database.transaction.wrapper.error', function(string $event, array $data) {
+    // $data contains: nested (bool), error (string), time
+    error_log("Transaction failed: " . $data['error']);
+});
+```
+
+### Event Usage Examples
+
+#### Performance Monitoring
+
+```php
+use function Gimli\Events\subscribe_event;
+
+class Database_Performance_Monitor {
+    private array $query_times = [];
+    
+    public function __construct() {
+        subscribe_event('gimli.database.start', [$this, 'startQuery']);
+        subscribe_event('gimli.database.end', [$this, 'endQuery']);
+    }
+    
+    public function startQuery(string $event, array $data): void {
+        $this->query_times[$data['sql']] = $data['time'];
+    }
+    
+    public function endQuery(string $event, array $data): void {
+        $start = $this->query_times[$data['sql']] ?? $data['time'];
+        $duration = $data['time'] - $start;
+        
+        if ($duration > 1.0) { // Log slow queries
+            error_log("Slow query ({$duration}s): " . $data['sql']);
+        }
+        
+        unset($this->query_times[$data['sql']]);
+    }
+}
+```
+
+## Complete Event Reference
+
+| Event Name | Trigger | Data Fields |
+|------------|---------|-------------|
+| `gimli.database.start` | Before any SQL execution | `sql`, `time` |
+| `gimli.database.end` | After any SQL execution | `sql`, `time` |
+| `gimli.database.insert.start` | Before insert operation | `table`, `data`, `time` |
+| `gimli.database.insert.end` | After insert operation | `table`, `success`, `time` |
+| `gimli.database.update.start` | Before update operation | `table`, `data`, `time` |
+| `gimli.database.update.end` | After update operation | `table`, `success`, `time` |
+| `gimli.database.fetch.start` | Before fetch operation | `operation`, `sql`, `time` |
+| `gimli.database.fetch.end` | After fetch operation | `operation`, varies by type, `time` |
+| `gimli.database.yield.start` | Before generator operation | `operation`, `sql`, `time`, optional `chunk_size` |
+| `gimli.database.yield.end` | After generator operation | `operation`, varies by type, `time` |
+| `gimli.database.batch.start` | Before batch operation | `operation`, `batch_size`, `sql`, `time` |
+| `gimli.database.batch.end` | After batch operation | `operation`, `batches`, `total_rows`, `time` |
+| `gimli.database.transaction.begin` | Before transaction start | `time` |
+| `gimli.database.transaction.started` | After transaction start | `success`, `time` |
+| `gimli.database.transaction.commit` | Before transaction commit | `time` |
+| `gimli.database.transaction.committed` | After transaction commit | `success`, `time` |
+| `gimli.database.transaction.rollback` | Before transaction rollback | `time` |
+| `gimli.database.transaction.rolledback` | After transaction rollback | `success`, `time` |
+| `gimli.database.transaction.wrapper.start` | Before transaction wrapper | `nested`, `time` |
+| `gimli.database.transaction.wrapper.success` | After successful transaction wrapper | `nested`, `time` |
+| `gimli.database.transaction.wrapper.error` | After failed transaction wrapper | `nested`, `error`, `time` |
+
 ## Best Practices
 
 1. **Use helper functions for simple queries**
@@ -369,6 +573,12 @@ The Faker system provides various data types for seeding:
    - Set specific seeds when generating test data to ensure consistency across test runs.
 
 6. **Organize models by domain**
-   - Group related models together in namespaces based on their domain/functionality. 
+   - Group related models together in namespaces based on their domain/functionality.
+
+7. **Monitor database performance with events**
+   - Use database events to track slow queries, monitor transaction patterns, and implement caching strategies.
+
+8. **Handle transaction events appropriately**
+   - Use transaction events for cleanup operations, cache invalidation, or audit logging.
 
 [Home](https://dvnc0.github.io/gimli-php/)

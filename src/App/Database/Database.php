@@ -10,6 +10,8 @@ use Throwable;
 use PDOException;
 use InvalidArgumentException;
 
+use function Gimli\Events\publish_event;
+
 class Database {
 
 	/**
@@ -34,8 +36,11 @@ class Database {
 	 * @return bool
 	 */
 	public function execute(string $sql, array $params = []): bool {
+		publish_event('gimli.database.start', ['sql' => $sql, 'time' => microtime(TRUE)]);
 		$stmt = $this->db->prepare($sql);
-		return $stmt->execute($params);
+		$result = $stmt->execute($params);
+		publish_event('gimli.database.end', ['sql' => $sql, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -57,6 +62,7 @@ class Database {
 	 * @return boolean
 	 */
 	public function update(string $table, string $where, array $data, array $params = []): bool {
+		publish_event('gimli.database.update.start', ['table' => $table, 'data' => $data, 'time' => microtime(TRUE)]);
 		$set = [];
 		foreach ($data as $key => $value) {
 			$set[]             = "{$key} = :{$key}";
@@ -64,7 +70,9 @@ class Database {
 		}
 		$set = implode(', ', $set);
 		$sql = "UPDATE {$table} SET {$set} WHERE {$where}";
-		return $this->execute($sql, $params);
+		$result = $this->execute($sql, $params);
+		publish_event('gimli.database.update.end', ['table' => $table, 'success' => $result, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -75,11 +83,14 @@ class Database {
 	 * @return boolean
 	 */
 	public function insert(string $table, array $data): bool {
+		publish_event('gimli.database.insert.start', ['table' => $table, 'data' => $data, 'time' => microtime(TRUE)]);
 		$keys    = array_keys($data);
 		$columns = implode(', ', $keys);
 		$values  = ':' . implode(', :', $keys);
 		$sql     = "INSERT INTO {$table} ({$columns}) VALUES ({$values})";
-		return $this->execute($sql, $data);
+		$result = $this->execute($sql, $data);
+		publish_event('gimli.database.insert.end', ['table' => $table, 'success' => $result, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -90,9 +101,12 @@ class Database {
 	 * @return array the results of the SQL query
 	 */
 	public function fetchAll(string $sql, array $params = []): array {
+		publish_event('gimli.database.fetch.start', ['operation' => 'fetchAll', 'sql' => $sql, 'time' => microtime(TRUE)]);
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
-		return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+		publish_event('gimli.database.fetch.end', ['operation' => 'fetchAll', 'count' => count($result), 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -103,9 +117,12 @@ class Database {
 	 * @return array the results of the SQL query
 	 */
 	public function fetchRow(string $sql, array $params = []): array {
+		publish_event('gimli.database.fetch.start', ['operation' => 'fetchRow', 'sql' => $sql, 'time' => microtime(TRUE)]);
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
-		return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+		$result = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+		publish_event('gimli.database.fetch.end', ['operation' => 'fetchRow', 'found' => !empty($result), 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -116,9 +133,12 @@ class Database {
 	 * @return mixed the results of the SQL query
 	 */
 	public function fetchColumn(string $sql, array $params = []): mixed {
+		publish_event('gimli.database.fetch.start', ['operation' => 'fetchColumn', 'sql' => $sql, 'time' => microtime(TRUE)]);
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
-		return $stmt->fetchColumn();
+		$result = $stmt->fetchColumn();
+		publish_event('gimli.database.fetch.end', ['operation' => 'fetchColumn', 'result' => $result, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -130,16 +150,20 @@ class Database {
 	 * @throws PDOException
 	 */
 	public function yieldRows(string $sql, array $params = []): Generator {
+		publish_event('gimli.database.yield.start', ['operation' => 'yieldRows', 'sql' => $sql, 'time' => microtime(TRUE)]);
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
 		
+		$row_count = 0;
 		try {
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$row_count++;
 				yield $row;
 			}
 		} finally {
 			// Ensure the statement cursor is closed
 			$stmt->closeCursor();
+			publish_event('gimli.database.yield.end', ['operation' => 'yieldRows', 'count' => $row_count, 'time' => microtime(TRUE)]);
 		}
 	}
 
@@ -157,25 +181,32 @@ class Database {
 			throw new InvalidArgumentException('Chunk size must be greater than 0');
 		}
 
+		publish_event('gimli.database.yield.start', ['operation' => 'yieldRowChunks', 'chunk_size' => $chunk_size, 'sql' => $sql, 'time' => microtime(TRUE)]);
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($params);
 		
+		$chunk_count = 0;
+		$total_rows = 0;
 		try {
 			$chunk = [];
 			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 				$chunk[] = $row;
+				$total_rows++;
 				
 				if (count($chunk) >= $chunk_size) {
+					$chunk_count++;
 					yield $chunk;
 					$chunk = [];
 				}
 			}
 			
 			if (!empty($chunk)) {
+				$chunk_count++;
 				yield $chunk;
 			}
 		} finally {
 			$stmt->closeCursor();
+			publish_event('gimli.database.yield.end', ['operation' => 'yieldRowChunks', 'chunks' => $chunk_count, 'total_rows' => $total_rows, 'time' => microtime(TRUE)]);
 		}
 	}
 
@@ -204,18 +235,25 @@ class Database {
 			}
 		}
 
+		publish_event('gimli.database.batch.start', ['operation' => 'yieldBatch', 'batch_size' => $batch_size, 'sql' => $sql, 'time' => microtime(TRUE)]);
 		$offset = 0;
+		$batch_count = 0;
+		$total_rows = 0;
 		
 		do {
 			$batch_sql = $sql . " LIMIT {$batch_size} OFFSET {$offset}";
 			$batch     = $this->fetchAll($batch_sql, $params);
 			
 			if (!empty($batch)) {
+				$batch_count++;
+				$total_rows += count($batch);
 				yield $batch;
 			}
 			
 			$offset += $batch_size;
 		} while (count($batch) === $batch_size);
+		
+		publish_event('gimli.database.batch.end', ['operation' => 'yieldBatch', 'batches' => $batch_count, 'total_rows' => $total_rows, 'time' => microtime(TRUE)]);
 	}
 
 	/**
@@ -225,7 +263,10 @@ class Database {
 	 * @throws PDOException
 	 */
 	public function beginTransaction(): bool {
-		return $this->db->beginTransaction();
+		publish_event('gimli.database.transaction.begin', ['time' => microtime(TRUE)]);
+		$result = $this->db->beginTransaction();
+		publish_event('gimli.database.transaction.started', ['success' => $result, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -235,7 +276,10 @@ class Database {
 	 * @throws PDOException
 	 */
 	public function commit(): bool {
-		return $this->db->commit();
+		publish_event('gimli.database.transaction.commit', ['time' => microtime(TRUE)]);
+		$result = $this->db->commit();
+		publish_event('gimli.database.transaction.committed', ['success' => $result, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -245,7 +289,10 @@ class Database {
 	 * @throws PDOException
 	 */
 	public function rollback(): bool {
-		return $this->db->rollback();
+		publish_event('gimli.database.transaction.rollback', ['time' => microtime(TRUE)]);
+		$result = $this->db->rollback();
+		publish_event('gimli.database.transaction.rolledback', ['success' => $result, 'time' => microtime(TRUE)]);
+		return $result;
 	}
 
 	/**
@@ -268,6 +315,8 @@ class Database {
 	public function transaction(callable $callback): mixed {
 		$was_in_transaction = $this->inTransaction();
 		
+		publish_event('gimli.database.transaction.wrapper.start', ['nested' => $was_in_transaction, 'time' => microtime(TRUE)]);
+		
 		if (!$was_in_transaction) {
 			$this->beginTransaction();
 		}
@@ -279,11 +328,13 @@ class Database {
 				$this->commit();
 			}
 			
+			publish_event('gimli.database.transaction.wrapper.success', ['nested' => $was_in_transaction, 'time' => microtime(TRUE)]);
 			return $result;
 		} catch (Throwable $e) {
 			if (!$was_in_transaction) {
 				$this->rollback();
 			}
+			publish_event('gimli.database.transaction.wrapper.error', ['nested' => $was_in_transaction, 'error' => $e->getMessage(), 'time' => microtime(TRUE)]);
 			throw $e;
 		}
 	}

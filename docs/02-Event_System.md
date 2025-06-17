@@ -220,6 +220,19 @@ $Event_Manager->subscribe('gimli.application.end', function($event, $args) {
 });
 ```
 
+### Database Events
+
+The Database system publishes comprehensive events for monitoring database operations. These events include timing information and operation details for performance monitoring, logging, and caching implementations.
+
+Key event categories:
+- **Query Execution**: `gimli.database.start` / `gimli.database.end`
+- **Data Operations**: `gimli.database.insert.*` / `gimli.database.update.*`
+- **Fetch Operations**: `gimli.database.fetch.*`
+- **Streaming**: `gimli.database.yield.*` / `gimli.database.batch.*`
+- **Transactions**: `gimli.database.transaction.*`
+
+For complete documentation and examples of database events, see the [Database System](03-Database_System.md#database-events) documentation.
+
 ## Best Practices
 
 1. **Use descriptive event names**:
