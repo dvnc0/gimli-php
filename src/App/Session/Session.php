@@ -338,6 +338,7 @@ class Session implements Session_Interface {
 		ini_set('session.entropy_length', (string)$this->getConfigValue('entropy_length'));
 		ini_set('session.hash_function', $this->getConfigValue('hash_function'));
 		ini_set('session.hash_bits_per_character', (string)$this->getConfigValue('hash_bits_per_character'));
+
 	}
 
 	/**
@@ -374,7 +375,17 @@ class Session implements Session_Interface {
 	 */
 	private function validateSession(): void {
 		if (session_status() !== PHP_SESSION_ACTIVE) {
-			throw new \Exception('Session is not active');
+			// Try to initialize the session instead of immediately throwing an exception
+			try {
+				$this->initializeSecureSession();
+			} catch (\Throwable $e) {
+				throw new \Exception('Session could not be initialized: ' . $e->getMessage());
+			}
+			
+			// If session is still not active after initialization attempt, then throw
+			if (session_status() !== PHP_SESSION_ACTIVE) {
+				throw new \Exception('Session is not active and could not be started');
+			}
 		}
 
 		$current_time = time();
@@ -482,10 +493,17 @@ class Session implements Session_Interface {
 	 * @return string
 	 */
 	private function generateFingerprint(): string {
+		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+		
+		// Normalize User-Agent for PWA compatibility
+		// Remove common PWA/WebView indicators that change between contexts
+		$user_agent = preg_replace('/\s*\[wv\]/', '', $user_agent); // Remove WebView indicator
+		$user_agent = preg_replace('/\s*Mobile\s*Safari\/[\d.]+/', ' Mobile Safari', $user_agent); // Normalize Safari version
+		
 		$components = [
-			$_SERVER['HTTP_USER_AGENT'] ?? '',
+			$user_agent,
 			$_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '',
-			$_SERVER['HTTP_ACCEPT_ENCODING'] ?? '',
+			// Removed HTTP_ACCEPT_ENCODING as it can vary between PWA and browser
 		];
 		
 		return hash('sha256', implode('|', $components));
@@ -529,6 +547,21 @@ class Session implements Session_Interface {
 			   (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
 			   (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on') ||
 			   (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+	}
+
+	/**
+	 * Check if the request is from a PWA (Progressive Web App) context
+	 * 
+	 * @return bool
+	 */
+	private function isPwa(): bool {
+		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+		
+		// Check for PWA indicators
+		return strpos($user_agent, '[wv]') !== false || // WebView indicator
+			   (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'com.android.browser.application_id') ||
+			   (!empty($_SERVER['HTTP_SEC_FETCH_SITE']) && $_SERVER['HTTP_SEC_FETCH_SITE'] === 'same-origin' && 
+			    !empty($_SERVER['HTTP_SEC_FETCH_MODE']) && $_SERVER['HTTP_SEC_FETCH_MODE'] === 'navigate');
 	}
 
 	/**
