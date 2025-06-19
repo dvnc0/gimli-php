@@ -137,7 +137,7 @@ Route::get('/users/:id', [UserController::class, 'show']);
 Route::group('/admin', function() {
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/users', [AdminController::class, 'users']);
-})->addMiddleware(AdminMiddleware::class);
+}, [AdminMiddleware::class]);
 ```
 
 If you set `autoload_routes` to `true` in your config, Gimli will automatically load all PHP files in your routes directory.

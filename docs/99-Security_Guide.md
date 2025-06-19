@@ -60,6 +60,7 @@ return [
         'cookie_httponly' => true,        // HttpOnly cookies
         'cookie_secure' => true,          // Secure cookies
         'cookie_samesite' => 'Strict',    // SameSite policy
+        'cookie_lifetime' => 0,           // 0 = session cookies, non-zero = persistent cookies
     ],
 ];
 ```
@@ -72,6 +73,26 @@ Security features include:
 - Secure cookie settings
 - Protection against session fixation
 - Data size limits to prevent DoS
+- Automatic session initialization
+- PWA compatibility features
+
+#### PWA and Mobile App Considerations
+
+For Progressive Web Apps (PWAs) and mobile applications using WebView:
+
+1. Set `cookie_samesite` to `'Lax'` for better PWA compatibility
+2. Set `enable_fingerprinting` to `false` or use the enhanced fingerprinting that normalizes user-agent strings
+3. Set `cookie_lifetime` to a non-zero value (in seconds) for persistent sessions
+
+```php
+'session' => [
+    'enable_fingerprinting' => false,  // Disable fingerprinting for PWA compatibility
+    'cookie_samesite' => 'Lax',        // Less restrictive SameSite setting for PWAs
+    'cookie_lifetime' => 604800,       // 1 week in seconds (persistent sessions)
+],
+```
+
+The Session class provides built-in WebView detection and user-agent normalization to improve compatibility with various mobile contexts.
 
 ### Model Mass Assignment Protection
 

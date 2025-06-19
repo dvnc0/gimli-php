@@ -374,6 +374,9 @@ The Session class provides:
 - Protection against session fixation
 - Automatic session regeneration
 - Session timeouts (inactivity and absolute)
+- Self-initializing sessions (no manual session_start required)
+- Progressive Web App (PWA) compatibility features
+- User-agent normalization for consistent device identification
 
 ## Organizing Routes
 

@@ -82,7 +82,7 @@ These settings configure the template engine:
     'cookie_httponly' => true,           // HttpOnly flag prevents JavaScript access
     'cookie_secure' => 'auto',           // Auto-detect HTTPS ('auto', true, false)
     'cookie_samesite' => 'Strict',       // SameSite attribute ('Strict', 'Lax', 'None')
-    'cookie_lifetime' => 0,              // Session cookies only (0 = browser session)
+    'cookie_lifetime' => 0,              // Session cookies only (0 = browser session, non-zero = seconds until expiration)
     
     // PHP session settings
     'use_strict_mode' => true,           // Strict session mode
@@ -113,6 +113,24 @@ The session configuration provides extensive options for security and performanc
 - `cookie_httponly`: Prevents JavaScript from accessing the session cookie
 - `cookie_secure`: Ensures cookies are only sent over HTTPS
 - `cookie_samesite`: Controls when cookies are sent with cross-site requests
+- `cookie_lifetime`: Controls cookie persistence:
+  - `0`: Session cookie (expires when browser closes)
+  - `604800`: Example for 1 week persistence (in seconds)
+  - **Note**: For sessions to persist across browser restarts, this must be non-zero
+
+#### Progressive Web App (PWA) Compatibility
+For applications that run as PWAs or in WebView contexts, consider these settings:
+- `enable_fingerprinting`: Set to `false` for better PWA compatibility
+- `cookie_samesite`: Set to `'Lax'` instead of `'Strict'` for PWA contexts
+- `cookie_lifetime`: Set to non-zero value (e.g., `604800` for 1 week)
+
+#### Server-Side Session Storage
+The server's `session.gc_maxlifetime` value in php.ini also affects session persistence.
+If sessions expire too quickly, check:
+1. Your application's `max_lifetime` setting
+2. Server's PHP configuration for `session.gc_maxlifetime`
+
+Both values should be set to the desired session duration in seconds.
 
 ### Events Configuration
 
