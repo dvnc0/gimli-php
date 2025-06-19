@@ -4,8 +4,39 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use Gimli\Database\Database;
 use Gimli\Database\Pdo_Manager;
+use Gimli\Application;
+use Gimli\Application_Registry;
+use Gimli\Injector\Injector_Interface;
+use Gimli\Events\Event_Manager;
 
 class Database_Test extends TestCase {
+
+	protected function setUp(): void {
+		// Clear any existing Application_Registry
+		Application_Registry::clear();
+		
+		// Create mock Event_Manager that doesn't do anything
+		$eventManagerMock = $this->createMock(Event_Manager::class);
+		// publish() method has void return type, so we don't need to specify willReturn()
+		
+		// Create mock Injector
+		$injectorMock = $this->createMock(Injector_Interface::class);
+		$injectorMock->method('resolve')
+			->with(Event_Manager::class)
+			->willReturn($eventManagerMock);
+		
+		// Create mock Application
+		$applicationMock = $this->createMock(Application::class);
+		$applicationMock->Injector = $injectorMock;
+		
+		// Set the mock Application in the registry
+		Application_Registry::set($applicationMock);
+	}
+
+	protected function tearDown(): void {
+		// Clean up after each test
+		Application_Registry::clear();
+	}
 
 	private function getPdoManagerMock(): Pdo_Manager {
 		$pdoMock = $this->createMock(PDO::class);
