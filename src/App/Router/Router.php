@@ -52,7 +52,7 @@ class Router {
 		':integer' => "([0-9]{1,10})",              // Only digits, max 10 digits
 		':numeric' => "([0-9]+(?:\.[0-9]+)?)",          // Proper decimal format
 		':id' => "([1-9][0-9]{0,9})",              // Positive integers, max 10 digits
-		':slug' => "([a-zA-Z0-9-]{1,100})",        // URL-safe slugs, max 100
+		':slug' => "([a-zA-Z0-9-_]{1,100})",        // URL-safe slugs, max 100
 		':uuid' => "([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})", // UUID format
 	];
 
