@@ -127,10 +127,10 @@ class Router {
 		
 		$route_match = [];
 
-		foreach($this->routes[$type] as $route) {
-
-			if ($route === $uri) {
-				$route_match = $route;
+		foreach($this->routes[$type] as $path => $route) {
+			if ($path === $uri) {
+				$route_match['route_info'] = $route;
+				$route_match['args'] = []; // this is empty because the path is the same as the uri
 				break;
 			}
 
@@ -180,7 +180,7 @@ class Router {
 		}
 
 		if (is_callable($route_match['route_info']['handler'])) {
-			call_user_func_array($route_match['route_info']['handler'], $route_match['args'] ?: []);
+			echo call_user_func_array($route_match['route_info']['handler'], $route_match['args'] ?: []);
 			return;
 		}
 
@@ -289,7 +289,7 @@ class Router {
 		$cli_route = $cli_routes[$cli_command];
 
 		if (is_callable($cli_route['handler'])) {
-			call_user_func_array($cli_route['handler'], array_slice($cli_args, 1));
+			echo call_user_func_array($cli_route['handler'], array_slice($cli_args, 1));
 			return;
 		}
 
