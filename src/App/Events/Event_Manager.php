@@ -172,7 +172,7 @@ class Event_Manager {
 					call_user_func_array($callback, [$event, $args]);
 				}
 			} catch (Throwable $e) {
-				error_log('Error publishing event: ' . $e->getMessage());
+				error_log('[' . $event . '] Error publishing event: ' . $e->getMessage());
 				throw $e;
 			}
 		}
