@@ -29,6 +29,15 @@ class Database {
 	}
 
 	/**
+	 * Close the database connection
+	 *
+	 * @return void
+	 */
+	public function closeConnection(): void {
+		$this->Pdo_Manager->closeConnection();
+	}
+
+	/**
 	 * Executes a SQL query
 	 *
 	 * @param string $sql    the SQL query to execute
@@ -338,6 +347,4 @@ class Database {
 			throw $e;
 		}
 	}
-
-
 }
