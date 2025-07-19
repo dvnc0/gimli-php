@@ -12,6 +12,7 @@ use Gimli\Middleware\Middleware_Response;
 use Exception;
 use ReflectionNamedType;
 
+use function Gimli\Environment\get_config_value;
 use function Gimli\Injector\resolve;
 
 /**
@@ -36,6 +37,11 @@ class Router {
 	 * @var bool $trailing_slash_matters
 	 */
 	protected bool $trailing_slash_matters = TRUE;
+
+	/**
+	 * @var bool $auto_handle_options
+	 */
+	protected bool $auto_handle_options = TRUE;
 
 	/**
 	 * @var Request $Request
@@ -69,7 +75,8 @@ class Router {
 		"PUT",
 		"POST",
 		"DELETE",
-		"PATCH"
+		"PATCH",
+		"OPTIONS",
 	];
 	
 	/**
@@ -82,6 +89,7 @@ class Router {
 	public function __construct(Application $Application) {
 		$this->Application = $Application;
 		$this->Dispatch    = $this->Injector->resolve(Dispatch::class);
+		$this->auto_handle_options = get_config_value('auto_handle_options') ?? TRUE;
 	}
 
 	/**
@@ -123,6 +131,11 @@ class Router {
 
 		if (!in_array($type, $this->allowed_methods)) {
 			throw new Exception("Request method {$type} not allowed");
+		}
+		
+		if ($type === 'OPTIONS' && $this->auto_handle_options) {
+			$this->handleOptionsRequest($uri);
+			return;
 		}
 		
 		$route_match = [];
@@ -447,6 +460,51 @@ class Router {
 			default:
 				throw new Exception("Unsupported cast type: {$type}");
 		}
+	}
+
+	/**
+	 * Handle OPTIONS requests automatically
+	 *
+	 * @param string $uri The requested URI
+	 * @return void
+	 */
+	protected function handleOptionsRequest(string $uri): void {
+		$search_keys   = array_keys($this->patterns);
+		$replace_regex = array_values($this->patterns);
+		$allowed_methods = [];
+
+		foreach (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as $method) {
+			if (!isset($this->routes[$method])) {
+				continue;
+			}
+
+			foreach ($this->routes[$method] as $path => $route) {
+				if ($path === $uri) {
+					$allowed_methods[] = $method;
+					break;
+				}
+
+				$possible_route = str_replace($search_keys, $replace_regex, $route['route']);
+				if (preg_match('#^' . $possible_route . '$#', $uri)) {
+					$allowed_methods[] = $method;
+					break;
+				}
+			}
+		}
+
+		$allowed_methods[] = 'OPTIONS';
+
+		http_response_code(200);
+		header('Allow: ' . implode(', ', $allowed_methods));
+		
+		if (isset($_SERVER['HTTP_ORIGIN'])) {
+			header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+		}
+		header('Access-Control-Allow-Methods: ' . implode(', ', $allowed_methods));
+		header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
+		header('Access-Control-Max-Age: 86400');
+		
+		return;
 	}
 
 	/**

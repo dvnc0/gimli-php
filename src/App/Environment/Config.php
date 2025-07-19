@@ -82,6 +82,7 @@ class Config {
 		],
 		'autoload_routes' => TRUE,
 		'route_directory' => '/App/Routes/',
+		'auto_handle_options' => TRUE,
 		'enable_latte' => TRUE,
 		'template_base_dir' => 'App/views/',
 		'template_temp_dir' => 'tmp',
