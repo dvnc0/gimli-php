@@ -89,7 +89,7 @@ class Seeder {
 			$iterated_seed += 1;
 
 			$model = resolve($this->class_name);
-			$model->loadFromDataSet($result_set);
+			$model->createFromDataset($result_set);
 			$model->save();
 			
 			if (empty($this->callback)) {

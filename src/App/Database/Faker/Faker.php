@@ -19,8 +19,8 @@ class Faker {
 		'decimal' => 'getRandomFloat',
 		'money' => 'getRandomFloat',
 		'price' => 'getRandomFloat',
-		'one_of' => 'oneOf',
-		'date' => 'randomDate',
+		'one_of' => 'options',
+		'date' => 'date',
 		'bool' => 'getRandomBool',
 		'email' => 'email',
 		'unique_id' => 'getRandomString',
@@ -48,6 +48,7 @@ class Faker {
 		'state_full' => 'stateLong',
 		'tiny_int' => 'tinyInt',
 		'always' => 'always',
+		'uuid' => 'uuid',
 	];
 
 	/**
