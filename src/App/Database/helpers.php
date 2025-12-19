@@ -206,3 +206,64 @@ if (!function_exists('Gimli\Database\yield_batch')) {
 		return $Database->yieldBatch($sql, $params, $batch_size, $order_by);
 	}
 }
+
+if (!function_exists('Gimli\Database\insert')) {
+	/**
+	 * Insert data into a database table
+	 *
+	 * @param string $table the table to insert into
+	 * @param array  $data  the data to insert
+	 * @return bool Returns true on success, false on failure
+	 * @throws PDOException
+	 */
+	function insert(string $table, array $data): bool {
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
+		return $Database->insert($table, $data);
+	}
+}
+
+if (!function_exists('Gimli\Database\update')) {
+	/**
+	 * Update data in a database table
+	 *
+	 * @param string $table the table to update
+	 * @param string $where the WHERE clause for the update
+	 * @param array  $data  the data to update
+	 * @param array  $params the parameters for the WHERE clause
+	 * 
+	 * @return bool Returns true on success, false on failure
+	 * @throws PDOException
+	 */
+	function update(string $table, string $where, array $data, array $params = []): bool {
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
+		return $Database->update($table, $where, $data, $params);
+	}
+}
+
+if (!function_exists('Gimli\Database\insert_batch')) {
+	/**
+	 * Insert multiple rows into a database table
+	 *
+	 * @param string $table the table to insert into
+	 * @param array  $data  the data to insert
+	 * @return bool Returns true on success, false on failure
+	 * @throws PDOException
+	 */
+	function insert_batch(string $table, array $data): bool {
+		$Database = Application_Registry::get()->Injector->resolve(Database::class);
+
+		// need to make a big insert into {table} values (?, ?), (?, ?), ...
+		$values = [];
+		$placeholders = [];
+		foreach ($data as $row) {
+			$row_placeholders = [];
+			foreach ($row as $value) {
+				$values[] = $value;
+				$row_placeholders[] = '?';
+			}
+			$placeholders[] = '(' . implode(', ', $row_placeholders) . ')';
+		}
+		$sql = "INSERT INTO {$table} VALUES " . implode(', ', $placeholders);
+		return $Database->execute($sql, $values);
+	}
+}
