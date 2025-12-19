@@ -334,6 +334,135 @@ class Database_Helpers_Test extends TestCase {
 		$this->assertTrue(function_exists('Gimli\Database\seed_data'));
 	}
 
+	public function testInsertHelper() {
+		$this->setupApplicationRegistry();
+
+		$database = $this->createMock(Database::class);
+		$database->expects($this->once())
+			->method('insert')
+			->with('users', ['name' => 'John', 'email' => 'john@example.com'])
+			->willReturn(true);
+
+		$injector = $this->createMock(Injector::class);
+		$injector->method('resolve')
+			->with(Database::class)
+			->willReturn($database);
+
+		$application = Application_Registry::get();
+		$application->Injector = $injector;
+
+		$result = \Gimli\Database\insert('users', ['name' => 'John', 'email' => 'john@example.com']);
+		$this->assertTrue($result);
+	}
+
+	public function testUpdateHelper() {
+		$this->setupApplicationRegistry();
+
+		$database = $this->createMock(Database::class);
+		$database->expects($this->once())
+			->method('update')
+			->with('users', 'id = ?', ['name' => 'Jane'], [1])
+			->willReturn(true);
+
+		$injector = $this->createMock(Injector::class);
+		$injector->method('resolve')
+			->with(Database::class)
+			->willReturn($database);
+
+		$application = Application_Registry::get();
+		$application->Injector = $injector;
+
+		$result = \Gimli\Database\update('users', 'id = ?', ['name' => 'Jane'], [1]);
+		$this->assertTrue($result);
+	}
+
+	public function testInsertBatchHelper() {
+		$this->setupApplicationRegistry();
+
+		$batchData = [
+			[1, 'John', 'john@example.com'],
+			[2, 'Jane', 'jane@example.com'],
+			[3, 'Bob', 'bob@example.com']
+		];
+
+		$expectedSql = 'INSERT INTO users VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?)';
+		$expectedValues = [1, 'John', 'john@example.com', 2, 'Jane', 'jane@example.com', 3, 'Bob', 'bob@example.com'];
+
+		$database = $this->createMock(Database::class);
+		$database->expects($this->once())
+			->method('execute')
+			->with($expectedSql, $expectedValues)
+			->willReturn(true);
+
+		$injector = $this->createMock(Injector::class);
+		$injector->method('resolve')
+			->with(Database::class)
+			->willReturn($database);
+
+		$application = Application_Registry::get();
+		$application->Injector = $injector;
+
+		$result = \Gimli\Database\insert_batch('users', $batchData);
+		$this->assertTrue($result);
+	}
+
+	public function testInsertBatchHelperWithSingleRow() {
+		$this->setupApplicationRegistry();
+
+		$batchData = [
+			[1, 'John', 'john@example.com']
+		];
+
+		$expectedSql = 'INSERT INTO users VALUES (?, ?, ?)';
+		$expectedValues = [1, 'John', 'john@example.com'];
+
+		$database = $this->createMock(Database::class);
+		$database->expects($this->once())
+			->method('execute')
+			->with($expectedSql, $expectedValues)
+			->willReturn(true);
+
+		$injector = $this->createMock(Injector::class);
+		$injector->method('resolve')
+			->with(Database::class)
+			->willReturn($database);
+
+		$application = Application_Registry::get();
+		$application->Injector = $injector;
+
+		$result = \Gimli\Database\insert_batch('users', $batchData);
+		$this->assertTrue($result);
+	}
+
+	public function testInsertBatchHelperWithDifferentColumnCounts() {
+		$this->setupApplicationRegistry();
+
+		$batchData = [
+			['John', 'john@example.com'],
+			['Jane', 'jane@example.com']
+		];
+
+		$expectedSql = 'INSERT INTO users VALUES (?, ?), (?, ?)';
+		$expectedValues = ['John', 'john@example.com', 'Jane', 'jane@example.com'];
+
+		$database = $this->createMock(Database::class);
+		$database->expects($this->once())
+			->method('execute')
+			->with($expectedSql, $expectedValues)
+			->willReturn(true);
+
+		$injector = $this->createMock(Injector::class);
+		$injector->method('resolve')
+			->with(Database::class)
+			->willReturn($database);
+
+		$application = Application_Registry::get();
+		$application->Injector = $injector;
+
+		$result = \Gimli\Database\insert_batch('users', $batchData);
+		$this->assertTrue($result);
+	}
+
 	public function testHelperFunctionsExist() {
 		// Test that all helper functions are defined
 		$this->assertTrue(function_exists('Gimli\Database\get_database'));
@@ -350,5 +479,8 @@ class Database_Helpers_Test extends TestCase {
 		$this->assertTrue(function_exists('Gimli\Database\with_transaction'));
 		$this->assertTrue(function_exists('Gimli\Database\yield_row_chunks'));
 		$this->assertTrue(function_exists('Gimli\Database\yield_batch'));
+		$this->assertTrue(function_exists('Gimli\Database\insert'));
+		$this->assertTrue(function_exists('Gimli\Database\update'));
+		$this->assertTrue(function_exists('Gimli\Database\insert_batch'));
 	}
 } 

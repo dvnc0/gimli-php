@@ -41,6 +41,9 @@ use function Gimli\Database\fetch_row;
 use function Gimli\Database\fetch_column;
 use function Gimli\Database\row_exists;
 use function Gimli\Database\get_database;
+use function Gimli\Database\insert;
+use function Gimli\Database\update;
+use function Gimli\Database\insert_batch;
 
 // Get all rows from a table
 $users = fetch_all("SELECT * FROM users WHERE status = ?", [1]);
@@ -58,6 +61,23 @@ if (row_exists("SELECT 1 FROM users WHERE email = ?", ['user@example.com'])) {
 
 // Direct access to the database instance
 $Database = get_database();
+
+// Insert a row
+insert('users', ['name' => 'John', 'email' => 'user@example.com']);
+
+// Update a row
+update('users', 'email = :email', ['name' => 'James'], ['email' => 'user@example.com']);
+
+// Insert multiple rows in a single query
+
+$users = [
+    ['name' => 'John', 'email' => 'john@example.com'],
+    ['name' => 'James', 'email' => 'james@example.com'],
+    ['name' => 'Jane', 'email' => 'jane@example.com'],
+];
+
+insert_batch('users', $users);
+
 ```
 
 ### Using the Database Class Directly
