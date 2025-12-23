@@ -160,7 +160,7 @@ class Router {
 		
 		if (empty($route_match)) {
 			http_response_code(404);
-			echo "404 page not found";
+			echo $this->Application->notFound() ?: "404 page not found";
 			return;
 		}
 

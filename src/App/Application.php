@@ -51,6 +51,13 @@ class Application {
 	public Injector_Interface $Injector;
 
 	/**
+	 * @var array<string, array{0: class-string, 1: string}> $special_pages
+	 */
+	protected array $special_pages = [
+		'404' => [],
+	];
+
+	/**
 	 * Create a new Application instance (no longer singleton)
 	 * 
 	 * @param non-empty-string        $app_root         The application root path
@@ -224,6 +231,29 @@ class Application {
 	 */
 	public function isCli(): bool {
 		return \PHP_SAPI === 'cli';
+	}
+
+	/**
+	 * Special pages handlers
+	 * 
+	 * @var array<string, array{0: class-string, 1: string}> $special_pages
+	 */
+	public function setNotFoundPage(array $handler): void {
+		$this->special_pages['404'] = $handler;
+	}
+
+	/**
+	 * Handle 404 Not Found page
+	 * 
+	 * @return string|null
+	 */
+	public function notFound(): ?string {
+		[$handler_class, $handler_method] = $this->special_pages['404'];
+		if (empty($handler_class) || empty($handler_method)) {
+			return NULL;
+		}
+		$handler_class_instance = $this->Injector->resolve($handler_class);
+		return $handler_class_instance->$handler_method();
 	}
 
 	/**
