@@ -252,8 +252,9 @@ class Application {
 		if (empty($handler_class) || empty($handler_method)) {
 			return NULL;
 		}
-		$handler_class_instance = $this->Injector->resolve($handler_class);
-		return $handler_class_instance->$handler_method();
+		
+		$Response = $this->Injector->call($handler_class, $handler_method);
+		return $Response->response_body;
 	}
 
 	/**
