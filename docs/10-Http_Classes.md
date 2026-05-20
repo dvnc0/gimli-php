@@ -60,11 +60,15 @@ $allParams = $Request->getQueryParams();  // ['query' => 'php', 'page' => '2']
 To access data submitted via POST, PUT, or PATCH:
 
 ```php
-// Get a specific post parameter
+// Get a specific post parameter works for $_POST or JSON
 $username = $Request->getPostParam('username');
+// Can also use this for JSON
+$username = $Request->getJsonValue('username');
 
 // Get all post parameters as an array
 $formData = $Request->getPostParams();
+// Again, you can use this for JSON
+$formData = $Request->getJsonValues();
 ```
 
 The Request class automatically handles both form-encoded data and JSON request bodies.

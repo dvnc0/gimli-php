@@ -242,4 +242,23 @@ class Request
 	public function getPostParam($key) {
 		return $this->post[$key] ?? NULL;
 	}
+
+	/**
+	 * Get all JSON values (same as post parameters)
+	 *
+	 * @return array
+	 */
+	public function getJsonValues(): array {
+		return $this->post;
+	}
+
+	/**
+	 * Get a JSON value (same as post parameter)
+	 *
+	 * @param string $key The key of the JSON value
+	 * @return mixed
+	 */
+	public function getJsonValue(string $key): mixed {
+		return $this->post[$key] ?? NULL;
+	}
 }
