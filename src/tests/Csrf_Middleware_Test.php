@@ -122,7 +122,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     public function testBlocksPutRequestWithoutToken(): void {
@@ -135,7 +137,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     public function testBlocksPatchRequestWithoutToken(): void {
@@ -148,7 +152,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     public function testBlocksDeleteRequestWithoutToken(): void {
@@ -161,7 +167,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     // === VALID TOKEN TESTS ===
@@ -236,7 +244,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     public function testBlocksRequestWithExpiredToken(): void {
@@ -253,7 +263,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     public function testBlocksRequestWithEmptyToken(): void {
@@ -266,7 +278,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     // === API ENDPOINT BYPASS TESTS ===
@@ -306,7 +320,9 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
     // === INTEGRATION TESTS ===
@@ -366,9 +382,93 @@ class Csrf_Middleware_Test extends TestCase {
         
         $this->assertInstanceOf(Middleware_Response::class, $response);
         $this->assertFalse($response->success);
-        $this->assertEquals('/error/csrf', $response->message); // Bug: middleware passes URL as message
+        $this->assertEquals('CSRF token mismatch', $response->message);
+        $this->assertNotNull($response->response);
+        $this->assertSame(403, $response->response->response_code);
     }
     
+    public function testFailureIsPlainTextForBrowserRequest(): void {
+        $this->mockRequest->REQUEST_METHOD = 'POST';
+        $this->mockRequest->REQUEST_URI = '/form/submit';
+        $_POST = [];
+
+        $response = (new Csrf_Middleware())->process();
+
+        $this->assertFalse($response->success);
+        $this->assertSame('', $response->forward);
+        $this->assertFalse($response->response->is_json);
+        $this->assertSame(403, $response->response->response_code);
+        $this->assertSame('CSRF token mismatch', $response->response->response_body);
+    }
+
+    public function testFailureIsJsonForXhrRequest(): void {
+        $this->mockRequest->REQUEST_METHOD = 'POST';
+        $this->mockRequest->REQUEST_URI = '/form/submit';
+        $this->mockRequest->HTTP_X_REQUESTED_WITH = 'XMLHttpRequest';
+        $_POST = [];
+
+        $response = (new Csrf_Middleware())->process();
+
+        $this->assertFalse($response->success);
+        $this->assertTrue($response->response->is_json);
+        $this->assertSame(403, $response->response->response_code);
+        $decoded = json_decode($response->response->response_body, true);
+        $this->assertFalse($decoded['success']);
+        $this->assertSame('CSRF token mismatch', $decoded['text']);
+    }
+
+    public function testFailureIsJsonForAcceptJson(): void {
+        $this->mockRequest->REQUEST_METHOD = 'POST';
+        $this->mockRequest->REQUEST_URI = '/form/submit';
+        $this->mockRequest->HTTP_ACCEPT = 'application/json';
+        $_POST = [];
+
+        $response = (new Csrf_Middleware())->process();
+
+        $this->assertTrue($response->response->is_json);
+        $this->assertSame(403, $response->response->response_code);
+    }
+
+    public function testServerSuperglobalAloneDoesNotTriggerJson(): void {
+        $this->mockRequest->REQUEST_METHOD = 'POST';
+        $this->mockRequest->REQUEST_URI = '/form/submit';
+        $_POST = [];
+
+        $had = array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER);
+        $prior = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? null;
+        $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest';
+        try {
+            $response = (new Csrf_Middleware())->process();
+        } finally {
+            if ($had) {
+                $_SERVER['HTTP_X_REQUESTED_WITH'] = $prior;
+            } else {
+                unset($_SERVER['HTTP_X_REQUESTED_WITH']);
+            }
+        }
+
+        $this->assertFalse($response->success);
+        $this->assertFalse($response->response->is_json);
+        $this->assertSame(403, $response->response->response_code);
+    }
+
+    public function testFailureCarriesVaryHeaderTextVariant(): void {
+        $this->mockRequest->REQUEST_METHOD = 'POST';
+        $this->mockRequest->REQUEST_URI = '/form/submit';
+        $_POST = [];
+        $response = (new Csrf_Middleware())->process();
+        $this->assertContains('Vary: Accept, X-Requested-With', $response->response->headers);
+    }
+
+    public function testFailureCarriesVaryHeaderJsonVariant(): void {
+        $this->mockRequest->REQUEST_METHOD = 'POST';
+        $this->mockRequest->REQUEST_URI = '/form/submit';
+        $this->mockRequest->HTTP_ACCEPT = 'application/json';
+        $_POST = [];
+        $response = (new Csrf_Middleware())->process();
+        $this->assertContains('Vary: Accept, X-Requested-With', $response->response->headers);
+    }
+
     public function testHandlesNullRequestMethod(): void {
         $this->mockRequest->REQUEST_METHOD = null;
         

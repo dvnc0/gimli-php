@@ -5,9 +5,11 @@ namespace Gimli\Middleware;
 
 use Gimli\View\Csrf;
 use Gimli\Http\Request;
+use Gimli\Http\Response;
 use Gimli\Middleware\Middleware_Interface;
 use Gimli\Middleware\Middleware_Response;
 
+use function Gimli\Http\sanitize_for_log;
 use function Gimli\Injector\resolve;
 
 class Csrf_Middleware implements Middleware_Interface
@@ -36,11 +38,34 @@ class Csrf_Middleware implements Middleware_Interface
 		
 		if (!Csrf::validateRequest($post_data)) {
 			// Log security event
-			error_log("CSRF validation failed for " . $Request->REQUEST_URI);
+			error_log("CSRF validation failed for " . sanitize_for_log((string) $Request->REQUEST_URI));
 			
-			return new Middleware_Response(FALSE, '/error/csrf');
+			if ($this->expectsJson($Request)) {
+				return Middleware_Response::json([], 'CSRF token mismatch', 403, ['Vary: Accept, X-Requested-With']);
+			}
+
+			$Response = new Response('CSRF token mismatch', FALSE, [], 403);
+			$Response->setHeader('Content-Type: text/plain; charset=UTF-8');
+			$Response->setHeader('Vary: Accept, X-Requested-With');
+
+			return Middleware_Response::respond($Response, 'CSRF token mismatch');
 		}
 		
 		return new Middleware_Response(TRUE);
+	}
+
+	/**
+	 * Does the client look like XHR/fetch wanting JSON?
+	 *
+	 * @param Request $Request the current request
+	 *
+	 * @return bool
+	 */
+	protected function expectsJson(Request $Request): bool {
+		if (strtolower((string) $Request->HTTP_X_REQUESTED_WITH) === 'xmlhttprequest') {
+			return TRUE;
+		}
+
+		return stripos((string) $Request->HTTP_ACCEPT, 'application/json') !== FALSE;
 	}
 } 

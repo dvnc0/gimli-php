@@ -10,9 +10,11 @@ use Gimli\Http\Request;
 use Gimli\Middleware\Middleware_Interface;
 use Gimli\Middleware\Middleware_Response;
 use Exception;
+use RuntimeException;
 use ReflectionNamedType;
 
 use function Gimli\Environment\get_config_value;
+use function Gimli\Http\sanitize_for_log;
 use function Gimli\Injector\resolve;
 
 /**
@@ -60,7 +62,23 @@ class Router {
 		':id' => "([1-9][0-9]{0,9})",              // Positive integers, max 10 digits
 		':slug' => "([a-zA-Z0-9-_]{1,100})",        // URL-safe slugs, max 100
 		':uuid' => "([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})", // UUID format
+		':path' => "((?![a-zA-Z0-9._~/-]{501})[a-zA-Z0-9_~-][a-zA-Z0-9._~-]*(?:/[a-zA-Z0-9_~-][a-zA-Z0-9._~-]*)*)", // One or more /-separated segments, no leading dot or empty segments, max ~500
 	];
+
+	/**
+	 * @var string|null $placeholder_split_regex built lazily by compilePattern()
+	 */
+	protected ?string $placeholder_split_regex = NULL;
+
+	/**
+	 * @var bool $legacy_redirect_noticed the legacy redirect deprecation is raised once per process
+	 */
+	protected static bool $legacy_redirect_noticed = FALSE;
+
+	/**
+	 * @var array<string, string> $compiled_patterns route string => compiled regex
+	 */
+	protected array $compiled_patterns = [];
 
 	/**
 	 * @var Dispatch $Dispatch
@@ -118,9 +136,7 @@ class Router {
 			$this->processCliRequest();
 			return;
 		}
-		$search_keys   = array_keys($this->patterns);
-		$replace_regex = array_values($this->patterns);
-		$uri           = explode('?', $this->Request->REQUEST_URI)[0];
+		$uri = explode('?', $this->Request->REQUEST_URI)[0];
 
 		if ($uri[strlen($uri) - 1] === '/' && !$this->trailing_slash_matters) {
 			$uri                        = substr($uri, 0, strlen($uri) - 1);
@@ -147,8 +163,7 @@ class Router {
 				break;
 			}
 
-			$possible_route = str_replace($search_keys, $replace_regex, $route['route']);
-			if (preg_match('#^' . $possible_route . '$#', $uri, $route_match)) {
+			if (preg_match($this->compilePattern($route['route']), $uri, $route_match)) {
 				$route_match['args']       = array_slice($route_match, 1);
 				if (!empty($route['arg_names'])) {
 					$route_match['args']       = array_combine($route['arg_names'], $route_match['args']);
@@ -186,7 +201,7 @@ class Router {
 			foreach($route_match['route_info']['middleware'] as $middleware) {
 				$middleware_response = $this->callMiddleware($middleware);
 				if ($middleware_response->success === false) {
-					header("Location: " . $middleware_response->forward);
+					$this->handleMiddlewareFailure($middleware_response);
 					return;
 				}
 			}
@@ -463,14 +478,52 @@ class Router {
 	}
 
 	/**
+	 * Compile a route path into a regex, matching literal text literally
+	 * and swapping placeholder tokens for their capture-group patterns
+	 *
+	 * @param string $route The route path, e.g. /posts/:integer/comments/:slug
+	 * 
+	 * @return string The full regex, delimited with # and anchored
+	 * @throws RuntimeException
+	 */
+	protected function compilePattern(string $route): string {
+		if (isset($this->compiled_patterns[$route])) {
+			return $this->compiled_patterns[$route];
+		}
+
+		if ($this->placeholder_split_regex === NULL) {
+			$keys = array_keys($this->patterns);
+			// longest first so :alphanumeric wins over :alpha
+			usort($keys, fn(string $a, string $b): int => strlen($b) <=> strlen($a));
+			$alternation = implode('|', array_map(fn(string $key): string => preg_quote($key, '#'), $keys));
+
+			$this->placeholder_split_regex = '#(' . $alternation . ')#';
+		}
+
+		$pieces = preg_split($this->placeholder_split_regex, $route, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+		if ($pieces === FALSE) {
+			throw new RuntimeException("Failed to compile route pattern '{$route}': " . preg_last_error_msg());
+		}
+
+		$regex = '';
+
+		foreach ($pieces as $piece) {
+			$regex .= $this->patterns[$piece] ?? preg_quote($piece, '#');
+		}
+
+		$this->compiled_patterns[$route] = '#^' . $regex . '$#D';
+
+		return $this->compiled_patterns[$route];
+	}
+
+	/**
 	 * Handle OPTIONS requests automatically
 	 *
 	 * @param string $uri The requested URI
 	 * @return void
 	 */
 	protected function handleOptionsRequest(string $uri): void {
-		$search_keys   = array_keys($this->patterns);
-		$replace_regex = array_values($this->patterns);
 		$allowed_methods = [];
 
 		foreach (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as $method) {
@@ -484,8 +537,7 @@ class Router {
 					break;
 				}
 
-				$possible_route = str_replace($search_keys, $replace_regex, $route['route']);
-				if (preg_match('#^' . $possible_route . '$#', $uri)) {
+				if (preg_match($this->compilePattern($route['route']), $uri)) {
 					$allowed_methods[] = $method;
 					break;
 				}
@@ -496,15 +548,157 @@ class Router {
 
 		http_response_code(200);
 		header('Allow: ' . implode(', ', $allowed_methods));
-		
-		if (isset($_SERVER['HTTP_ORIGIN'])) {
-			header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+
+		$this->sendCorsHeaders($allowed_methods);
+
+		return;
+	}
+
+	/**
+	 * Send the CORS headers. The origin policy is the one OPTIONS has always used:
+	 * the request Origin is echoed back when one is sent. An Origin of "null" is
+	 * never echoed, and an Access-Control-Allow-Origin that is already queued (or
+	 * carried by the response about to be dispatched) is left alone.
+	 *
+	 * @param array<int, string>|null $allowed_methods  When given (preflight), the
+	 *                                                  method/header/max-age headers are sent too
+	 * @param array<int, string>      $response_headers Raw header lines of the response about to be dispatched
+	 *
+	 * @return void
+	 */
+	protected function sendCorsHeaders(?array $allowed_methods = NULL, array $response_headers = []): void {
+		$origin = $_SERVER['HTTP_ORIGIN'] ?? NULL;
+		$sent   = array_merge($this->queuedHeaders(), $response_headers);
+
+		if ($origin !== NULL && $origin !== 'null' && $this->hasHeader($sent, 'access-control-allow-credentials')) {
+			error_log("Origin not echoed, a response with Access-Control-Allow-Credentials needs an explicit origin policy");
+		} elseif ($origin !== NULL && $origin !== 'null' && !$this->hasHeader($sent, 'access-control-allow-origin')) {
+			header('Access-Control-Allow-Origin: ' . $origin);
+			header('Vary: Origin', FALSE);
 		}
+
+		if ($allowed_methods === NULL) {
+			return;
+		}
+
 		header('Access-Control-Allow-Methods: ' . implode(', ', $allowed_methods));
 		header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
 		header('Access-Control-Max-Age: 86400');
-		
-		return;
+	}
+
+	/**
+	 * Headers already queued for this response. Protected so a test subclass can
+	 * override it (xdebug intercepts headers in CLI, where headers_list() sees none).
+	 *
+	 * @return array<int, string>
+	 */
+	protected function queuedHeaders(): array {
+		return headers_list();
+	}
+
+	/**
+	 * Is a header with this name in the list?
+	 *
+	 * @param array<int, string> $headers raw header lines
+	 * @param string             $name    lowercase header name, without the colon
+	 *
+	 * @return bool
+	 */
+	protected function hasHeader(array $headers, string $name): bool {
+		foreach ($headers as $header) {
+			if (stripos(ltrim($header), $name . ':') === 0) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Send the response for a middleware that failed. The handler never runs.
+	 *
+	 * Precedence: a Response on the middleware response, then a forward URL,
+	 * then (deprecated) a "/path" passed as the message, then a bare 403.
+	 * Every branch gets the CORS headers.
+	 *
+	 * @param Middleware_Response $middleware_response the failed middleware response
+	 *
+	 * @return void
+	 */
+	protected function handleMiddlewareFailure(Middleware_Response $middleware_response): void {
+		if (headers_sent()) {
+			error_log("Middleware failure response not sent, output already started");
+			return;
+		}
+
+		$response = $middleware_response->response;
+
+		if ($response !== NULL && ($response->response_code < 300 || $response->response_code > 599)) {
+			error_log("Middleware failed with a non-error status of {$response->response_code}, sending 403");
+			$this->sendCorsHeaders();
+			http_response_code(403);
+			return;
+		}
+
+		if ($response !== NULL) {
+			$this->sendCorsHeaders(NULL, $response->headers);
+			$this->Dispatch->dispatch($response);
+			return;
+		}
+
+		$this->sendCorsHeaders();
+
+		if ($middleware_response->forward !== '') {
+			if (preg_match('/[\x00-\x1F\x7F]/', $middleware_response->forward) === 1) {
+				error_log("Middleware forward location contains control characters, sending 403");
+				http_response_code(403);
+				return;
+			}
+
+			http_response_code(302);
+			header('Location: ' . $middleware_response->forward);
+			return;
+		}
+
+		if ($this->looksLikeLegacyRedirect($middleware_response->message)) {
+			http_response_code(302);
+			header('Location: ' . $middleware_response->message);
+			$this->noticeLegacyRedirect($middleware_response->message);
+			return;
+		}
+
+		error_log("Middleware failed without a response or forward location, sending 403. Message: " . sanitize_for_log($middleware_response->message));
+		http_response_code(403);
+	}
+
+	/**
+	 * Raise the legacy-redirect deprecation, once per process
+	 *
+	 * @param string $url the redirect target that was passed as the message
+	 *
+	 * @return void
+	 */
+	protected function noticeLegacyRedirect(string $url): void {
+		if (static::$legacy_redirect_noticed === TRUE) {
+			return;
+		}
+
+		static::$legacy_redirect_noticed = TRUE;
+
+		$example = var_export(substr($url, 0, 100), TRUE);
+		$notice  = "Middleware_Response received a redirect URL as its second argument (message), which is deprecated. Use Middleware_Response::redirect({$example}) or pass the URL as the third argument (forward).";
+		trigger_error($notice, E_USER_DEPRECATED);
+	}
+
+	/**
+	 * Is the message a plain local path (one leading slash, safe characters only) rather than text?
+	 *
+	 * @param string $message the middleware message
+	 *
+	 * @return bool
+	 */
+	protected function looksLikeLegacyRedirect(string $message): bool {
+		return preg_match('#^(?!.*(?://|/\./))/[A-Za-z0-9\-._~!$&\'()*+,;=:@/%?\#\[\]]*$#D', $message) === 1;
 	}
 
 	/**

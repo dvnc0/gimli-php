@@ -225,10 +225,14 @@ class CsrfMiddleware implements Middleware_Interface {
         }
         
         // CSRF validation failed
-        return new Middleware_Response(false, '/error/csrf');
+        return Middleware_Response::json([], 'CSRF token mismatch', 403);
     }
 }
 ```
+
+See [Failing a Middleware](05-Routing_System.md#failing-a-middleware) for the other ways a middleware can respond.
+
+> **Behaviour change:** the built-in `Gimli\Middleware\Csrf_Middleware` no longer redirects to `/error/csrf` on a failed check. It now sends `403` with the message `CSRF token mismatch`: a JSON response (`{"success": false, "body": [], "text": "CSRF token mismatch"}`) when the request sends `X-Requested-With: XMLHttpRequest` or an `Accept` header containing `application/json` (both read from the `Request` object), and a plain text `403` response otherwise. Applications relying on the `/error/csrf` redirect should check for the `403` instead, or write their own middleware that returns `Middleware_Response::redirect('/error/csrf')`.
 
 Apply the middleware to routes:
 

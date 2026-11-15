@@ -341,4 +341,14 @@ class Request_Test extends TestCase {
         $this->assertEquals('value', $postRequest->getPostParam('mixed'));
         $this->assertEquals('456', $postRequest->getPostParam('numeric'));
     }
-} 
+
+    public function testHttpXRequestedWithPopulatedFromConstructorArray(): void {
+        $request = new Request(['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest', 'REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/']);
+        $this->assertSame('XMLHttpRequest', $request->HTTP_X_REQUESTED_WITH);
+    }
+
+    public function testHttpAcceptPopulatedFromConstructorArray(): void {
+        $request = new Request(['HTTP_ACCEPT' => 'application/json', 'REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/']);
+        $this->assertSame('application/json', $request->HTTP_ACCEPT);
+    }
+}

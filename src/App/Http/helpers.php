@@ -6,6 +6,19 @@ namespace Gimli\Http;
 use Gimli\Http\Response;
 use Gimli\Application_Registry;
 
+if (!function_exists('Gimli\Http\sanitize_for_log')) {
+	/**
+	 * Escape control characters and cap the length so a value cannot forge log lines
+	 *
+	 * @param string $value      the value to log
+	 * @param int    $max_length the maximum number of bytes kept
+	 * @return string
+	 */
+	function sanitize_for_log(string $value, int $max_length = 200): string {
+		return addcslashes(substr($value, 0, $max_length), "\0..\37\177");
+	}
+}
+
 if (!function_exists('Gimli\Http\response')) {
 	/**
 	 * Returns a response
