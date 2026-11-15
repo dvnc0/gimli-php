@@ -238,6 +238,26 @@ Route::get('/api/users/:id', function(Request $Request, Response $Response, int 
 });
 ```
 
+## Responses from Middleware
+
+A failing middleware can send a `Response` instead of letting the route handler run, for example a 401 JSON response. Build it with `Middleware_Response::json()`, `redirect()` or `respond()`:
+
+```php
+<?php
+use Gimli\Http\Response;
+use Gimli\Middleware\Middleware_Response;
+
+// {"success": false, "body": [], "text": "Unauthorized"} with status 401
+return Middleware_Response::json([], 'Unauthorized', 401, ['WWW-Authenticate: Bearer']);
+
+// Any Response with a status of 400 to 599
+return Middleware_Response::respond(new Response('Forbidden', FALSE, [], 403), 'Forbidden');
+```
+
+The router dispatches that response with its status code and headers. `Set-Cookie`, `WWW-Authenticate` and `Vary` headers are appended rather than replacing earlier ones, and a `Content-Type` header on the response overrides the default `application/json`. See [Failing a Middleware](05-Routing_System.md#failing-a-middleware) for details, including the trusted-URL rule for `redirect()`.
+
+`setJsonResponse()` (and so `json_response()` and `Middleware_Response::json()`) encodes with `JSON_INVALID_UTF8_SUBSTITUTE`: invalid UTF-8 in your data is replaced with U+FFFD rather than failing. Data that cannot be encoded at all (for example `NAN` or a resource) still fails loudly with a `TypeError`.
+
 ## Best Practices
 
 1. **Use dependency injection**: Let Gimli inject the Request and Response objects into your controllers.

@@ -30,6 +30,10 @@ class Request
 	 */
 	public $HTTP_ACCEPT;
 	/**
+	 * @var string $HTTP_X_REQUESTED_WITH
+	 */
+	public $HTTP_X_REQUESTED_WITH;
+	/**
 	 * @var string $HTTP_ACCEPT_ENCODING
 	 */
 	public $HTTP_ACCEPT_ENCODING;

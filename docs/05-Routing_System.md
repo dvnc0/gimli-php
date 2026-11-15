@@ -93,6 +93,23 @@ Gimli supports various parameter patterns:
 | `:id` | ID values | Positive integers only, max 10 digits |
 | `:slug` | URL-friendly slugs | Alphanumeric + hyphens, max 100 chars |
 | `:uuid` | UUID values | Standard UUID format |
+| `:path` | One or more `/`-separated segments | Letters, digits, `.` `_` `~` `-` per segment; segments cannot be empty or start with `.`; no trailing `/`; max ~500 chars |
+
+#### Catch-all and multi-segment routes
+
+Use `:path` to capture several URL segments in one parameter. The capture does not include the slash before the placeholder:
+
+```php
+<?php
+// /docs/guide/intro => $page = "guide/intro"
+Route::get('/docs/:path#page', function(string $page) {
+    echo "Page: " . $page;
+});
+```
+
+#### Literal route paths
+
+Route paths are matched literally. Characters such as `.`, `+`, `(`, `)`, `*` and `?` are no longer treated as regular expression syntax, so `/sitemap.xml` matches only `/sitemap.xml`. Raw-regex routes such as `/.*` or `/(.*)` no longer work; use `:path` for catch-all routes instead. An optional trailing slash (for example `/users/?`) is not supported.
 
 ### Parameter Validation & Security
 
@@ -199,7 +216,7 @@ class AuthMiddleware implements Middleware_Interface {
         // Check if user is authenticated
         if (!$this->isAuthenticated()) {
             // Redirect to login page if not authenticated
-            return new Middleware_Response(false, '/login');
+            return Middleware_Response::redirect('/login');
         }
         
         // Allow request to continue
@@ -212,6 +229,71 @@ class AuthMiddleware implements Middleware_Interface {
     }
 }
 ```
+
+### Failing a Middleware
+
+A middleware either lets the request through with `new Middleware_Response(true)` or stops it. When a middleware fails, the route handler is never called and the router sends the response the middleware describes. Use one of the factory methods:
+
+| Factory | Sends |
+|---------|-------|
+| `Middleware_Response::redirect(string $url, int $status = 302)` | A redirect with a `Location` header. `$status` must be 3xx and the URL must not contain control characters. |
+| `Middleware_Response::json(array $body = [], string $message = 'Unauthorized', int $status = 401, array $headers = [])` | A JSON response. `$status` must be 400 to 599. |
+| `Middleware_Response::respond(Response $response, string $message = '')` | Any `Gimli\Http\Response` you build. Its status must be 400 to 599 (use `redirect()` for redirects). |
+
+```php
+<?php
+use Gimli\Middleware\Middleware_Interface;
+use Gimli\Middleware\Middleware_Response;
+
+class ApiAuthMiddleware implements Middleware_Interface {
+    public function process(): Middleware_Response {
+        if (!$this->hasValidToken()) {
+            // 401 with a JSON body. A 401 should say how to authenticate,
+            // pass the WWW-Authenticate header (and any others) as raw header lines.
+            return Middleware_Response::json(
+                [],
+                'Unauthorized',
+                401,
+                ['WWW-Authenticate: Bearer realm="api"']
+            );
+        }
+
+        return new Middleware_Response(true);
+    }
+}
+```
+
+The JSON body uses the same envelope as the `json_response()` helper:
+
+```json
+{"success": false, "body": [], "text": "Unauthorized"}
+```
+
+`$body` is the `body` value, `$message` is `text` and `success` is always `false`. The `Content-Type: application/json` header is added for you.
+
+Because `Response::$response_body` is a string, you can also build the response yourself and hand it over with `respond()`:
+
+```php
+<?php
+$Response = new Response('Maintenance', FALSE, [], 503);
+$Response->setHeader('Retry-After: 120');
+
+return Middleware_Response::respond($Response, 'Maintenance mode');
+```
+
+**Notes**
+
+- **Redirect and forward URLs are trusted.** Pass a fixed path or a URL you built yourself. Never pass user input (for example a `?next=` parameter) to `redirect()`, or to the `$forward` constructor argument, without validating it first, or you create an open redirect. `redirect()` throws an `InvalidArgumentException` for non-3xx statuses and for URLs containing control characters (`\x00-\x1F`, `\x7F`).
+- **Status codes.** `json()` and `respond()` accept 400 to 599 only. A `Response` handed to the constructor with a status below 300 (or above 599) is not sent: the router logs it and sends an empty `403`.
+- **Dispatch order and status.** This applies to every `Response` a controller returns as well as to middleware failures. A `Response` with the default `200` status has the status set before the headers, so PHP can still turn a `Location` header into a `302` (this is the only code that gets PHP's implicit redirect). Any other status, such as `202`, `401` or `404`, is set after the headers and sent exactly as you set it. Before this change the status was set first for every response, so PHP could rewrite it: for example a `401` with a `WWW-Authenticate` header stayed `401` only by luck, and a `403` with `WWW-Authenticate` became `401`.
+- **Headers.** `Set-Cookie`, `WWW-Authenticate` and `Vary` header lines are appended, so cookies already queued by `setcookie()` or `session_start()` are kept, you can send several challenges, and your own `Vary` does not remove the `Vary: Origin` added for CORS. Any other header replaces an earlier header of the same name. If your `Response` sets its own `Content-Type`, that wins over the default `application/json`. Only a well formed `Name:` line counts as a `Content-Type` header.
+- **Output already started.** If output has already been sent (`headers_sent()`), the status and headers cannot be changed. A controller `Response` still has its body written, and the problem is logged with `error_log()`. A middleware failure is only logged and the router returns without writing a body.
+- **CORS.** If the request has an `Origin` header (other than the literal `null`), every failure response echoes it in `Access-Control-Allow-Origin` and adds `Vary: Origin`, the same origin handling as the automatic `OPTIONS` response, so browser clients can read a 401. An `Access-Control-Allow-Origin` header that is already queued, or that your `Response` carries, is left alone, so you can set a stricter value yourself. If an `Access-Control-Allow-Credentials` header is queued or on your `Response`, the origin is **not** echoed and a warning is logged, because reflecting any origin together with credentials is unsafe: set an explicit `Access-Control-Allow-Origin` yourself in that case. This applies to every branch below, including the legacy ones. The automatic `OPTIONS` response also gets `Vary: Origin` and no longer echoes `Origin: null`. If your web server adds CORS headers itself (for example nginx `add_header Access-Control-Allow-Origin`), they will conflict with, and may duplicate, the echoed header: configure CORS in one place.
+- **The constructor.** `new Middleware_Response(bool $success, string $message = '', string $forward = '', ?Response $response = NULL)`. The second argument is a *message*, not a URL. A failing response is chosen in this order:
+  1. `$response` (what the factories set) is dispatched as is.
+  2. Otherwise a non-empty `$forward` sends a `302` with `Location: $forward`. If `$forward` contains control characters (`\x00-\x1F`, `\x7F`) nothing is redirected: the router logs it and sends an empty `403`.
+  3. Otherwise, **deprecated**: if `$message` is a plain local path it is treated as a redirect target to keep old `new Middleware_Response(false, '/login')` code working. The path must start with a single `/`, contain only ASCII letters, digits and ``- . _ ~ ! $ & ' ( ) * + , ; = : @ / % ? # [ ]``, and must not contain `//` or a `/./` segment, whitespace, a backslash or control characters. Non-ASCII characters must be percent-encoded. An `E_USER_DEPRECATED` notice is raised, once per request under PHP-FPM or mod_php and once per worker process in persistent runtimes (Swoole, RoadRunner, ...). If your application's error handler throws on deprecations, the legacy redirect becomes an error, so migrate to `Middleware_Response::redirect('/login')`.
+  4. Otherwise the router sends an empty `403` and logs the message (with control characters escaped and the length capped).
 
 ## CLI Commands
 
@@ -359,7 +441,7 @@ class AuthMiddleware implements Middleware_Interface {
     
     public function process(): Middleware_Response {
         if (!$this->Session->has('user_id')) {
-            return new Middleware_Response(false, '/login');
+            return Middleware_Response::redirect('/login');
         }
         
         return new Middleware_Response(true);
@@ -452,7 +534,7 @@ class ErrorHandlingMiddleware implements Middleware_Interface {
     public function process(): Middleware_Response {
         // Your custom error handling logic
         if ($someErrorCondition) {
-            return new Middleware_Response(false, '/error/404');
+            return Middleware_Response::redirect('/error/404');
         }
         
         return new Middleware_Response(true);

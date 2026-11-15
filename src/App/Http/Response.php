@@ -80,7 +80,7 @@ class Response
 	public function setJsonResponse(array $body = [], string $message = 'OK', bool $success = TRUE, int $response_code = 200) {
 		$this->is_json       = TRUE;
 		$this->success       = $success;
-		$this->response_body = json_encode(['success' => $success, 'body' => $body, 'text' => $message]);
+		$this->response_body = json_encode(['success' => $success, 'body' => $body, 'text' => $message], JSON_INVALID_UTF8_SUBSTITUTE);
 		$this->response_code = $response_code;
 		$this->data          = $body;
 		return $this;
